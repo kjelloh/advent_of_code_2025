@@ -3,9 +3,11 @@ project(aoc25 CXX)
 
 
 
-add_executable(aoc25 src/aoc25.cpp src/main.cpp)
-
-
+add_executable(
+  aoc25 
+  src/aoc25.cpp 
+  src/main.cpp
+  src/puzzle/day00.cpp)
 
 install(TARGETS aoc25 DESTINATION "."
         RUNTIME DESTINATION bin
