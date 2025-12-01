@@ -3,10 +3,10 @@
 #include <string>
 #include <print>
 
-int day01() {
+int solve(std::string file) {
   int result{};
 
-  std::ifstream in{"example01.txt"};
+  std::ifstream in{file};
 
   int location{50};
   std::print(" Points at: {}",location);
@@ -31,4 +31,10 @@ int day01() {
   std::print("\npassword: {}",result);
 
   return 0;
+
+}
+
+int day01() {
+  // return solve("example01.txt");
+  return solve("day01.txt");
 }
