@@ -3,10 +3,10 @@
 #include <string>
 #include <print>
 
-int day00() {
+int day01() {
   int result{};
 
-  std::ifstream in{"example00.txt"};
+  std::ifstream in{"example01.txt"};
 
   int location{50};
   std::print(" Points at: {}",location);

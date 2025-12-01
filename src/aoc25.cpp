@@ -2,9 +2,10 @@
 #include "aoc25.h"
 
 int day00();
+int day01();
 
 int solve() {
-  return day00();
+  return day01();
 }
 
 void aoc25(){
