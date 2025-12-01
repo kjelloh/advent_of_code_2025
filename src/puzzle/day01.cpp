@@ -78,7 +78,7 @@ int solve_part_2(std::string file) {
 
     result += clicks;
 
-    current = mod(next,100);
+    current = mod(next,100); // 'Wrap' to nob markings 0..99
 
     std::print(" Points at: {} total clicks: {}",current,result);
 
