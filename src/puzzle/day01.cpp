@@ -25,7 +25,7 @@ int solve_part_1(std::string file) {
     int val = std::stoi(line.substr(1));
     std::print(" -> dir:{} val:{}",dir,val);
 
-    location = mod(location,100);
+    location = mod(location + dir*val,100);
 
     std::print(" Points at: {}",location);
 
@@ -66,13 +66,13 @@ int solve_part_2(std::string file) {
     }
     else if (next == 0) {
       // We ended up at zero
-      result += 1;
+      clicks = 1;
       std::print("  ==0 clicks: {}",clicks);
     }
     else if (next < 0) {
       // We ended up below zero.
       clicks = ((-next + 100) / 100);
-      if (current == 0) clicks += -1; // We already counted the zero 'crossing'
+      if (current == 0) clicks -= 1; // We already counted the zero 'crossing'
       std::print(" <0 clicks: {}",clicks);
     }
 
