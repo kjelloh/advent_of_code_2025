@@ -3,6 +3,12 @@
 #include <string>
 #include <print>
 
+// Mathematical mod using C/C++ signed reminder operator '%'
+int mod(int x, int N) {
+    int r = x % N; // signed reminder
+    return (r < 0) ? r + N : r; // compensate for sign
+}
+
 int solve_part_1(std::string file) {
   int result{};
 
@@ -19,8 +25,7 @@ int solve_part_1(std::string file) {
     int val = std::stoi(line.substr(1));
     std::print(" -> dir:{} val:{}",dir,val);
 
-    location = (location + dir*val) % 100;
-    location = (location < 0)?location+100:location;
+    location = mod(location,100);
 
     std::print(" Points at: {}",location);
 
@@ -32,10 +37,6 @@ int solve_part_1(std::string file) {
 
   return 0;
 
-}
-
-int modulo_100(int x) {
-  return ((x % 100) + 100) % 100; // keep C++ mod in 0..100 (wrap from negative)
 }
 
 int solve_part_2(std::string file) {
@@ -77,7 +78,7 @@ int solve_part_2(std::string file) {
 
     result += clicks;
 
-    current = modulo_100(next);
+    current = mod(next,100);
 
     std::print(" Points at: {} total clicks: {}",current,result);
 
