@@ -43,7 +43,7 @@ fi
 # First, try to get day number from first argument
 DAY_FROM_ARG=false
 if [[ -n "$1" ]] && [[ "$1" =~ ^[0-9]+$ ]] && [[ "$1" -ge 0 ]] && [[ "$1" -le 25 ]]; then
-    DAY_NUM=$(printf "%02d" "$1")
+    DAY_NUM=$(printf "%d" "$1")
     DAY_FROM_ARG=true
     echo "run.zsh: Using day number from argument: $DAY_NUM"
     # Remove the day argument from the argument list

@@ -60,10 +60,9 @@ bool contains_repeats(auto id) {
   return result;
 }
 
-
 int day02() {
   std::print("\nday02");
-  std::ifstream in{"day02.txt"};
+  std::ifstream in{"in.txt"};
   auto parsed = 
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){

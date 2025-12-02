@@ -2,28 +2,32 @@
 
 My solutions to ADvent of Cod 2025
 
-## Build and Run
+## Init the tool chain
 
-You can try the z-shell scripts (tested on macOS) to init the tool chain (build environment) and and compile and run the code.
+You can try the z-shell scripts (tested on macOS) to init the tool chain (build environment) and compile and run the code.
 
 * init_tool_chain.zsh
 
 It basically does two things:
 
 1. Tells conan to 'install' the requirements specified in conanfile.py
-2. Tells cmake what 'preset' to use
+2. Tells cmake what 'preset' to use to generate the tool cain
 
 ```sh
 conan install . --settings=compiler.cppstd=23 --settings=build_type=$BUILD_TYPE --build=missing
 cmake --preset $PRESET_NAME
 ```
 
+## Build and run
+
+The 'run' script builds and runs the binary
+
 * run.zsh
 
 It basically does three things:
 
 1. Tells cmake to build the executable
-2. Copies it to 'workspace'
+2. Copies it to 'workspace' and sub-folder defined by current day
 3. Executes it (passing user arguments)
 
 ```sh
@@ -31,6 +35,19 @@ cmake --build --preset $PRESET_NAME
 cp "build/$BUILD_TYPE/$EXECUTABLE" "$WORKSPACE_DIR/"
 ./$EXECUTABLE "$@"
 ```
+
+## Pull data from advent of code web page
+
+The script 'pull_data' calls curl to download current day input data into the 'day' subfolder in workspace folder.
+
+Note: The workspace folder + 'day' subfolder must already exist. It may be created with the 'run' script and passing the day number without leading zeroes.
+
+* pull_data.zsh
+
+For this script to work it needs your session 'cookie' from the advent of code web service to be stored into the cookie.txt file.
+
+Note: Look up the instructions for your browser and platform on how to get hold of the session cookie for you advent of code login.
+
 
 ## conan 2.0 support
 
