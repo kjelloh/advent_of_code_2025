@@ -5,6 +5,7 @@
 #include <fstream>
 #include <utility> // std::make_pair
 #include <numeric> // std::accumulate,...
+#include <set>
 
 struct Entry
 {
@@ -16,7 +17,7 @@ struct Entry
     }
 }; // Entry
 
-bool is_invalid(auto id) {
+bool contains_mirrored(auto id) {
   bool result{};
 
   auto s = std::to_string(id);
@@ -32,9 +33,37 @@ bool is_invalid(auto id) {
   return result;
 }
 
+bool contains_repeats(auto id) {
+  bool result{};
+
+  auto s = std::to_string(id);
+
+
+  for (size_t i=1;i<s.size();++i) {
+
+    if ((s.size() % i) == 0) {
+      // splits into i parts
+      auto count = s.size() / i;
+      std::set<std::string> parts_set{};
+      for (int j=0;j<count;++j) {
+        parts_set.insert(s.substr(i*j,i));
+      }
+      if (parts_set.size() == 1) {
+        result = true;
+        break;
+      }
+    }
+  }
+
+  if (result) std::print(" invalid:{}",s);
+
+  return result;
+}
+
+
 int day02() {
   std::print("\nday02");
-  std::ifstream in{"day02.txt"};
+  std::ifstream in{"example02.txt"};
   auto parsed = 
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){
@@ -51,7 +80,7 @@ int day02() {
       if (i==first) std::print("\nfirst:{}",i);
       if (i==last) std::print("\nlast:{}",i);
 
-      if (is_invalid(i)) invalids.push_back(i);
+      if (contains_repeats(i)) invalids.push_back(i);
 
     }
   }
