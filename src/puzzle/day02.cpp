@@ -4,7 +4,7 @@
 #include <ranges>
 #include <fstream>
 #include <utility> // std::make_pair
-#include <set>
+#include <numeric> // std::accumulate,...
 
 struct Entry
 {
@@ -41,10 +41,11 @@ int day02() {
         auto pos = entry.s.find('-');
         return std::make_pair(entry.s.substr(0,pos),entry.s.substr(pos+1));
       });
+
+  std::vector<size_t> invalids{};
   for (auto const& entry : parsed) {
     std::print("\n{} {} ",entry.first,entry.second);
 
-    std::vector<size_t> invalids{};
     auto [first,last] = std::make_pair(std::stoll(entry.first),std::stoll(entry.second));
     for (auto i= first;i<=last;++i) {
       if (i==first) std::print("\nfirst:{}",i);
@@ -53,8 +54,14 @@ int day02() {
       if (is_invalid(i)) invalids.push_back(i);
 
     }
-    std::print("\ninvalids:{}",invalids.size());
-
   }
+  std::print("\ninvalids:{}",invalids.size());
+  auto answer = std::accumulate(
+     invalids.begin()
+    ,invalids.end()
+    ,0);
+
+  std::print("\n\nANSWER:{}",answer);
+
   return 0;
 }
