@@ -1,3 +1,4 @@
+#include <string>
 #include <print>
 #include <iostream>
 #include <ranges>
@@ -12,7 +13,7 @@ struct Entry
         std::getline(s, entry.s,',');
         return s;
     }
-}; // FileLine
+}; // Entry
 
 int day02() {
   std::print("\nday02");
@@ -21,11 +22,17 @@ int day02() {
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){
         auto pos = entry.s.find('-');
-        return std::make_pair(entry.s.substr(0,pos),std::stoi(entry.s.substr(pos+1)));
+        return std::make_pair(entry.s.substr(0,pos),entry.s.substr(pos+1));
       });
   for (auto const& entry : parsed) {
     std::print("\n{} {} ",entry.first,entry.second);
-    
+
+    auto [first,last] = std::make_pair(std::stoll(entry.first),std::stoll(entry.second));
+    for (auto i= first;i<=last;++i) {
+      if (i==first) std::print("\nfirst:{}",i);
+      if (i==last) std::print("\nlast:{}",i);
+    }
+
   }
   return 0;
 }
