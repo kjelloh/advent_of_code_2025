@@ -4,6 +4,7 @@
 #include <ranges>
 #include <fstream>
 #include <utility> // std::make_pair
+#include <set>
 
 struct Entry
 {
@@ -14,6 +15,22 @@ struct Entry
         return s;
     }
 }; // Entry
+
+bool is_invalid(auto id) {
+  bool result{};
+
+  auto s = std::to_string(id);
+
+  if ((s.size() % 2) == 0) {
+    // mirror possible
+    auto second = s.size() / 2;
+    result = (s.substr(0,second) == s.substr(second));
+  }
+
+  if (result) std::print(" invalid:{}",s);
+
+  return result;
+}
 
 int day02() {
   std::print("\nday02");
@@ -27,11 +44,16 @@ int day02() {
   for (auto const& entry : parsed) {
     std::print("\n{} {} ",entry.first,entry.second);
 
+    std::vector<size_t> invalids{};
     auto [first,last] = std::make_pair(std::stoll(entry.first),std::stoll(entry.second));
     for (auto i= first;i<=last;++i) {
       if (i==first) std::print("\nfirst:{}",i);
       if (i==last) std::print("\nlast:{}",i);
+
+      if (is_invalid(i)) invalids.push_back(i);
+
     }
+    std::print("\ninvalids:{}",invalids.size());
 
   }
   return 0;
