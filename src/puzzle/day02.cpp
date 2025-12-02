@@ -34,7 +34,7 @@ bool is_invalid(auto id) {
 
 int day02() {
   std::print("\nday02");
-  std::ifstream in{"example02.txt"};
+  std::ifstream in{"day02.txt"};
   auto parsed = 
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){
@@ -59,7 +59,7 @@ int day02() {
   auto answer = std::accumulate(
      invalids.begin()
     ,invalids.end()
-    ,0);
+    ,size_t{});
 
   std::print("\n\nANSWER:{}",answer);
 
