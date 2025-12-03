@@ -8,6 +8,7 @@
 #include <set>
 
 int day03() {
+  size_t answer{};
   std::print("\nday03");
   // std::ifstream in{"in.txt"};
   std::ifstream in{"ex0.txt"};
@@ -25,7 +26,9 @@ int day03() {
       }
     }
     std::print(" picked {}{}",picked.first,picked.second);
+    answer += (picked.first - '0')*10 + picked.second - '0';
   }
+  std::print("\nANSWER: {}",answer);
 
 
   return 0;
