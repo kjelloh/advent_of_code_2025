@@ -94,4 +94,5 @@ int day03() {
   auto answer2 = p2();
   std::print("\nANSWER p1:{}",answer1);
   std::print("\nANSWER p2:{}",answer2);
+  return 0;
 }
