@@ -10,22 +10,15 @@ else()
     set(DAY_NUMBER "0")
 endif()
 
-# Format with leading zero (e.g., 2 -> 02)
-if(DAY_NUMBER LESS 10)
-    set(DAY_FORMATTED "0${DAY_NUMBER}")
-else()
-    set(DAY_FORMATTED "${DAY_NUMBER}")
-endif()
+# Set the day file path (no leading zero)
+set(DAY_FILE "src/puzzle/day${DAY_NUMBER}.cpp")
 
-# Set the day file path
-set(DAY_FILE "src/puzzle/day${DAY_FORMATTED}.cpp")
-
-# Check if the file exists, fallback to day00.cpp if not
+# Check if the file exists, fallback to day0.cpp if not
 if(EXISTS "${CMAKE_SOURCE_DIR}/${DAY_FILE}")
     message(STATUS "Building for Day ${DAY_NUMBER} using file: ${DAY_FILE}")
 else()
-    message(WARNING "Day file not found: ${DAY_FILE} - falling back to day00.cpp")
-    set(DAY_FILE "src/puzzle/day00.cpp")
+    message(WARNING "Day file not found: ${DAY_FILE} - falling back to day0.cpp")
+    set(DAY_FILE "src/puzzle/day0.cpp")
 endif()
 
 add_executable(aoc25
