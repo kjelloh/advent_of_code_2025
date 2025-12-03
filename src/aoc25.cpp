@@ -1,10 +1,25 @@
-#include <iostream>
 #include "aoc25.h"
+#include <iostream>
+#include <filesystem> // std::filesystem::path,...
 
-int day();
+std::string day(std::filesystem::path in_file_path);
 
 int solve() {
-  return day();
+
+  std::vector<std::string> answers{};
+
+  for (const auto& entry : std::filesystem::directory_iterator(".")) {
+    if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+        std::cout << entry.path() << std::endl;
+        answers.push_back(day(entry.path()));
+    }
+  }
+
+  int i{};
+  for (auto const& answer : answers) {
+    std::print("\nANSWER {:2} : {}",i++,answer);
+  }
+  return 0;
 }
 
 void print_platform(){

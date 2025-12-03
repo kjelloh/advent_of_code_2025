@@ -7,11 +7,10 @@
 #include <numeric> // std::accumulate,...
 #include <set>
 
-size_t p1() {
+size_t p1(std::filesystem::path in_file_path) {
   size_t answer{};
   std::print("\nday03");
-  std::ifstream in{"in.txt"};
-  // std::ifstream in{"ex0.txt"};
+  std::ifstream in{in_file_path};
   std::string entry;
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
@@ -33,11 +32,10 @@ size_t p1() {
   return answer;
 }
 
-size_t p2() {
+size_t p2(std::filesystem::path in_file_path) {
   size_t answer{};
   std::print("\nday03");
-  // std::ifstream in{"ex0.txt"};
-  std::ifstream in{"in.txt"};
+  std::ifstream in{in_file_path};
   std::string entry;
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
@@ -89,10 +87,8 @@ size_t p2() {
 }
 
 
-int day() {
-  auto answer1 = p1();
-  auto answer2 = p2();
-  std::print("\nANSWER p1:{}",answer1);
-  std::print("\nANSWER p2:{}",answer2);
-  return 0;
+std::string day(std::filesystem::path in_file_path) {
+  auto answer1 = p1(in_file_path);
+  auto answer2 = p2(in_file_path);
+  return std::format("p1:{} p2:{}",answer1,answer2);
 }

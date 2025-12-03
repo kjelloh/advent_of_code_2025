@@ -9,10 +9,10 @@ int mod(int x, int N) {
     return (r < 0) ? r + N : r; // compensate for sign
 }
 
-int solve_part_1(std::string file) {
+std::string solve_part_1(std::filesystem::path in_file_path) {
   int result{};
 
-  std::ifstream in{file};
+  std::ifstream in{in_file_path};
 
   int location{50};
   std::print(" Points at: {}",location);
@@ -33,16 +33,15 @@ int solve_part_1(std::string file) {
 
   }
 
-  std::print("\npassword: {}",result);
+  return std::format("password: {}",result);
 
-  return 0;
 
 }
 
-int solve_part_2(std::string file) {
+std::string solve_part_2(std::string in_file_path) {
   int result{};
 
-  std::ifstream in{file};
+  std::ifstream in{in_file_path};
 
   int current{50};
   std::print(" Points at: {}",current);
@@ -84,16 +83,13 @@ int solve_part_2(std::string file) {
 
   }
 
-  std::print("\npassword: {}",result);
-
-  return 0;
-
+  return std::format("password: {}",result);
 }
 
 
-int day() {
+std::string day(std::filesystem::path file_path) {
   // return solve_part_1("example01.txt");
   // return solve_part_1("day01.txt");
   // return solve_part_2("example01.txt");
-  return solve_part_2("day01.txt");
+  return solve_part_2(file_path.filename());
 }

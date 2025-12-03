@@ -91,9 +91,9 @@ bool contains_repeats(auto id) {
   return result;
 }
 
-int day() {
+std::string day(std::filesystem::path in_file_path) {
   std::print("\nday02");
-  std::ifstream in{"in.txt"};
+  std::ifstream in{in_file_path};
   auto parsed = 
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){
@@ -120,7 +120,5 @@ int day() {
     ,invalids.end()
     ,size_t{});
 
-  std::print("\n\nANSWER:{}",answer);
-
-  return 0;
+  return std::format("{}",answer);
 }
