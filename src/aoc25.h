@@ -12,5 +12,4 @@
 
 int solve();
 
-AOC25_EXPORT void aoc25();
-AOC25_EXPORT void aoc25_print_vector(const std::vector<std::string> &strings);
+AOC25_EXPORT void print_platform();
