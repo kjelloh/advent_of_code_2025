@@ -7,6 +7,35 @@
 #include <numeric> // std::accumulate,...
 #include <set>
 
+namespace aoc {
+
+  // function compute_failure_function(s):
+  //     n = length of s
+  //     failure = array of size n, initialized to 0
+      
+  //     j = 0  // length of previous longest prefix-suffix match
+      
+  //     for i from 1 to n-1:
+  //         // Try to extend the match
+  //         while j > 0 and s[i] != s[j]:
+  //             j = failure[j - 1]  // fall back using previous failure values
+          
+  //         // If characters match, increment the match length
+  //         if s[i] == s[j]:
+  //             j = j + 1
+          
+  //         failure[i] = j
+      
+  //     return failure
+
+  // Knuth–Morris–Pratt algorithm (https://en.wikipedia.org/wiki/Knuth–Morris–Pratt_algorithm)
+  std::vector<size_t> to_kmp_failure_v(std::string_view const s) {
+    std::vector<size_t> result{};
+    return result;
+  }
+
+}
+
 struct Entry
 {
     std::string s;
@@ -17,7 +46,8 @@ struct Entry
     }
 }; // Entry
 
-bool contains_mirrored(auto id) {
+// Trie if provided id is made up of two repeating patterns
+bool is_two_repeats(auto id) {
   bool result{};
 
   auto s = std::to_string(id);
@@ -33,6 +63,7 @@ bool contains_mirrored(auto id) {
   return result;
 }
 
+// returns true if provided id is made up of any length repeats 1..1/2 length
 bool contains_repeats(auto id) {
   bool result{};
 
@@ -60,7 +91,7 @@ bool contains_repeats(auto id) {
   return result;
 }
 
-int day02() {
+int day() {
   std::print("\nday02");
   std::ifstream in{"in.txt"};
   auto parsed = 

@@ -91,7 +91,7 @@ int solve_part_2(std::string file) {
 }
 
 
-int day01() {
+int day() {
   // return solve_part_1("example01.txt");
   // return solve_part_1("day01.txt");
   // return solve_part_2("example01.txt");

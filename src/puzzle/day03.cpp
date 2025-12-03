@@ -89,7 +89,7 @@ size_t p2() {
 }
 
 
-int day03() {
+int day() {
   auto answer1 = p1();
   auto answer2 = p2();
   std::print("\nANSWER p1:{}",answer1);
