@@ -1,7 +1,11 @@
 #include <string>
 #include <print>
 #include <iostream>
+#include <ranges>
 #include <fstream>
+#include <utility> // std::make_pair
+#include <numeric> // std::accumulate,...
+#include <set>
 #include <optional>
 
 std::optional<size_t> p1(std::filesystem::path in_file_path) {
@@ -25,6 +29,7 @@ std::optional<size_t> p2(std::filesystem::path in_file_path) {
 
   return answer;
 }
+
 
 std::string day(std::filesystem::path in_file_path) {
   std::print("\nday04");
