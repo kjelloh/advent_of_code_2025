@@ -48,21 +48,34 @@ size_t p2() {
     std::stack<char> stack{};
 
     for (size_t i=0;i<entry.size();++i) {
-      while (not stack.empty() and to_remove > 0 and entry[i] > stack.top()) {
+
+      // Dispose stacked digits 'weaker' than current entry[i] if we can
+      while (
+            not stack.empty() 
+        and to_remove > 0 
+        and entry[i] > stack.top()) {
+
         stack.pop();
         --to_remove;
+
       }
-      stack.push(entry[i]);
+
+      stack.push(entry[i]); // push the new one
+
     }
 
     while (stack.size() > 12) stack.pop();
 
+    // Empty the stack to a digit string
     std::string picked{};
     while (not stack.empty()) {
       picked += stack.top();
       stack.pop();
     }
+
+    // Reverse it to get the digit in the correct order (oldest = first)
     std::reverse(picked.begin(),picked.end());
+
     auto optimized = std::stoll(picked);
 
     std::print(" optimized:{}",optimized);

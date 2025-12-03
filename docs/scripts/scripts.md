@@ -1,4 +1,76 @@
-# day 01
+# day 3
+
+## part 1
+
+In part 1 we are to 'turn on' two batteries in a 'jolt battery bank' in such a way that the bank produces the 'highest jolt'.
+
+The jolt produced by the bank is determined by combining the 'jolt value' for the two batteries 'as if' they combine into a decimal number jolt value. The first battery provides the first digit and the second battery the second digit of the combined jolt value.
+
+We are not allowed to re-arrange the order of batteries in the bank.
+
+So what is the 'highest jolt' we can get from a bank with batteries marked '987654321111111'?
+
+Pause the video here if you want to think about this yourself.
+
+Well, we see that if we turn on the battery marked '9' and then the battery marked '8' we get the jolt value 98. And this is the highest we can get by turning on two batteries in the bank.
+
+So what is the 'highest jolt' we can get from a bank with batteries marked '818181911112111'?
+
+Pause the video here if you want to think about this yourself.
+
+In this case we see that if we pich battery marked '9' and then the one marked '2' whe get the jolt value 92 which is the hights we can get.
+
+It seems we scan the string from left to right looking for the current largest first digit. And when we found one, we continue to find the following largest second digit.
+
+## part 2
+
+In part one we are to 'turn on' 12 batteries in a 'jolt battery bank' in such a way that the bank produces the 'highest jolt'.
+
+The jolt produced by the bank is determined by combining the 'jolt value' for the turned on batteries 'as if' they combine into a decimal number jolt value. The first turned on battery provides the first digit, the second turned on battery the second digit, and so on.
+
+We are not allowed to re-arrange the order of batteries in the bank.
+
+So what is the 'highest jolt' we can get from a bank with batteries marked '987654321111111'? If we turn on 12 batteries and is not allowed to change the battry order?
+
+Pause the video here if you want to think about this yourself.
+
+The answer is 987 654 321 111 (987 billion 654 miljon 321 thousand 111).
+
+We can view this as a 'turning off batteries' or 'remove digits' problem where we keep all digits but turn off the last three '1'.
+
+```text
+987654321111111
+            xxx
+987654321111
+```
+
+So what is the 'highest jolt' we can get from a bank with batteries marked '818 181 911 112 111'?
+
+Pause the video here if you want to think about this yourself.
+
+In this case the answer is 888 911 112 111 (888 billion 911 miljon 112 thousand 111).
+
+Again we can view this as a 'turning off batteries' or 'remove digits' problem where we keep all digits but the three leftmost '1' in the sequnce.
+
+```text
+818181911112111
+ x x x
+8 8 8 911112111
+```
+
+It seems we scan the string from left to right looking for the largest first digit. Then, when we found one we continue to scan for the largest second digit and so on. With the caveat that if the digit we are processing is in fact even larger than the last picked one, we instead replace that one. In fact, we 'delete' all digits picked so far that are less than the current one in the input.
+
+We can solve this problem using a 'monotonic decreasing stack'.
+
+We create this stack by ensuring each digit we push onto the stack is always equal or less to the current top digit.
+
+So, when we examine the next digit in the input, and we find that the top of the stack contains a digit that is less than the one we are about to push - then we purge digits from the stack until the top fullfills the criteria. Then we can safelly push the new one.
+
+While doing this we also upholds the requirement to keep 12 digits. We do this by keeping track of how many digits we are allowed to delete. And when we pop a digit from the stack we are in fact 'deleting' it. Thus, we can pair the pop with decrementing the 'to delete' counter.
+
+All left to do now is to empty the stack of digits so we have the 12 first digits we are looking for. Then dump the stacked digits to a string. And finally reverse it to get the digits in the correct order and transform it into a decimal number.
+
+# day 1
 
 ## part 1
 
