@@ -10,5 +10,5 @@ YEAR=$(cat year.txt)
 DAY_NUMBER=$(cat workspace/day.txt)
 
 curl -H "Cookie: session=$SESSION_COOKIE" -o "workspace/day$DAY_NUMBER/in.txt" https://adventofcode.com/$YEAR/day/$DAY_NUMBER/input
-cat "in.txt"
+cat "workspace/day$DAY_NUMBER/in.txt"
 

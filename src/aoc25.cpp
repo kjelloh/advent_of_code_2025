@@ -1,12 +1,13 @@
 #include <iostream>
 #include "aoc25.h"
 
+int day03();
 int day02();
 int day01();
 int day00();
 
 int solve() {
-  return day02();
+  return day03();
 }
 
 void aoc25(){

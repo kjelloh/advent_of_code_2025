@@ -4,6 +4,7 @@ project(aoc25 CXX)
 
 
 add_executable(aoc25 
+  src/puzzle/day03.cpp
   src/puzzle/day02.cpp
   src/puzzle/day01.cpp
   src/puzzle/day00.cpp

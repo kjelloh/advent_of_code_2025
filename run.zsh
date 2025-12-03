@@ -43,23 +43,22 @@ fi
 # First, try to get day number from first argument
 DAY_FROM_ARG=false
 if [[ -n "$1" ]] && [[ "$1" =~ ^[0-9]+$ ]] && [[ "$1" -ge 0 ]] && [[ "$1" -le 25 ]]; then
-    DAY_NUM=$(printf "%d" "$1")
+    DAY_NUM="$1"
     DAY_FROM_ARG=true
     echo "run.zsh: Using day number from argument: $DAY_NUM"
     # Remove the day argument from the argument list
     shift
 # If workspace exists, try to read from day.txt
 elif [[ "$WORKSPACE_EXISTED" == "true" ]] && [[ -f "$WORKSPACE_DIR/day.txt" ]]; then
-    DAY_NUM_RAW=$(cat "$WORKSPACE_DIR/day.txt" 2>/dev/null | tr -d '[:space:]')
-    if [[ -n "$DAY_NUM_RAW" ]] && [[ "$DAY_NUM_RAW" =~ ^[0-9]+$ ]] && [[ "$DAY_NUM_RAW" -ge 0 ]] && [[ "$DAY_NUM_RAW" -le 25 ]]; then
-        DAY_NUM=$(printf "%02d" "$DAY_NUM_RAW")
+    DAY_NUM=$(cat "$WORKSPACE_DIR/day.txt" 2>/dev/null | tr -d '[:space:]')
+    if [[ -n "$DAY_NUM" ]] && [[ "$DAY_NUM" =~ ^[0-9]+$ ]] && [[ "$DAY_NUM" -ge 0 ]] && [[ "$DAY_NUM" -le 25 ]]; then
         echo "run.zsh: Using day number from $WORKSPACE_DIR/day.txt: $DAY_NUM"
     else
-        DAY_NUM="00"
+        DAY_NUM="0"
         echo "run.zsh: Invalid day number in $WORKSPACE_DIR/day.txt, using fallback: $DAY_NUM"
     fi
 else
-    DAY_NUM="00"
+    DAY_NUM="0"
     echo "run.zsh: No valid day number found, using fallback: $DAY_NUM"
 fi
 
