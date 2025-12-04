@@ -15,6 +15,7 @@ class PuzzleArgs {
 
 public:
   struct Meta {
+    bool m_is_part_1{true};
   };
 
   PuzzleArgs(Meta meta,std::filesystem::path in_file_path);

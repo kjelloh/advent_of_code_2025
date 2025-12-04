@@ -1,6 +1,7 @@
 #include "aoc25.h"
 #include <iostream>
 #include <filesystem> // std::filesystem::path,...
+#include <algorithm> // std::ranges::sort
 
 PuzzleArgs::PuzzleArgs(Meta meta,std::filesystem::path in_file_path)
   : m_meta{meta},m_in_file_path{in_file_path} {}
@@ -9,19 +10,35 @@ std::string day(PuzzleArgs puzzle_args);
 
 int solve() {
 
-  std::vector<std::string> answers{};
 
-  for (const auto& entry : std::filesystem::directory_iterator(".")) {
+  std::vector<std::filesystem::path> in_data_files{};
+  for (auto const& entry : std::filesystem::directory_iterator(".")) {
     if (entry.is_regular_file() && entry.path().extension() == ".txt") {
         std::cout << entry.path() << std::endl;
-        PuzzleArgs puzzle_args({},entry.path());
-        answers.push_back(day(puzzle_args));
+        in_data_files.push_back(entry.path());
     }
   }
 
+  std::ranges::sort(in_data_files); // ex..txt before in.txt
+
+  struct SolveResult {
+    PuzzleArgs m_puzzle_args;
+    std::optional<std::string> m_maybe_answer{};
+  };
+
+  std::vector<SolveResult> solve_results{};
+
+  for (auto const& in_file_path : in_data_files) {
+    PuzzleArgs puzzle_args({},in_file_path);
+    solve_results.push_back(SolveResult{puzzle_args,day(puzzle_args)});
+  }
+
   int i{};
-  for (auto const& answer : answers) {
-    std::print("\nANSWER {:2} : {}",i++,answer);
+  for (auto const& solve_result : solve_results) {
+    std::print(
+       "\nANSWER '{:15}' -> {}"
+      ,solve_result.m_puzzle_args.in_file_path().filename().string()
+      ,solve_result.m_maybe_answer.value_or("null"));
   }
   return 0;
 }
