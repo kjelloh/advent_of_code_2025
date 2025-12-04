@@ -28,7 +28,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     for (int c=0;c<static_cast<int>(grid[0].size());++c) {
       if (grid[r][c] == '@') {
         size_t count{};
-        for (auto dp : std::vector<std::pair<int,int>>{
+        for (auto [dr,dc] : std::vector<std::pair<int,int>>{
            {-1,0}
           ,{-1,1}
           ,{0,1}
@@ -39,8 +39,8 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
           ,{-1,-1}
         }) {
 
-          auto nr = r + dp.first;
-          auto nc = c + dp.second;
+          auto nr = r + dr;
+          auto nc = c + dc;
 
           if (nr < 0) continue;
           if (nr >= grid.size()) continue;
