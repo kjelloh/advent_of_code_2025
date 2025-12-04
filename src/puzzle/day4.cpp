@@ -86,25 +86,24 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   while (true) {
     std::set<V> to_remove{};
     for (auto v : grid) {
-      if (grid.contains(v)) {
-        size_t count{};
-        for (auto [dr,dc] : neighbourhood) {
+      size_t count{};
+      for (auto [dr,dc] : neighbourhood) {
 
-          V nv{v.r+dr,v.c+dc};
-          auto [nr,nc] = nv;
+        if (v.r == 0 && dr < 0) continue;
+        if (v.c == 0 && dc < 0) continue;
 
-          if (nr < 0) continue;
-          if (nr >= height) continue;
-          if (nc < 0) continue;
-          if (nc >= width) continue;
-          
-          if (grid.contains(nv)) ++count;
+        V nv{v.r+dr,v.c+dc};
+        auto [nr,nc] = nv;
 
-        }
-
-        if (count < 4) to_remove.insert(v);
+        if (nr >= height) continue;
+        if (nc >= width) continue;
+        
+        if (grid.contains(nv)) ++count;
 
       }
+
+      if (count < 4) to_remove.insert(v);
+      
     } // for v in grid
     
     std::print("\nRemove {} rolls of paper",to_remove.size());
