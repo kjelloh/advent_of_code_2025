@@ -110,11 +110,10 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
     acc += to_remove.size();
     if (to_remove.size() == 0) break;
 
-    std::set<V> next{};
-    for (auto v : grid) {
-      if (not to_remove.contains(v)) next.insert(v);
+    for (auto v : to_remove) {
+      grid.erase(v);
     }
-    grid = next;
+
   } // while
 
   answer = acc;
