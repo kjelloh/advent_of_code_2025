@@ -8,8 +8,13 @@
 #include <numeric> // std::accumulate,...
 #include <set>
 #include <optional>
+#include <array>
 
-
+static constexpr std::array<std::pair<int,int>,8> neighbourhood {{
+   {-1,-1},{-1,0},{-1,1}
+  ,{ 0,-1}        ,{0,1}
+  ,{ 1,-1},{ 1,0},{ 1,1}
+}};
 
 std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
@@ -28,16 +33,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     for (int c=0;c<static_cast<int>(grid[0].size());++c) {
       if (grid[r][c] == '@') {
         size_t count{};
-        for (auto [dr,dc] : std::vector<std::pair<int,int>>{
-           {-1,0}
-          ,{-1,1}
-          ,{0,1}
-          ,{1,1}
-          ,{1,0}
-          ,{1,-1}
-          ,{0,-1}
-          ,{-1,-1}
-        }) {
+        for (auto [dr,dc] : neighbourhood) {
 
           auto nr = r + dr;
           auto nc = c + dc;
