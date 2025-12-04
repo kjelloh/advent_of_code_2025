@@ -88,18 +88,9 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
     for (auto v : grid) {
       if (grid.contains(v)) {
         size_t count{};
-        for (auto dv : std::vector<std::pair<int,int>>{
-          {-1,0}
-          ,{-1,1}
-          ,{0,1}
-          ,{1,1}
-          ,{1,0}
-          ,{1,-1}
-          ,{0,-1}
-          ,{-1,-1}
-        }) {
+        for (auto [dr,dc] : neighbourhood) {
 
-          V nv{v.r+dv.first,v.c+dv.second};
+          V nv{v.r+dr,v.c+dc};
           auto [nr,nc] = nv;
 
           if (nr < 0) continue;
@@ -115,6 +106,7 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
 
       }
     } // for v in grid
+    
     std::print("\nRemove {} rolls of paper",to_remove.size());
     acc += to_remove.size();
     if (to_remove.size() == 0) break;
