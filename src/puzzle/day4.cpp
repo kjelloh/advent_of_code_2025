@@ -9,6 +9,8 @@
 #include <set>
 #include <optional>
 
+
+
 std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
@@ -22,8 +24,8 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   }
 
   size_t acc{};
-  for (size_t r=0;r<grid.size();++r) {
-    for (size_t c=0;c<grid[0].size();++c) {
+  for (int r=0;r<static_cast<int>(grid.size());++r) {
+    for (int c=0;c<static_cast<int>(grid[0].size());++c) {
       if (grid[r][c] == '@') {
         size_t count{};
         for (auto dp : std::vector<std::pair<int,int>>{
