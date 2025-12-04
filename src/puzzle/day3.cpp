@@ -1,3 +1,4 @@
+#include "aoc25.h"
 #include <string>
 #include <print>
 #include <iostream>
@@ -7,10 +8,10 @@
 #include <numeric> // std::accumulate,...
 #include <set>
 
-size_t p1(std::filesystem::path in_file_path) {
+size_t p1(PuzzleArgs puzzle_args) {
   size_t answer{};
   std::print("\nday03");
-  std::ifstream in{in_file_path};
+  std::ifstream in{puzzle_args.in_file_path()};
   std::string entry;
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
@@ -32,10 +33,10 @@ size_t p1(std::filesystem::path in_file_path) {
   return answer;
 }
 
-size_t p2(std::filesystem::path in_file_path) {
+size_t p2(PuzzleArgs puzzle_args) {
   size_t answer{};
   std::print("\nday03");
-  std::ifstream in{in_file_path};
+  std::ifstream in{puzzle_args.in_file_path()};
   std::string entry;
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
@@ -87,8 +88,8 @@ size_t p2(std::filesystem::path in_file_path) {
 }
 
 
-std::string day(std::filesystem::path in_file_path) {
-  auto answer1 = p1(in_file_path);
-  auto answer2 = p2(in_file_path);
+std::string day(PuzzleArgs puzzle_args) {
+  auto answer1 = p1(puzzle_args);
+  auto answer2 = p2(puzzle_args);
   return std::format("p1:{} p2:{}",answer1,answer2);
 }

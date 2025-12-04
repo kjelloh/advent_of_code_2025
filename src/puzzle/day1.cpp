@@ -1,3 +1,4 @@
+#include "aoc25.h"
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -9,10 +10,10 @@ int mod(int x, int N) {
     return (r < 0) ? r + N : r; // compensate for sign
 }
 
-std::string solve_part_1(std::filesystem::path in_file_path) {
+std::string solve_part_1(PuzzleArgs puzzle_args) {
   int result{};
 
-  std::ifstream in{in_file_path};
+  std::ifstream in{puzzle_args.in_file_path()};
 
   int location{50};
   std::print(" Points at: {}",location);
@@ -38,10 +39,10 @@ std::string solve_part_1(std::filesystem::path in_file_path) {
 
 }
 
-std::string solve_part_2(std::string in_file_path) {
+std::string solve_part_2(PuzzleArgs puzzle_args) {
   int result{};
 
-  std::ifstream in{in_file_path};
+  std::ifstream in{puzzle_args.in_file_path()};
 
   int current{50};
   std::print(" Points at: {}",current);
@@ -87,9 +88,6 @@ std::string solve_part_2(std::string in_file_path) {
 }
 
 
-std::string day(std::filesystem::path file_path) {
-  // return solve_part_1("example01.txt");
-  // return solve_part_1("day01.txt");
-  // return solve_part_2("example01.txt");
-  return solve_part_2(file_path.filename());
+std::string day(PuzzleArgs puzzle_args) {
+  return solve_part_2(puzzle_args);
 }

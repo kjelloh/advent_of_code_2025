@@ -26,6 +26,9 @@ add_executable(aoc25
   src/aoc25.cpp
   src/main.cpp)
 
+# Add src directory as include path so puzzle files can use #include "aoc25.h"
+target_include_directories(aoc25 PRIVATE "${CMAKE_SOURCE_DIR}/src")
+
 install(TARGETS aoc25 DESTINATION "."
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib

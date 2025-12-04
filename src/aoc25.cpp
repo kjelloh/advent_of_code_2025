@@ -2,7 +2,10 @@
 #include <iostream>
 #include <filesystem> // std::filesystem::path,...
 
-std::string day(std::filesystem::path in_file_path);
+PuzzleArgs::PuzzleArgs(Meta meta,std::filesystem::path in_file_path)
+  : m_meta{meta},m_in_file_path{in_file_path} {}
+
+std::string day(PuzzleArgs puzzle_args);
 
 int solve() {
 
@@ -11,7 +14,8 @@ int solve() {
   for (const auto& entry : std::filesystem::directory_iterator(".")) {
     if (entry.is_regular_file() && entry.path().extension() == ".txt") {
         std::cout << entry.path() << std::endl;
-        answers.push_back(day(entry.path()));
+        PuzzleArgs puzzle_args({},entry.path());
+        answers.push_back(day(puzzle_args));
     }
   }
 

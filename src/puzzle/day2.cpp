@@ -1,3 +1,4 @@
+#include "aoc25.h"
 #include <string>
 #include <print>
 #include <iostream>
@@ -91,9 +92,9 @@ bool contains_repeats(auto id) {
   return result;
 }
 
-std::string day(std::filesystem::path in_file_path) {
+std::string day(PuzzleArgs puzzle_args) {
   std::print("\nday02");
-  std::ifstream in{in_file_path};
+  std::ifstream in{puzzle_args.in_file_path()};
   auto parsed = 
       std::views::istream<Entry>(in)
     | std::views::transform([](auto const& entry){
