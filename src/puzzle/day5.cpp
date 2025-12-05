@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <optional>
+#include <algorithm>
 
 // 334 442 869 995 852 = 3.34.. * 10^15
 // 2^64 = 1.8.. * 10^19
@@ -33,10 +34,34 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     else {
       model.second.push_back(std::stoll(entry));
     }
+
   }
 
-  // return answer;
-  return std::nullopt;
+  size_t acc{};
+  for (auto id : model.second) {
+    std::string log{};
+    std::print("\nIngridient {}",id);
+    auto is_fresh = std::ranges::any_of(model.first,[id,&log](auto range){
+      auto result = (range.first <= id) and (id <= range.second);
+      if (result) {
+        log = std::format(
+           "falls into range {}-{}"
+          ,range.first
+          ,range.second);
+      }
+      return result;
+    });
+    if (is_fresh) {
+      std::print(" is fresh because it {}",log);
+      ++acc;
+    }
+    else {
+      std::print(" is spoiled because it does not fall into any range");
+    }
+  }
+  answer = acc;
+
+  return answer;
 }
 
 std::optional<size_t> p2(PuzzleArgs puzzle_args) {
