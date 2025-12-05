@@ -29,7 +29,9 @@ int solve(AppArgs args) {
 
   for (auto const& in_file_path : in_data_files) {
     std::print("\nSolving for [{}]",in_file_path.string());
-    PuzzleArgs puzzle_args({.m_debug = args.debug},in_file_path);
+    PuzzleArgs puzzle_args(
+       {.m_debug = args.debug,.m_part = args.part}
+      ,in_file_path);
     auto maybe_answer = day(puzzle_args);
     auto solve_result = SolveResult{puzzle_args,maybe_answer};
     solve_results.push_back(solve_result);

@@ -15,7 +15,8 @@ class PuzzleArgs {
 
 public:
   struct Meta {
-    bool m_is_part_1{true};
+    // bool m_is_part_1{true};
+    int m_part{1};
     bool m_debug{false};
   };
 
