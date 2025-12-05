@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(aoc25 CXX)
 
+find_package(CLI11 REQUIRED)
+
 # Read the current day from workspace/day.txt, default to 0 if file doesn't exist
 if(EXISTS "${CMAKE_SOURCE_DIR}/workspace/day.txt")
     file(STRINGS "${CMAKE_SOURCE_DIR}/workspace/day.txt" DAY_NUMBER LIMIT_COUNT 1)
@@ -28,6 +30,9 @@ add_executable(aoc25
 
 # Add src directory as include path so puzzle files can use #include "aoc25.h"
 target_include_directories(aoc25 PRIVATE "${CMAKE_SOURCE_DIR}/src")
+
+# Link CLI11
+target_link_libraries(aoc25 PRIVATE CLI11::CLI11)
 
 install(TARGETS aoc25 DESTINATION "."
         RUNTIME DESTINATION bin

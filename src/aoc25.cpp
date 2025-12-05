@@ -8,7 +8,7 @@ PuzzleArgs::PuzzleArgs(Meta meta,std::filesystem::path in_file_path)
 
 std::optional<std::string> day(PuzzleArgs puzzle_args);
 
-int solve() {
+int solve(AppArgs args) {
 
   std::vector<std::filesystem::path> in_data_files{};
   for (auto const& entry : std::filesystem::directory_iterator(".")) {

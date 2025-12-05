@@ -27,8 +27,13 @@ private:
 
   Meta m_meta{};
   std::filesystem::path m_in_file_path;
-}
-;
-int solve();
+};
+
+struct AppArgs {
+  int part;
+  std::string input_file_stem;
+};
+
+int solve(AppArgs args);
 
 AOC25_EXPORT void print_platform();
