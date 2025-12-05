@@ -31,6 +31,7 @@ private:
 
 struct AppArgs {
   int part;
+  bool debug;
   std::string input_file_stem;
 };
 
