@@ -9,15 +9,13 @@
 // 334 442 869 995 852 = 3.34.. * 10^15
 // 2^64 = 1.8.. * 10^19
 
-std::optional<size_t> p1(PuzzleArgs puzzle_args) {
-  std::optional<size_t> answer{};
-  std::ifstream in{puzzle_args.in_file_path()};
+using Model = std::pair<
+    std::vector<std::pair<size_t,size_t>>
+  ,std::vector<size_t>>;
+Model parse(std::istream& in) {
+  Model model{};
   std::string entry;
   bool is_ranges{true};
-  using Model = std::pair<
-     std::vector<std::pair<size_t,size_t>>
-    ,std::vector<size_t>>;
-  Model model{};
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
     if (entry.size() == 0) {
@@ -34,9 +32,14 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     else {
       model.second.push_back(std::stoll(entry));
     }
-
   }
+  return model;
+}
 
+std::optional<size_t> p1(PuzzleArgs puzzle_args) {
+  std::optional<size_t> answer{};
+  std::ifstream in{puzzle_args.in_file_path()};
+  auto model = parse(in);
   size_t acc{};
   for (auto id : model.second) {
     std::string log{};
@@ -67,10 +70,29 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
 std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
-  std::string entry;
-  while (std::getline(in,entry)) {
-    std::print("\n{} ",entry);
+  auto model = parse(in);
+
+  auto ranges = model.first;
+  std::ranges::sort(ranges,[](auto const& lhs,auto const& rhs){
+    return (lhs.first < rhs.first);
+  });
+
+  std::vector<std::pair<size_t,size_t>> disjunct{};
+  for (auto const& r : ranges) {
+    if (
+         (disjunct.size() == 0)
+      or (r.first > disjunct.back().second + 1)) disjunct.push_back(r);
+    else {
+      // Overlaps or adjacent -> extend current
+      disjunct.back().second = std::max(r.second,disjunct.back().second);
+    }
   }
+
+  size_t acc{};
+  for (auto const& r : disjunct) {
+    acc += (r.second - r.first + 1);
+  }
+  answer = acc;
 
   return answer;
 }
