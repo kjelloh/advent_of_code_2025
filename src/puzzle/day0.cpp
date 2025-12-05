@@ -35,7 +35,7 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
 }
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
-  std::print("\ndayxx");
+  std::print("\ndayxx debug:{}",puzzle_args.meta().m_debug);
   std::string result{};
   auto answer1 = p1(puzzle_args);
   if (answer1) {
