@@ -6,16 +6,15 @@
 PuzzleArgs::PuzzleArgs(Meta meta,std::filesystem::path in_file_path)
   : m_meta{meta},m_in_file_path{in_file_path} {}
 
-std::string day(PuzzleArgs puzzle_args);
+std::optional<std::string> day(PuzzleArgs puzzle_args);
 
 int solve() {
-
 
   std::vector<std::filesystem::path> in_data_files{};
   for (auto const& entry : std::filesystem::directory_iterator(".")) {
     if (entry.is_regular_file() && entry.path().extension() == ".txt") {
-        std::cout << entry.path() << std::endl;
-        in_data_files.push_back(entry.path());
+      std::print("\n{}",entry.path().string());
+      in_data_files.push_back(entry.path());
     }
   }
 
@@ -29,8 +28,12 @@ int solve() {
   std::vector<SolveResult> solve_results{};
 
   for (auto const& in_file_path : in_data_files) {
+    std::print("\nSolving for [{}]",in_file_path.string());
     PuzzleArgs puzzle_args({},in_file_path);
-    solve_results.push_back(SolveResult{puzzle_args,day(puzzle_args)});
+    auto maybe_answer = day(puzzle_args);
+    auto solve_result = SolveResult{puzzle_args,maybe_answer};
+    solve_results.push_back(solve_result);
+    if (!maybe_answer) break;
   }
 
   int i{};
