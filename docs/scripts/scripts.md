@@ -1,6 +1,6 @@
-# day 6
+# day 6 - part 2
 
-## part 2
+There is actually something important to notice about the input.
 
 ```text
 123 328  51 64 
@@ -9,6 +9,50 @@
 *   +   *   +  
 ```
 
+Can you see what it is?
+
+---
+
+Each column does in fact have a fixed width!
+
+```text
+123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  
+```
+
+But columns do NOT always share width!
+
+---
+
+We need to determine where each column starts and ends.
+
+```text
+123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  
+```
+
+What algorithm can we use to find the column split positions?
+
+---
+
+The column splits are the positions that have a ' ' in all rows.
+
+```text
+123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  
+---------------
+xxx xxx xxx xxx
+   |   |   |
+  s p l i t s
+```
+
+---
 pivot.
 
 ```text

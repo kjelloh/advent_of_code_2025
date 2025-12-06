@@ -88,66 +88,55 @@ Model parse2(std::istream& in) {
   std::vector<std::string> grid{};
   std::string ops{};
 
+  std::vector<std::string> entries{};
   std::string entry;
+  std::string sum_string{};
   while (std::getline(in, entry)) {
     std::print("\n{} ", entry);
-    // split on each single space following text
-    int state{0};
-    std::vector<std::string> tokens{};
-    tokens.push_back(""); // expect at least one token
-    int i{0};
-    // '123 328  51 64 '
-    while (i < static_cast<int>(entry.size())) {
+    entries.push_back(entry);
+
+    for (int i=0;i<entry.size();++i) {
       char ch = entry[i];
-      // '1' '2' '3' ' '
-      // '3' '2' '8' ' '
-      // ' ' '5' '1' ' '
-      // '6' '4' ' '
-      switch (state) {
-        case 0:
-          // Read leading spaces
-          if (ch != ' ') {
-            // '1'
-            // '3'
-            // '5'
-            // '6'
-            state = 1;
-            continue;
-          }
-          // ' '
-          tokens.back().push_back(ch);
-          ++i; // next
-          break;
-        case 1:
-          // Read text
-          if (ch == ' ') {
-            // ' '
-            // ' '
-            // ' '
-            // ' '
-            // New token if more input
-            if (i < entry.size()) tokens.push_back(""); // '123' '328' ' 51' '64'
-            ++i; // eat separator ' '
-            state = 0;
-            continue;
-          }
-
-          // '1' '2' '3'
-          // '3' '2' '8'
-          // '5' '1'
-          // '6' '4'
-          tokens.back().push_back(ch);
-          ++i; // next
-
-          break;        
-      }
-    } // while chars -> tokens
-
-    for (auto const& token : tokens) {
-      std::print("\n    '{}'",token);
+      if (sum_string.size() < i + 1) sum_string.push_back(ch);
+      else sum_string[i] = std::max(sum_string[i],ch); // digits win over ' '
     }
-
   }
+
+  std::print("\nsum_string:'{}'",sum_string);
+
+  // Detect column separators
+  std::vector<size_t> seps{};
+  size_t i=0;
+  for (int i = 0; i < static_cast<int>(sum_string.size());++i) {
+    if (sum_string[i] == ' ') {
+      if (seps.size() > 0 && seps.back() == i-1) {
+        std::print("\nAdjacent space separators detected at {}",i);
+      }
+      seps.push_back(i);
+    }
+  }
+
+  // Calculate column widths
+  std::vector<size_t> widths{};
+  int begin = 0;
+  for (auto end : seps) {
+    widths.push_back(end - begin);
+    begin = end+1;
+  }
+
+  for (auto width : widths) {
+    std::print("\n    width:{}",width);
+  }
+
+  for (auto const& entry : entries) {
+    // Split on column widths
+    std::vector<std::string> fields{};
+    for (auto const& field : fields) {
+      std::print("\n    '{}'",field);
+    }
+  }
+
+
 
   return model;
 }
