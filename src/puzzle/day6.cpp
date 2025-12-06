@@ -131,6 +131,23 @@ Model parse2(std::istream& in) {
   for (auto const& entry : entries) {
     // Split on column widths
     std::vector<std::string> fields{};
+
+    size_t begin{0};
+    for (auto width : widths) {
+      auto end = begin + width;
+      if (end <= entry.size()) {
+        fields.push_back(entry.substr(begin,width));
+      }
+      else {
+        std::print(
+           "\nFailed to consume field width:{} at {} in entry size:{}"
+          ,width
+          ,begin
+          ,entry.size());
+      }
+      begin += end+1;
+    }
+
     for (auto const& field : fields) {
       std::print("\n    '{}'",field);
     }
