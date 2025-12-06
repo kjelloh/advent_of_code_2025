@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-// size 5 x 3768
+// input size 5 x 3768
 struct Expression {
   std::vector<size_t> operands{};
   char op{};
@@ -111,10 +111,9 @@ Model parse2(std::istream& in) {
   // Now parse the pivot grid into expressions
   model.push_back({});
   for (auto entry : pivot_grid) {
-    if (std::ranges::all_of(entry,[](auto ch){ return ch == ' ';})) continue;
     std::print("\npivot:'{}'",entry);
+    if (std::ranges::all_of(entry,[](auto ch){ return ch == ' ';})) continue;
     if (entry.back() == '+' or entry.back() == '*') {
-      std::print(" --> {}",entry.back());
       model.back().op = entry.back();
       entry.back() = ' ';
       model.back().operands.push_back(std::stoll(entry));
@@ -147,7 +146,6 @@ std::optional<std::string> day(PuzzleArgs puzzle_args) {
     ,puzzle_args.meta().m_part
     ,puzzle_args.meta().m_debug);
   
-
   switch (puzzle_args.meta().m_part) {
     case 1: {
       return p1(puzzle_args)
