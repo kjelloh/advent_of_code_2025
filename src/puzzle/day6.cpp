@@ -5,16 +5,48 @@
 #include <fstream>
 #include <optional>
 #include <algorithm>
+#include <sstream>
 
-using Model = std::vector<std::string>;
+// size 5 x 3768
+struct Expression {
+  std::vector<size_t> operands{};
+  char op{};
+  size_t eval() const {
+    switch (op) {
+      case '+': return 0;
+      case '*': return 0;
+      default: return 0;
+    }
+  }
+};
+
+using Model = std::vector<Expression>;
+
 Model parse(std::istream& in) {
   Model model{};
   std::string entry;
-  bool is_ranges{true};
   while (std::getline(in,entry)) {
     std::print("\n{} ",entry);
-    model.push_back(entry);
+
+    // read csv
+    std::istringstream iss{entry};
+    std::vector<std::string> csvs{};
+    std::string s{};
+    while (std::getline(iss,s,' ')) {
+      csvs.push_back(s);
+    }
+
+    // entry is either the next operands or the operators
+    if (csvs[0][0] >= '0' or csvs[0][0] <= '9') {
+      // operands
+      std::print("\noperands:{}",csvs.size());
+    }
+    else {
+      // operators
+      std::print("\noperagtors:{}",csvs.size());
+    }
   }
+
   return model;
 }
 
