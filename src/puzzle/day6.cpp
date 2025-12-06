@@ -16,7 +16,7 @@ struct Expression {
     switch (op) {
       case '+': return std::ranges::fold_left(operands, size_t{0}, std::plus<>{});
       case '*': return std::ranges::fold_left(operands, size_t{1}, std::multiplies<>{});;
-      default: return 0;
+      default: return 0; // harmless for default (empty) expression
     }
   }
 
@@ -86,82 +86,43 @@ Model parse2(std::istream& in) {
   Model model{};
 
   std::vector<std::string> grid{};
-  std::string ops{};
-
-  std::vector<std::string> entries{};
   std::string entry;
-  std::string sum_string{};
   while (std::getline(in, entry)) {
-    std::print("\n{} ", entry);
-    entries.push_back(entry);
+    std::print("\nparse2:{} ", entry);
+    grid.push_back(entry);
+  }
 
-    for (int i=0;i<entry.size();++i) {
-      char ch = entry[i];
-      if (sum_string.size() < i + 1) sum_string.push_back(ch);
-      else sum_string[i] = std::max(sum_string[i],ch); // digits win over ' '
+  // pivot the grid counter-clockwise on character columns
+  int in_row_count = grid.size();
+  int in_col_count = grid[0].size(); // fixed width
+
+  int pivot_row_count = in_col_count;
+  int pivot_col_count = in_row_count;
+  std::vector<std::string> pivot_grid(
+     pivot_row_count
+    ,std::string(pivot_col_count,' ')
+  );
+  for (int r=0;r<pivot_row_count;++r) {
+    for (int c=0;c<pivot_col_count;++c) {
+      pivot_grid[r][c] = grid[c][in_col_count-r-1];
     }
   }
 
-  std::print("\nsum_string:'{}'",sum_string);
-
-  // Detect column separators
-  std::vector<size_t> seps{};
-  size_t i=0;
-  for (int i = 0; i < static_cast<int>(sum_string.size());++i) {
-    if (sum_string[i] == ' ') {
-      if (seps.size() > 0 && seps.back() == i-1) {
-        std::print("\nAdjacent space separators detected at {}",i);
-      }
-      seps.push_back(i);
+  // Now parse the pivot grid into expressions
+  model.push_back({});
+  for (auto entry : pivot_grid) {
+    if (std::ranges::all_of(entry,[](auto ch){ return ch == ' ';})) continue;
+    std::print("\npivot:'{}'",entry);
+    if (entry.back() == '+' or entry.back() == '*') {
+      std::print(" --> {}",entry.back());
+      model.back().op = entry.back();
+      entry.back() = ' ';
+      model.back().operands.push_back(std::stoll(entry));
+      model.push_back({}); // next expression
+      continue;
     }
+    model.back().operands.push_back(std::stoll(entry));
   }
-
-  // Calculate column widths
-  std::vector<size_t> widths{};
-  int begin = 0;
-  for (auto end : seps) {
-    widths.push_back(end - begin);
-    begin = end+1;
-  }
-
-  for (auto width : widths) {
-    std::print("\n    width:{}",width);
-  }
-
-  std::vector<std::vector<std::string>> rows_of_column_fields{};
-  for (auto const& entry : entries) {
-    std::vector<std::string> fields{};
-
-    // Split on column widths
-    size_t begin{0};
-    for (auto width : widths) {
-      auto end = begin + width;
-      if (end <= entry.size()) {
-        fields.push_back(entry.substr(begin,width));
-      }
-      else {
-        std::print(
-           "\nFailed to consume field width:{} at {} in entry size:{}"
-          ,width
-          ,begin
-          ,entry.size());
-      }
-      begin = end + 1;
-    }
-
-    rows_of_column_fields.push_back(fields);
-
-    for (auto const& field : fields) {
-      std::print("\n    '{}'",field);
-    }
-  }
-
-  
-
-
-
-
-
   return model;
 }
 
@@ -170,6 +131,13 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse2(in);
   // Solve here
+  size_t acc{};
+  for (auto const& expression : model) {
+    auto val = expression.eval();
+    acc += val;
+    std::print("\n{} = {}",expression.to_string(),val);
+  }
+  answer = acc;
   return answer;
 }
 
