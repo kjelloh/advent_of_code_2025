@@ -12,12 +12,21 @@ struct Expression {
   std::vector<size_t> operands{};
   char op{};
   size_t eval() const {
+    size_t result{};
     switch (op) {
-      case '+': return 0;
-      case '*': return 0;
+      case '+': return std::ranges::fold_left(operands, size_t{0}, std::plus<>{});
+      case '*': return std::ranges::fold_left(operands, size_t{1}, std::multiplies<>{});;
       default: return 0;
     }
   }
+
+  std::string to_string() const {
+    std::string result{};
+    for (auto const& op : operands) result += (std::to_string(op) + " ");
+    result.push_back(op);
+    return result;
+  }
+
 };
 
 using Model = std::vector<Expression>;
@@ -39,8 +48,20 @@ Model parse(std::istream& in) {
 
     if (std::isdigit(static_cast<unsigned char>(csvs[0][0]))) {
       std::print("\noperands: {}", csvs.size());
+      for (int i=0;i<csvs.size();++i) {
+        // i is expression index
+        if (model.size() < i+1) model.push_back({});
+        model[i].operands.push_back(std::stoll(csvs[i]));
+        std::print(" {}:{}",i,csvs[i]);
+      }
     } else {
       std::print("\noperators: {}", csvs.size());
+      for (int i=0;i<csvs.size();++i) {
+        // i is expression index
+        if (model.size() < i+1) model.push_back({});
+        model[i].op = csvs[i][0];
+        std::print(" {}:{}",i,csvs[i][0]);
+      }
     }
   }
   return model;
@@ -51,6 +72,13 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
   // Solve here
+  size_t acc{};
+  for (auto const& expression : model) {
+    auto val = expression.eval();
+    acc += val;
+    std::print("\n{} = {}",expression.to_string(),val);
+  }
+  answer = acc;
   return answer;
 }
 
