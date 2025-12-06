@@ -88,13 +88,65 @@ Model parse2(std::istream& in) {
   std::vector<std::string> grid{};
   std::string ops{};
 
-  int max_width{};
   std::string entry;
   while (std::getline(in, entry)) {
     std::print("\n{} ", entry);
-    if (entry[0]=='+' or entry[0]=='*') ops = entry;
-    else grid.push_back(entry);
-    max_width = std::max(max_width,static_cast<int>(entry.size()));
+    // split on each single space following text
+    int state{0};
+    std::vector<std::string> tokens{};
+    tokens.push_back(""); // expect at least one token
+    int i{0};
+    // '123 328  51 64 '
+    while (i < static_cast<int>(entry.size())) {
+      char ch = entry[i];
+      // '1' '2' '3' ' '
+      // '3' '2' '8' ' '
+      // ' ' '5' '1' ' '
+      // '6' '4' ' '
+      switch (state) {
+        case 0:
+          // Read leading spaces
+          if (ch != ' ') {
+            // '1'
+            // '3'
+            // '5'
+            // '6'
+            state = 1;
+            continue;
+          }
+          // ' '
+          tokens.back().push_back(ch);
+          ++i; // next
+          break;
+        case 1:
+          // Read text
+          if (ch == ' ') {
+            // ' '
+            // ' '
+            // ' '
+            // ' '
+            // New token if more input
+            if (i < entry.size()) tokens.push_back(""); // '123' '328' ' 51' '64'
+            ++i; // eat separator ' '
+            state = 0;
+            continue;
+          }
+
+          // '1' '2' '3'
+          // '3' '2' '8'
+          // '5' '1'
+          // '6' '4'
+          tokens.back().push_back(ch);
+          ++i; // next
+
+          break;        
+      }
+    } // while chars -> tokens
+
+    for (auto const& token : tokens) {
+      std::print("\n    '{}'",token);
+    }
+
   }
 
   return model;
@@ -105,7 +157,6 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse2(in);
   // Solve here
-  answer = 0;
   return answer;
 }
 
@@ -114,16 +165,21 @@ std::optional<std::string> day(PuzzleArgs puzzle_args) {
     "\nday6 part:{} debug:{}"
     ,puzzle_args.meta().m_part
     ,puzzle_args.meta().m_debug);
-  std::string result{};
-  auto answer1 = p1(puzzle_args);
-  if (answer1) {
-    result += std::format("p1:{}",*answer1);
-    auto answer2 = p2(puzzle_args);
-    if (answer2) {
-      result += std::format(" p2:{}",*answer2);      
-    }
-  }
+  
 
-  if (result.size() > 0) return result;
+  switch (puzzle_args.meta().m_part) {
+    case 1: {
+      return p1(puzzle_args)
+        .transform([](auto answer){
+          return std::format("{}",answer);
+        });
+    } break;
+    case 2:
+      return p2(puzzle_args)
+        .transform([](auto answer){
+          return std::format("{}",answer);
+        });
+      break;
+  }
   return std::nullopt;
 }
