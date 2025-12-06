@@ -129,9 +129,9 @@ Model parse2(std::istream& in) {
   }
 
   for (auto const& entry : entries) {
-    // Split on column widths
     std::vector<std::string> fields{};
 
+    // Split on column widths
     size_t begin{0};
     for (auto width : widths) {
       auto end = begin + width;
@@ -145,7 +145,7 @@ Model parse2(std::istream& in) {
           ,begin
           ,entry.size());
       }
-      begin += end+1;
+      begin = end + 1;
     }
 
     for (auto const& field : fields) {
