@@ -14,8 +14,8 @@
 class PuzzleArgs {
 
 public:
+
   struct Meta {
-    // bool m_is_part_1{true};
     int m_part{1};
     bool m_debug{false};
   };
@@ -34,7 +34,7 @@ private:
 struct AppArgs {
   int part;
   bool debug;
-  std::string input_file_stem;
+  std::string input_file_name;
 };
 
 int solve(AppArgs args);

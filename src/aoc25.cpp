@@ -11,14 +11,20 @@ std::optional<std::string> day(PuzzleArgs puzzle_args);
 int solve(AppArgs args) {
 
   std::vector<std::filesystem::path> in_data_files{};
-  for (auto const& entry : std::filesystem::directory_iterator(".")) {
-    if (entry.is_regular_file() && entry.path().extension() == ".txt") {
-      std::print("\n{}",entry.path().string());
-      in_data_files.push_back(entry.path());
-    }
+  if (args.input_file_name.size() > 0) {
+    in_data_files.push_back(args.input_file_name);
   }
+  else {
+    for (auto const& entry : std::filesystem::directory_iterator(".")) {
+      if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+        std::print("\n{}",entry.path().string());
+        in_data_files.push_back(entry.path());
+      }
+    }
 
-  std::ranges::sort(in_data_files); // ex..txt before in.txt
+    std::ranges::sort(in_data_files); // ex..txt before in.txt
+  } 
+
 
   struct SolveResult {
     PuzzleArgs m_puzzle_args;
