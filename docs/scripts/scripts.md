@@ -22,7 +22,7 @@ Each column does in fact have a fixed width!
 *   +   *   +  
 ```
 
-But columns do NOT always share width!
+What is the column with of the data un the example above?
 
 ---
 
@@ -51,40 +51,49 @@ xxx xxx xxx xxx
    |   |   |
   s p l i t s
 ```
-
 ---
-pivot.
+
+When we know the split positions we can create a table with rows fo extracted column fields
 
 ```text
-    4
-4 3 1
-6 2 3
-+
-1 7 5
-5 8 1
-  3 2
-*
-8
-2 4 8
-3 6 9
-+
-3 5 6
-2 4  
-1
-*
+
+// rows_of_column_fields
+
+'123' '328' ' 51' '64 '
+' 45' '64 ' '387' '23 '
+'  6' '98 ' '215' '314'
+'*  ' '+  ' '*  ' '+  '
 ```
 
-We need to respect spaces in the digit columns!
+How can we turn single digit columns right to left into single digit rows?
 
-- '123 328  51 64 ' splits into '123' '328' ' 51' '64 '
 ---
 
-- split on single ' ' and respect ' ' in resulting tokens.
-- pivot the table on character level.
-- Filter white space from rows
-- On number, push on stack.
-- On operator, fold stacked numbers with operator and add to answer
-- return answer
+We can pivot the table counter-clockwise on single character columns!
+
+```text
+'123' '328' ' 51' '64 '
+' 45' '64 ' '387' '23 '
+'  6' '98 ' '215' '314'
+'*  ' '+  ' '*  ' '+  '
+```
+
+```text
+'  4 '
+'431 '
+'623+'
+'175 '
+'581 '
+' 32*'
+'8   '
+'248 '
+'369+'
+'356 '
+'24  '
+'1  *'
+```
+
+DARN! The inout data is a GRID! I can just pivot the grid and be done with it?!
 
 ---
 # day 3

@@ -128,6 +128,7 @@ Model parse2(std::istream& in) {
     std::print("\n    width:{}",width);
   }
 
+  std::vector<std::vector<std::string>> rows_of_column_fields{};
   for (auto const& entry : entries) {
     std::vector<std::string> fields{};
 
@@ -148,10 +149,16 @@ Model parse2(std::istream& in) {
       begin = end + 1;
     }
 
+    rows_of_column_fields.push_back(fields);
+
     for (auto const& field : fields) {
       std::print("\n    '{}'",field);
     }
   }
+
+  
+
+
 
 
 
