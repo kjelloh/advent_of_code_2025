@@ -31,7 +31,7 @@ struct Expression {
 
 using Model = std::vector<Expression>;
 
-Model parse(std::istream& in) {
+Model parse1(std::istream& in) {
   Model model{};
 
   std::string entry;
@@ -70,7 +70,7 @@ Model parse(std::istream& in) {
 std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
-  auto model = parse(in);
+  auto model = parse1(in);
   // Solve here
   size_t acc{};
   for (auto const& expression : model) {
@@ -82,11 +82,30 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   return answer;
 }
 
+Model parse2(std::istream& in) {
+  Model model{};
+
+  std::vector<std::string> grid{};
+  std::string ops{};
+
+  int max_width{};
+  std::string entry;
+  while (std::getline(in, entry)) {
+    std::print("\n{} ", entry);
+    if (entry[0]=='+' or entry[0]=='*') ops = entry;
+    else grid.push_back(entry);
+    max_width = std::max(max_width,static_cast<int>(entry.size()));
+  }
+
+  return model;
+}
+
 std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
-  auto model = parse(in);
+  auto model = parse2(in);
   // Solve here
+  answer = 0;
   return answer;
 }
 
@@ -101,7 +120,7 @@ std::optional<std::string> day(PuzzleArgs puzzle_args) {
     result += std::format("p1:{}",*answer1);
     auto answer2 = p2(puzzle_args);
     if (answer2) {
-      result += std::format("p1:{}",*answer2);      
+      result += std::format(" p2:{}",*answer2);      
     }
   }
 

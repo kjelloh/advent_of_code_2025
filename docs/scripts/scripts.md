@@ -1,3 +1,48 @@
+# day 6
+
+## part 2
+
+```text
+123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  
+```
+
+pivot.
+
+```text
+    4
+4 3 1
+6 2 3
++
+1 7 5
+5 8 1
+  3 2
+*
+8
+2 4 8
+3 6 9
++
+3 5 6
+2 4  
+1
+*
+```
+
+We need to respect spaces in the digit columns!
+
+- '123 328  51 64 ' splits into '123' '328' ' 51' '64 '
+---
+
+- split on single ' ' and respect ' ' in resulting tokens.
+- pivot the table on character level.
+- Filter white space from rows
+- On number, push on stack.
+- On operator, fold stacked numbers with operator and add to answer
+- return answer
+
+---
 # day 3
 
 ## part 1
