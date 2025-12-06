@@ -24,29 +24,25 @@ using Model = std::vector<Expression>;
 
 Model parse(std::istream& in) {
   Model model{};
-  std::string entry;
-  while (std::getline(in,entry)) {
-    std::print("\n{} ",entry);
 
-    // read csv
-    std::istringstream iss{entry};
-    std::vector<std::string> csvs{};
-    std::string s{};
-    while (std::getline(iss,s,' ')) {
+  std::string entry;
+  while (std::getline(in, entry)) {
+    std::print("\n{} ", entry);
+
+    std::istringstream iss(entry);
+    std::vector<std::string> csvs;
+    std::string s;
+
+    while (iss >> s) {
       csvs.push_back(s);
     }
 
-    // entry is either the next operands or the operators
-    if (csvs[0][0] >= '0' or csvs[0][0] <= '9') {
-      // operands
-      std::print("\noperands:{}",csvs.size());
-    }
-    else {
-      // operators
-      std::print("\noperagtors:{}",csvs.size());
+    if (std::isdigit(static_cast<unsigned char>(csvs[0][0]))) {
+      std::print("\noperands: {}", csvs.size());
+    } else {
+      std::print("\noperators: {}", csvs.size());
     }
   }
-
   return model;
 }
 
