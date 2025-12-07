@@ -10,6 +10,8 @@ std::optional<std::string> day(PuzzleArgs puzzle_args);
 
 int solve(AppArgs args) {
 
+  aoc::print_is_enabled = args.debug;
+
   std::vector<std::filesystem::path> in_data_files{};
 
   if (args.input_file_name.size() > 0) {

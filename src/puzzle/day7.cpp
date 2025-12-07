@@ -13,7 +13,7 @@ using Grid = std::vector<std::string>;
 void print(Grid const& grid) {
   int ix{0};
   for (auto const& row : grid) {
-    std::print("\n{:4}[0..{:3}]: '{}' ", ix++,row.size()-1,row);
+    aoc::print("\n{:4}[0..{:3}]: '{}' ", ix++,row.size()-1,row);
   }
 }
 
@@ -24,7 +24,7 @@ Model parse(std::istream& in) {
   std::string entry;
   int ix{0};
   while (std::getline(in, entry)) {
-    std::print("\n{:4}[0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
+    aoc::print("\n{:4}[0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
     model.push_back(entry);
   }
   return model;
@@ -65,7 +65,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
       }
       else beams[r].insert(splitter-1);
     }
-    std::print(
+    aoc::print(
        "\n{} -> hit_splitters:{} beams:{}"
       ,model[r],hit_splitters.size()
       ,beams[r].size());
@@ -108,7 +108,7 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
       }
       else beams[r].insert(splitter-1);
     }
-    std::print(
+    aoc::print(
        "\n{} -> hit_splitters:{} beams:{}"
       ,model[r],hit_splitters.size()
       ,beams[r].size());
@@ -120,12 +120,12 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
     current[beam] = 1;
   }
   for (int r=num_rows-1;r>0;--r) {
-    std::print("\n");
+    aoc::print("\n");
     for (int c=0;c<num_cols;++c) {
-      if (beams[r].contains(c)) std::print("{}",'|');
-      else std::print("{}",model[r][c]);
+      if (beams[r].contains(c)) aoc::print("{}",'|');
+      else aoc::print("{}",model[r][c]);
     }
-    for (auto counter : current) std::print(" {}",counter);
+    for (auto counter : current) aoc::print(" {}",counter);
 
     std::map<int,size_t> prev{};
     for (auto beam : beams[r]) {
@@ -141,14 +141,14 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
     answer = current.begin()->second;
   }
   else {
-    std::print("\nFAILED: Expected one but found {} final counters",current.size());
+    aoc::print("\nFAILED: Expected one but found {} final counters",current.size());
   }
 
   return answer;
 }
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
-  std::print(
+  aoc::print(
     "\nday7 part:{} debug:{}"
     ,puzzle_args.meta().m_part
     ,puzzle_args.meta().m_debug);

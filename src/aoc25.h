@@ -38,6 +38,14 @@ struct AppArgs {
   std::optional<std::string> maybe_answer;
 };
 
+namespace aoc {
+  inline bool print_is_enabled{false};
+  template <typename... Args>
+  void print(std::format_string<Args...> fmt, Args&&... args) {
+    if (print_is_enabled) std::print(fmt, std::forward<Args>(args)...);
+  }
+}
+
 int solve(AppArgs args);
 
 AOC25_EXPORT void print_platform();
