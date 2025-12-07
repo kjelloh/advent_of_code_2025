@@ -5,16 +5,26 @@
 #include <fstream>
 #include <optional>
 #include <algorithm>
-#include <sstream>
+#include <set>
+#include <map>
 
-using Model = std::vector<std::string>;
+using Grid = std::vector<std::string>;
+
+void print(Grid const& grid) {
+  int ix{0};
+  for (auto const& row : grid) {
+    aoc::print("\ngrid:{:4}[0..{:3}]: '{}' ", ix++,row.size()-1,row);
+  }
+}
+
+using Model = Grid;
 Model parse(std::istream& in) {
   Model model{};
 
   std::string entry;
   int ix{0};
   while (std::getline(in, entry)) {
-    std::print("\n{}[0..{}]:'{}' ", ix++,entry.size()-1,entry);
+    aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
     model.push_back(entry);
   }
   return model;
@@ -25,8 +35,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
   // Solve here
-  size_t acc{};
-  // answer = acc;
+  size_t candidate{};
   return answer;
 }
 
@@ -35,13 +44,12 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
   // Solve here
-  size_t acc{};
-  // answer = acc;
+  size_t candidate{};
   return answer;
 }
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
-  std::print(
+  aoc::print(
     "\nday part:{} debug:{}"
     ,puzzle_args.meta().m_part
     ,puzzle_args.meta().m_debug);

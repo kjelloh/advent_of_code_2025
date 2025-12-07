@@ -38,8 +38,11 @@ int solve(AppArgs args) {
   int first_part = args.maybe_part.value_or(1);
   int second_part = args.maybe_part.value_or(2);
 
+  bool do_break{false};  
   for (int part = first_part;part <= second_part;++part) {
+    if (do_break) break;
     for (auto const& in_file_path : in_data_files) {
+      if (do_break) break;
       std::print("\nSolving for [{}]",in_file_path.string());
       PuzzleArgs puzzle_args(
         {.m_debug = args.debug,.m_part = part}
@@ -47,7 +50,7 @@ int solve(AppArgs args) {
       auto maybe_answer = day(puzzle_args);
       auto solve_result = SolveResult{puzzle_args,maybe_answer};
       solve_results.push_back(solve_result);
-      if (!maybe_answer) break;
+      do_break = not maybe_answer.has_value();
     }
   }
 
