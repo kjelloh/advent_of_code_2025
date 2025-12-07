@@ -71,7 +71,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   }
 
   answer = acc;
-  return answer;
+  return answer; // 1499
 }
 
 std::optional<size_t> p2(PuzzleArgs puzzle_args) {
