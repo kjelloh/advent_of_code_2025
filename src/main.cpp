@@ -11,9 +11,8 @@ int main(int argc, char** argv) {
 
   // Define command-line options
 
-  app.add_option("-p,--part", args.part, "Part to solve (1=part1, 2=part2)")
-     ->check(CLI::Range(1, 2))
-     ->default_val(1);
+  app.add_option("-p,--part", args.maybe_part, "Part to solve (1=part1, 2=part2)")
+     ->check(CLI::Range(1, 2));
 
   app.add_flag("-d,--debug", args.debug, "Enable DEBUG output logging");
 

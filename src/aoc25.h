@@ -32,7 +32,7 @@ private:
 };
 
 struct AppArgs {
-  int part;
+  std::optional<int> maybe_part;
   bool debug;
   std::string input_file_name;
   std::optional<std::string> maybe_answer;
