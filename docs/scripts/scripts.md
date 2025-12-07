@@ -1,3 +1,21 @@
+# day7 part 2
+
+How many paths can a single particle take to reach the bottom row?
+
+```text
+.......S.......             1
+.......|.......             1
+......|^.......           1   1
+......|........           1   1
+.....|^.^......         1   2   1
+.....|.........         1   2   1
+```
+
+Each time it hits a splitter on its path it can chose left or right (if there is room).
+
+So at each row we can keep a running count of the number of ways the particle can reach a column on that row.
+
+
 # day 6 - part 2
 
 There is actually something important to notice about the input.

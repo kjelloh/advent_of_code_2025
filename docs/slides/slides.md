@@ -1,6 +1,50 @@
 ---
 marp : true
 ---
+# day7 part 2
+
+How many paths can a single particle take to reach the bottom row?
+
+```text
+.......S.......             1
+.......|.......             1
+......|^.......           1   1
+......|........           1   1
+.....|^.^......         1   2   1
+.....|.........         1   2   1
+```
+
+<!-- 
+Each time it hits a splitter on its path it can chose left or right (if there is room).
+
+So at each row we can keep a running count of the number of ways the particle can reach a column on that row.
+-->
+
+---
+
+Can we count the number of possible paths by using the registered beams?
+
+```text
+.......S.......
+.......|.......          4
+......|^|......         2 2
+......|.|......         2 2
+.....|^|^|.....       1  1  1
+.....|.|.|.....       1  1  1
+```
+
+```sh
+for row in num_rows down to 1
+  for beam in beams on row
+    if split_from_left_above
+      increment above left_beam path options counter
+    if split_from_right_above
+      increment above right_beam path options counter
+```
+
+The options counter for the initial beam on the top row is now the sum of all possible paths?
+
+---
 # Advent of Code - Day 5: Cafeteria (part 1)
 
 - [https://adventofcode.com/2025/day/5](https://adventofcode.com/2025/day/5)
