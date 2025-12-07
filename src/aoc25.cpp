@@ -11,6 +11,7 @@ std::optional<std::string> day(PuzzleArgs puzzle_args);
 int solve(AppArgs args) {
 
   std::vector<std::filesystem::path> in_data_files{};
+
   if (args.input_file_name.size() > 0) {
     in_data_files.push_back(args.input_file_name);
   }
@@ -24,7 +25,6 @@ int solve(AppArgs args) {
 
     std::ranges::sort(in_data_files); // ex..txt before in.txt
   } 
-
 
   struct SolveResult {
     PuzzleArgs m_puzzle_args;
@@ -47,9 +47,28 @@ int solve(AppArgs args) {
   int i{};
   for (auto const& solve_result : solve_results) {
     std::print(
-       "\nANSWER '{:15}' -> {}"
+       "\n{} -> solver -> {}"
       ,solve_result.m_puzzle_args.in_file_path().filename().string()
       ,solve_result.m_maybe_answer.value_or("null"));
+
+    if (args.maybe_answer) {
+      std::print(" (provided {}) ",args.maybe_answer.value());
+
+      if (solve_result.m_maybe_answer) {
+        if (
+             solve_result.m_maybe_answer.value() 
+          == args.maybe_answer.value()) {
+
+          std::print(" **PASSED** ");
+
+        }
+        else {
+
+          std::print(R"( Not there yet ¯\_(ツ)_/¯ ... )");
+
+        }
+      }
+    }
   }
   return 0;
 }

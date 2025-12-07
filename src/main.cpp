@@ -20,6 +20,8 @@ int main(int argc, char** argv) {
   app.add_option("--in", args.input_file_name, "Input file ex0.txt,in.txt... (if not provided, scans for .txt files)")
      ->check(CLI::ExistingFile);
 
+  app.add_option("-a,--answer",args.maybe_answer,"Known answer as formatted by solver (if provided solver will compare)");
+
   // Add platform info flag
   bool show_platform{false};
   app.add_flag("--platform", show_platform, "Show platform information");

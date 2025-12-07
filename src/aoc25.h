@@ -35,6 +35,7 @@ struct AppArgs {
   int part;
   bool debug;
   std::string input_file_name;
+  std::optional<std::string> maybe_answer;
 };
 
 int solve(AppArgs args);
