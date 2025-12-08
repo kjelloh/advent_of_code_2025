@@ -9,6 +9,8 @@
 #include <map>
 #include <sstream>
 
+using Integer= long long;
+
 struct Point {
   int x;
   int y;
@@ -29,10 +31,10 @@ std::string to_string(Point p) {
   return std::format("{},{},{}",p.x,p.y,p.z);  
 }
 
-auto squared_distance(Point lhs,Point rhs) {
-  auto dx = (rhs.x - lhs.x);
-  auto dy = (rhs.y - lhs.y);
-  auto dz = (rhs.z - lhs.z);
+Integer squared_distance(Point lhs,Point rhs) {
+  Integer dx = (rhs.x - lhs.x);
+  Integer dy = (rhs.y - lhs.y);
+  Integer dz = (rhs.z - lhs.z);
 
   return (dx*dx + dy*dy + dz*dz);
 }
