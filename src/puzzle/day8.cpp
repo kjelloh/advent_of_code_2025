@@ -63,6 +63,10 @@ Model parse(std::istream& in) {
 
 std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   std::optional<std::string> answer{};
+
+  // Example or full input?
+  int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
+
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
 
@@ -126,54 +130,75 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     adjacent[n2].insert(n1);
   }
 
-  // Split into disjoint subgraphs
-  std::vector<int> roots(model.size(),0);
-  for (int i=0;i<model.size();++i) roots[i] = i;
+  // Union find
+  std::vector<int> parents(model.size(),0);
+  for (int i=0;i<model.size();++i) parents[i] = i;
 
   std::vector<int> ranks(model.size(),1);
 
+  // Debug log
   auto print_vec = [](std::string_view caption,std::vector<int> const& vec){
     aoc::print("\n{:10}:",caption);
     for (auto val : vec) aoc::print(" {}",val);
   };
 
-  int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
+  auto find_root = [&parents](int x) {
+    int current = x;
+    while (parents[current] != current) {
+      current = parents[current]; // back track
+    }
+    return current;
+  };
+
   int connected_count = 0;
   for (int i=0;i<edges.size();++i) {
+
     auto const& [edge,dps] = edges[i];
-    auto& lhs_root = roots[edge.first];
-    auto& rhs_root = roots[edge.second];
+    auto lhs_root = find_root(edge.first);
+    auto rhs_root = find_root(edge.second);
+
     if (rhs_root == lhs_root) continue; // Skip
-    rhs_root = lhs_root; // mutate in place (refs)
-    ++ranks[lhs_root];
+
+    // aggregate to largets
+    auto lhs_rank = ranks[lhs_root];
+    auto rhs_rank = ranks[rhs_root];
+    if (lhs_rank > rhs_rank) {
+      parents[rhs_root] = parents[lhs_root]; // connect (same root as lhs)
+      ranks[lhs_root] += ranks[rhs_root]; // carry over connected ranks
+    }
+    else {
+      parents[lhs_root] = parents[rhs_root]; // connect (same root as lhs)
+      ranks[rhs_root] += ranks[lhs_root]; // carry over connected ranks
+    }
+
     ++connected_count;
 
-    print_vec("roots",roots);
+    print_vec("parents",parents);
     print_vec("ranks:",ranks);
 
     if (connected_count < N) continue;
     break;
   }
 
-  // Examine how many unions we have (each union have a unique root in roots)
-  std::set<int> unique_roots{};
-  for (auto root : roots) unique_roots.insert(root);
+  // Examine how many unions we have (each union have a unique root in parents)
+  std::set<int> unique_parents{};
+  for (auto root : parents) unique_parents.insert(root);
 
-  std::vector<int> sorted_roots(unique_roots.begin(),unique_roots.end());
-  std::ranges::sort(sorted_roots,[&ranks](auto lhs,auto rhs){
+  std::vector<int> sorted_parents(unique_parents.begin(),unique_parents.end());
+  std::ranges::sort(sorted_parents,[&ranks](auto lhs,auto rhs){
     return ranks[lhs] > ranks[rhs];
   });
 
   if (test_ix == 5) {
-    auto r0 = sorted_roots[0];
-    auto r1 = sorted_roots[1];
-    auto r2 = sorted_roots[2];
-    auto r3 = sorted_roots[3];
+    auto r0 = sorted_parents[0];
+    auto r1 = sorted_parents[1];
+    auto r2 = sorted_parents[2];
+    auto r3 = sorted_parents[3];
     if (ranks[r2] == ranks[r3]) {
       // "there are 11 circuits: one circuit which contains 5 junction boxes, one circuit which contains 4 junction boxes, two circuits which contain 2 junction boxes"
       return std::format(
         "there are {} circuits: one circuit which contains {} junction boxes, one circuit which contains {} junction boxes, two circuits which contain {} junction boxes"
-        ,unique_roots.size()
+        ,unique_parents.size()
         ,ranks[r0]
         ,ranks[r1]
         ,ranks[r2]);
@@ -184,7 +209,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   }
   size_t candidate{1};
   for (int i=0;i<3;++i) {
-    auto root = sorted_roots[i];
+    auto root = sorted_parents[i];
     auto size = ranks[root];
     candidate *= size;
     aoc::print("\nroot:{} size:{} -> candidate:{}",root,size,candidate);
