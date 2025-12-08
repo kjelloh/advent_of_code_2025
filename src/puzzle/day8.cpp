@@ -130,11 +130,11 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     adjacent[n2].insert(n1);
   }
 
-  // Union find
+  // Union find by counts
   std::vector<int> parents(model.size(),0);
   for (int i=0;i<model.size();++i) parents[i] = i;
 
-  std::vector<int> ranks(model.size(),1);
+  std::vector<int> counts(model.size(),1);
 
   // Debug log
   auto print_vec = [](std::string_view caption,std::vector<int> const& vec){
@@ -154,27 +154,22 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   for (int i=0;i<edges.size();++i) {
 
     auto const& [edge,dps] = edges[i];
-    auto lhs_root = find_root(edge.first);
-    auto rhs_root = find_root(edge.second);
+    auto first_root = find_root(edge.first);
+    auto second_root = find_root(edge.second);
 
-    if (rhs_root == lhs_root) continue; // Skip
+    if (second_root == first_root) continue; // Skip (already same union)
 
     // aggregate to largets
-    auto lhs_rank = ranks[lhs_root];
-    auto rhs_rank = ranks[rhs_root];
-    if (lhs_rank > rhs_rank) {
-      parents[rhs_root] = parents[lhs_root]; // connect (same root as lhs)
-      ranks[lhs_root] += ranks[rhs_root]; // carry over connected ranks
+    if (counts[first_root] > counts[second_root]) {
+      std::swap(first_root,second_root);
     }
-    else {
-      parents[lhs_root] = parents[rhs_root]; // connect (same root as lhs)
-      ranks[rhs_root] += ranks[lhs_root]; // carry over connected ranks
-    }
+    parents[second_root] = parents[first_root]; // connect 'smaller' to 'larger'
+    counts[first_root] += counts[second_root]; // carry over connected counts
 
     ++connected_count;
 
     print_vec("parents",parents);
-    print_vec("ranks:",ranks);
+    print_vec("counts:",counts);
 
     if (connected_count < N) continue;
     break;
@@ -185,8 +180,8 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   for (auto root : parents) unique_parents.insert(root);
 
   std::vector<int> sorted_parents(unique_parents.begin(),unique_parents.end());
-  std::ranges::sort(sorted_parents,[&ranks](auto lhs,auto rhs){
-    return ranks[lhs] > ranks[rhs];
+  std::ranges::sort(sorted_parents,[&counts](auto lhs,auto rhs){
+    return counts[lhs] > counts[rhs];
   });
 
   if (test_ix == 5) {
@@ -194,23 +189,23 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     auto r1 = sorted_parents[1];
     auto r2 = sorted_parents[2];
     auto r3 = sorted_parents[3];
-    if (ranks[r2] == ranks[r3]) {
+    if (counts[r2] == counts[r3]) {
       // "there are 11 circuits: one circuit which contains 5 junction boxes, one circuit which contains 4 junction boxes, two circuits which contain 2 junction boxes"
       return std::format(
         "there are {} circuits: one circuit which contains {} junction boxes, one circuit which contains {} junction boxes, two circuits which contain {} junction boxes"
         ,unique_parents.size()
-        ,ranks[r0]
-        ,ranks[r1]
-        ,ranks[r2]);
+        ,counts[r0]
+        ,counts[r1]
+        ,counts[r2]);
     }
     else {
-      return std::format("ranks[{}] != ranks[{}]",r2,r3);
+      return std::format("counts[{}] != counts[{}]",r2,r3);
     }
   }
   size_t candidate{1};
   for (int i=0;i<3;++i) {
     auto root = sorted_parents[i];
-    auto size = ranks[root];
+    auto size = counts[root];
     candidate *= size;
     aoc::print("\nroot:{} size:{} -> candidate:{}",root,size,candidate);
   }
