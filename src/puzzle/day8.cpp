@@ -37,13 +37,16 @@ auto squared_distance(Point lhs,Point rhs) {
   return (dx*dx + dy*dy + dz*dz);
 }
 
-struct Edge {
+struct Lights {
   Point p1;
   Point p2;
-  auto squared_size() const {
+  auto squared_length() const {
     return squared_distance(p1,p2);
   }
 };
+
+using Node = int;
+using Edge = std::pair<Node,Node>;
 
 using Model = std::vector<Point>;
 Model parse(std::istream& in) {
@@ -62,22 +65,25 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
+
   // Solve here
+
   if (puzzle_args.meta().m_debug) for (auto p : model) {
     aoc::print("\np:{}",to_string(p));
   }
 
   // Brute force?
   // Yes, seems feasable for part 1
-  std::vector<std::pair<Edge,int>> edges{};
+  std::vector<
+    std::pair<Edge,int>> edges{};
   for (int i=0;i<model.size();++i) {
     for (int j=i+1;j<model.size();++j) {
       auto pi = model[i];
       auto pj = model[j];
       auto dps = squared_distance(pi,pj);
       aoc::print("\ndps:{}",dps);
-      Edge edge{pi,pj};
-      edges.push_back(std::make_pair(edge,edge.squared_size()));
+      Edge edge{i,j};
+      edges.push_back(std::make_pair(edge,dps));
     }
   }
   std::ranges::sort(edges,[](auto const& lhs,auto const& rhs){
@@ -88,9 +94,19 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     aoc::print(
        "\nsorted:{} ({} - {})"
       ,entry.second
-      ,to_string(entry.first.p1)
-      ,to_string(entry.first.p2));
+      ,to_string(model[entry.first.first])
+      ,to_string(model[entry.first.second]));
   }
+  
+  std::map<Node,std::set<Node>> adjacent{};
+  for (auto const& entry : edges) {
+    auto const& [edge,squared_distance] = entry;
+    auto const& [n1,n2] = edge;
+    adjacent[n1].insert(n2);
+    adjacent[n2].insert(n1);
+  }
+
+  // Split into disjoint subgraphs
 
   size_t candidate{};
   return answer;
