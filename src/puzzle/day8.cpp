@@ -129,13 +129,24 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   // Split into disjoint subgraphs
   std::vector<int> roots(model.size(),0);
   for (int i=0;i<model.size();++i) roots[i] = i;
+
   std::vector<int> ranks(model.size(),1);
 
-  for (auto const& edge : edges) {
-    auto& lhs_root = roots[edge.first.first];
-    auto& rhs_root = roots[edge.first.second];
+  auto print_vec = [](std::string_view caption,std::vector<int> const& vec){
+    aoc::print("\n{:10}:",caption);
+    for (auto val : vec) aoc::print(" {}",val);
+  };
+
+  int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
+  for (int i=0;i<N;++i) {
+    auto const& [edge,dps] = edges[i];
+    auto& lhs_root = roots[edge.first];
+    auto& rhs_root = roots[edge.second];
     if (rhs_root == lhs_root) continue; // Already jointed
     rhs_root = lhs_root; // mutate in place (refs)
+    ++ranks[lhs_root];
+    print_vec("roots",roots);
+    print_vec("ranks:",ranks);
   }
 
   // Examine how many unions we have (each union have a unique root in roots)
@@ -143,8 +154,28 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   for (auto root : roots) unique_roots.insert(root);
 
   std::vector<int> sorted_roots(unique_roots.begin(),unique_roots.end());
-  std::ranges::sort(sorted_roots);
+  std::ranges::sort(sorted_roots,[&ranks](auto lhs,auto rhs){
+    return ranks[lhs] > ranks[rhs];
+  });
 
+  if (test_ix == 5) {
+    auto r0 = sorted_roots[0];
+    auto r1 = sorted_roots[1];
+    auto r2 = sorted_roots[2];
+    auto r3 = sorted_roots[3];
+    if (ranks[r2] == ranks[r3]) {
+      // "there are 11 circuits: one circuit which contains 5 junction boxes, one circuit which contains 4 junction boxes, two circuits which contain 2 junction boxes"
+      return std::format(
+        "there are {} circuits: one circuit which contains {} junction boxes, one circuit which contains {} junction boxes, two circuits which contain {} junction boxes"
+        ,unique_roots.size()
+        ,ranks[r0]
+        ,ranks[r1]
+        ,ranks[r2]);
+    }
+    else {
+      return std::format("ranks[{}] != ranks[{}]",r2,r3);
+    }
+  }
   size_t candidate{1};
   for (int i=0;i<3;++i) {
     auto root = sorted_roots[i];
