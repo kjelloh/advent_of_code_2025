@@ -1,3 +1,81 @@
+# day8 part 1
+
+So todays problem seems ro be about connected graphs?
+
+We have 'junction boxes' in 3D space given by XYZ in a list like:
+
+```text
+in[   0][0.. 10]: '162,817,812' 
+in[   1][0..  8]: '57,618,57' 
+in[   2][0.. 10]: '906,360,560' 
+in[   3][0.. 10]: '592,479,940' 
+in[   4][0.. 10]: '352,342,300' 
+in[   5][0.. 10]: '466,668,158' 
+in[   6][0..  9]: '542,29,236' 
+in[   7][0.. 10]: '431,825,988' 
+in[   8][0.. 10]: '739,650,466' 
+in[   9][0..  9]: '52,470,668' 
+in[  10][0.. 10]: '216,146,977' 
+in[  11][0..  9]: '819,987,18' 
+in[  12][0.. 10]: '117,168,530' 
+in[  13][0..  9]: '805,96,715' 
+in[  14][0.. 10]: '346,949,466' 
+in[  15][0..  9]: '970,615,88' 
+in[  16][0.. 10]: '941,993,340' 
+in[  17][0..  8]: '862,61,35' 
+in[  18][0..  9]: '984,92,344' 
+in[  19][0.. 10]: '425,690,689' 
+```
+
+We are to 'connect' junction boxes with strings of lights. But we must do this in a special way.
+
+```sh
+do 10 times
+  find pair of closest connetions
+    connect them
+```
+
+In the example.
+
+1. The first pair that are closest together are 162,817,812 and 425,690,689 (node 0 and 19).
+2. The next unconnected pair is 162,817,812 and 431,825,988 (node 0 and 7)
+3. Next pair is 906,360,560 and 805,96,715 (node 2 and 13)
+4. Then we find 431,825,988 and 425,690,689 (node 7 and 19)
+   (Note that they have both already been picked. 0-7 and 0-19)
+   ...
+
+```text
+
+      0 --- 19    2 -- 13
+      |     |
+      |     |
+      7 ----/
+
+```
+    ...
+11. When we have connected 10 pairs we have 11 curcuits.
+    * One with 5 boxes
+    * One with 4 boxes
+    * Two with 2 boxes each
+    * Seven remaining single box curcuits
+
+We now multiply the size of the three largest curcuits (size 5,4,2) and get 40.
+
+The full problem contains 1000 boxes. We are to connect 1000 pairs of increasing shortest distance apart. And then multiply the size of the three largest curcuits.
+
+It seems we need to keep track of edges we have created? So that when we search for the next shortest possible edge to create we do not re-create one we already have?
+
+But - we are allowed to create an edge between two nodes we have picked for previous edges?
+
+So what would be an efficient way to find the next edge to create?
+
+Key observations so far:
+
+* We start with N unpaired nodes
+* We are to connect them in edge-length order low to high
+* An edge length is the eucledian 
+
+
 # day7 part 2
 
 How many paths can a single particle take to reach the bottom row?

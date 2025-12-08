@@ -81,7 +81,6 @@ std::optional<size_t> p2(PuzzleArgs puzzle_args) {
   auto model = parse(in);
   // Solve here
   int c = model[0].find('S');
-  int dr{1};
   size_t num_rows = model.size();
   size_t num_cols = model[0].size();
 
