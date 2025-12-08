@@ -90,6 +90,11 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       auto pj = model[j];
       auto dps = squared_distance(pi,pj);
       aoc::print("\ndps:{}",dps);
+
+      if (dps < 0) {
+        return std::format("\nFAILED - Overflow to negative squared distance {}",dps);
+      }
+
       Edge edge{i,j};
       edges.push_back(std::make_pair(edge,dps));
     }
