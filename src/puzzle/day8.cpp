@@ -228,6 +228,8 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     aoc::print("\nroot:{} size:{} -> candidate:{}",root,size,candidate);
   }
 
+  answer = std::format("{}",candidate);
+
   return answer;
 }
 
