@@ -66,6 +66,10 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
   // Example or full input?
   int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
+  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
+
+  if (test_ix == 5) N = 1;
+  else if (test_ix == 6) N = 2;
 
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
@@ -103,7 +107,6 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   }
 
   // Test?
-  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
   switch (test_ix) {
     case 1:
     case 2:
@@ -137,9 +140,13 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   std::vector<int> counts(model.size(),1);
 
   // Debug log
-  auto print_vec = [](std::string_view caption,std::vector<int> const& vec){
+  auto print_vec = [](std::string_view caption,std::vector<int> const& vec,bool print_ix=false){
+    if (print_ix) {
+      aoc::print("\n{:10}:","ix:");
+      for (size_t i=0;i<vec.size();++i) aoc::print(" {:>4}",std::to_string(i).back());
+    }
     aoc::print("\n{:10}:",caption);
-    for (auto val : vec) aoc::print(" {}",val);
+    for (auto val : vec) aoc::print(" {:4}",val);
   };
 
   auto find_root = [&parents](int x) {
@@ -150,9 +157,8 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     return current;
   };
 
-  int connected_count = 0;
-  for (int i=0;i<edges.size();++i) {
-
+  for (int i=0;i<N;++i) {
+    aoc::print("\n\n{}:",i);
     auto const& [edge,dps] = edges[i];
     auto first_root = find_root(edge.first);
     auto second_root = find_root(edge.second);
@@ -163,45 +169,57 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     if (counts[first_root] > counts[second_root]) {
       std::swap(first_root,second_root);
     }
+
+    aoc::print(
+     " connect ({}::{})[u:{} c:{}]"
+    ,to_string(model[edge.first])
+    ,edge.first
+    ,first_root
+    ,counts[first_root]);
+
+    aoc::print(
+     " <-- ({}::{})[u:{} c:{}]"
+    ,to_string(model[edge.second])
+    ,edge.second
+    ,second_root
+    ,counts[second_root]);
+
     parents[second_root] = parents[first_root]; // connect 'smaller' to 'larger'
     counts[first_root] += counts[second_root]; // carry over connected counts
 
-    ++connected_count;
 
-    print_vec("parents",parents);
+    print_vec("parents",parents,true);
     print_vec("counts:",counts);
-
-    if (connected_count < N) continue;
-    break;
   }
 
   // Examine how many unions we have (each union have a unique root in parents)
   std::set<int> unique_parents{};
-  for (auto root : parents) unique_parents.insert(root);
+  for (auto parent : parents) unique_parents.insert(find_root(parent));
 
   std::vector<int> sorted_parents(unique_parents.begin(),unique_parents.end());
   std::ranges::sort(sorted_parents,[&counts](auto lhs,auto rhs){
     return counts[lhs] > counts[rhs];
   });
 
-  if (test_ix == 5) {
-    auto r0 = sorted_parents[0];
-    auto r1 = sorted_parents[1];
-    auto r2 = sorted_parents[2];
-    auto r3 = sorted_parents[3];
-    if (counts[r2] == counts[r3]) {
-      // "there are 11 circuits: one circuit which contains 5 junction boxes, one circuit which contains 4 junction boxes, two circuits which contain 2 junction boxes"
+  switch (test_ix) {
+    case 5: // one edge
+    case 6: // two edges
+    case 7: /* 10 edges */  {
+      auto r0 = sorted_parents[0];
+      auto r1 = sorted_parents[1];
+      auto r2 = sorted_parents[2];
+      auto r3 = sorted_parents[3];
       return std::format(
-        "there are {} circuits: one circuit which contains {} junction boxes, one circuit which contains {} junction boxes, two circuits which contain {} junction boxes"
+        "{},{},{},{},{}"
         ,unique_parents.size()
         ,counts[r0]
         ,counts[r1]
-        ,counts[r2]);
-    }
-    else {
-      return std::format("counts[{}] != counts[{}]",r2,r3);
-    }
+        ,counts[r2]
+        ,counts[r3]);
+    } break;
+    default: break;
   }
+
   size_t candidate{1};
   for (int i=0;i<3;++i) {
     auto root = sorted_parents[i];
