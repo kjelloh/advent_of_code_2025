@@ -44,8 +44,10 @@ int solve(AppArgs args) {
     for (auto const& in_file_path : in_data_files) {
       if (do_break) break;
       std::print("\nSolving for [{}]",in_file_path.string());
-      PuzzleArgs puzzle_args(
-        {.m_debug = args.debug,.m_part = part}
+      PuzzleArgs puzzle_args({
+         .m_debug = args.debug
+        ,.m_part = part
+        ,.m_maybe_test = args.maybe_test}
         ,in_file_path);
       auto maybe_answer = day(puzzle_args);
       auto solve_result = SolveResult{puzzle_args,maybe_answer};
@@ -57,13 +59,13 @@ int solve(AppArgs args) {
   int i{};
   for (auto const& solve_result : solve_results) {
     std::print(
-       "\n{} -> solver::part:{} -> {}"
+       "\n{} -> solver::part:{} -> '{}'"
       ,solve_result.m_puzzle_args.in_file_path().filename().string()
       ,solve_result.m_puzzle_args.meta().m_part
       ,solve_result.m_maybe_answer.value_or("null"));
 
     if (args.maybe_answer) {
-      std::print(" (provided {}) ",args.maybe_answer.value());
+      std::print(" (provided '{}') ",args.maybe_answer.value());
 
       if (solve_result.m_maybe_answer) {
         if (

@@ -18,6 +18,7 @@ public:
   struct Meta {
     int m_part{1};
     bool m_debug{false};
+    std::optional<int> m_maybe_test;
   };
 
   PuzzleArgs(Meta meta,std::filesystem::path in_file_path);
@@ -32,6 +33,7 @@ private:
 };
 
 struct AppArgs {
+  std::optional<int> maybe_test;
   std::optional<int> maybe_part;
   bool debug;
   std::string input_file_name;

@@ -30,9 +30,9 @@ std::string to_string(Point p) {
 }
 
 auto squared_distance(Point lhs,Point rhs) {
-  auto dx = (lhs.x - rhs.x);
-  auto dy = (lhs.x - rhs.x);
-  auto dz = (lhs.x - rhs.x);
+  auto dx = (rhs.x - lhs.x);
+  auto dy = (rhs.y - lhs.y);
+  auto dz = (rhs.z - lhs.z);
 
   return (dx*dx + dy*dy + dz*dz);
 }
@@ -61,8 +61,8 @@ Model parse(std::istream& in) {
   return model;
 }
 
-std::optional<size_t> p1(PuzzleArgs puzzle_args) {
-  std::optional<size_t> answer{};
+std::optional<std::string> p1(PuzzleArgs puzzle_args) {
+  std::optional<std::string> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
 
@@ -87,7 +87,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     }
   }
   std::ranges::sort(edges,[](auto const& lhs,auto const& rhs){
-    return (lhs.second > rhs.second);
+    return (lhs.second < rhs.second);
   });
 
   for (auto const& entry : edges) {
@@ -97,7 +97,17 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
       ,to_string(model[entry.first.first])
       ,to_string(model[entry.first.second]));
   }
-  
+
+  if (puzzle_args.meta().m_maybe_test.value_or(0) == 1) {
+    auto [edge,dps] = edges[0];
+    auto p1 = model[edge.first];
+    auto p2 = model[edge.second];
+    return std::format(
+      "{} and {}"
+      ,to_string(p1)
+      ,to_string(p2));
+  }
+
   std::map<Node,std::set<Node>> adjacent{};
   for (auto const& entry : edges) {
     auto const& [edge,squared_distance] = entry;
@@ -136,8 +146,8 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   return answer;
 }
 
-std::optional<size_t> p2(PuzzleArgs puzzle_args) {
-  std::optional<size_t> answer{};
+std::optional<std::string> p2(PuzzleArgs puzzle_args) {
+  std::optional<std::string> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
   // Solve here
@@ -153,16 +163,10 @@ std::optional<std::string> day(PuzzleArgs puzzle_args) {
   
   switch (puzzle_args.meta().m_part) {
     case 1: {
-      return p1(puzzle_args)
-        .transform([](auto answer){
-          return std::format("{}",answer);
-        });
+      return p1(puzzle_args);
     } break;
     case 2:
-      return p2(puzzle_args)
-        .transform([](auto answer){
-          return std::format("{}",answer);
-        });
+      return p2(puzzle_args);
       break;
   }
   return std::nullopt;

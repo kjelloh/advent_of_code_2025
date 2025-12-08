@@ -189,6 +189,22 @@ Each time it hits a splitter on its path it can chose left or right (if there is
 
 So at each row we can keep a running count of the number of ways the particle can reach a column on that row.
 
+## day8 part 1 trap
+
+I found [57,618,57] and [52,470,668] to be the shortest distanced (squared distance of 75).
+
+But the puzzle stated the expected 'first pick' should be [162,817,812] and [425,690,689] (with a square distance of 207507).
+
+What is going on?
+
+```text
+Edge: [162,817,812] - [425,690,689]
+dx = 425-162 = 263
+dy = 690-817 = -127
+dz = 689-812 = -123
+dx*dx+dy*dy+dz*dz = 69 169 + 16 129 + 15 129 = 100 427 
+```
+
 
 # day 6 - part 2
 
