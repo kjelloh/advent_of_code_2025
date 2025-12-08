@@ -75,9 +75,62 @@ Key observations so far:
 * We are to connect them in edge-length order low to high
 * An edge length is the eucledian distance 'square root of the sum of x,y,z diffs squared
 
-## Union Find
+## day8 part 2 Union Find on size (revisited)
+
+This is an update to union find in 'Day 8 part 1 Union Find (first try)'.
+
+We can use a Union Find on size. For part 2 we can not add N edges and then apply the Union fidn.
+
+Observations:
+
+- We are to add edges until the union count is one (all nodes connected).
+- Thus we need to integrate the 'add edge' with 'Union Find'
+
+Lets count the unions in our example.
+
+```text
+
+      0 --- 19    2 -- 13
+      |     |
+      |     |
+      7 ----/
+
+```
+
+- Keep a vector 'parents' for each node that holds its parent node.
+- Keep a vector 'counts' that holds the registered union member count (at root nodes)
+
+- Initialise the 'parents' vector to make each node its own parent
+- Initialise the 'counts' vector to all 'ones'
+  (in effect make each node the single element in their own one element union)
+
+## V*(V-1)/2 unique possible connections
+
+```c++
+  std::vector<size_t> sorted_edges(V*(V-1)/2);
+  for (size_t i=0;i<V;++i) {
+    for (size_t j=i+1;j<V;++j) {
+
+    }
+  }
+```
+
+Worth noting - The 'diagonal' (0,0),(1,1),...(V-1,V-1) has V members. So If we were to include them we ned the size V*(V+1)/2
+
+```c++
+  std::vector<size_t> sorted_edges(V*(V+1)/2);
+  for (size_t i=0;i<V;++i) {
+    for (size_t j=i;j<V;++j) {
+
+    }
+  }
+```
+
+## Day 8 part 1 Union Find (first try)
 
 It seems we can apply a 'union find'?
+
+*Disclaimer* The following is not fully correct! I realised this while solving part 1.
 
 - Keep a vector that stores the 'root' of each node in our graph
 - Keep a vector that stores a 'rank' of each node in our graph
@@ -113,7 +166,6 @@ Process edge: 0-7
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
 roots:  0   2         0           13          19
 ranks:  2   1         1           1           1
-
 ```
 
 - Edge 2-13: Update the root of 13 to the root of 2
@@ -172,6 +224,10 @@ ranks:  3   2         1           1           1
 - The size of the union wih root 0 is ranks[0] = 3.
 - The size of the union with root 2 is ranks[2] = 2.
 
+This is actually NOT how the Union Find shoudl work!
+
+Darn!
+
 # day7 part 2
 
 How many paths can a single particle take to reach the bottom row?
@@ -188,23 +244,6 @@ How many paths can a single particle take to reach the bottom row?
 Each time it hits a splitter on its path it can chose left or right (if there is room).
 
 So at each row we can keep a running count of the number of ways the particle can reach a column on that row.
-
-## day8 part 1 trap
-
-I found [57,618,57] and [52,470,668] to be the shortest distanced (squared distance of 75).
-
-But the puzzle stated the expected 'first pick' should be [162,817,812] and [425,690,689] (with a square distance of 207507).
-
-What is going on?
-
-```text
-Edge: [162,817,812] - [425,690,689]
-dx = 425-162 = 263
-dy = 690-817 = -127
-dz = 689-812 = -123
-dx*dx+dy*dy+dz*dz = 69 169 + 16 129 + 15 129 = 100 427 
-```
-
 
 # day 6 - part 2
 

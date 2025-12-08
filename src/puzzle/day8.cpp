@@ -98,7 +98,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       }
 
       Edge edge{i,j};
-      edges.push_back(std::make_pair(edge,dps));
+      edges.push_back(std::make_pair(edge,dps)); // silemtly narrows long long to pair.second type!
     }
   }
   std::ranges::sort(edges,[](auto const& lhs,auto const& rhs){
@@ -128,8 +128,6 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
         ,to_string(p2));
     } break;
     default: break;
-  }
-  if (puzzle_args.meta().m_maybe_test.value_or(0) == 1) {
   }
 
   std::map<Node,std::set<Node>> adjacent{};
@@ -173,7 +171,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     if (second_root == first_root) continue; // Skip (already same union)
 
     // aggregate to largets
-    if (counts[first_root] > counts[second_root]) {
+    if (counts[first_root] < counts[second_root]) {
       std::swap(first_root,second_root);
     }
 
@@ -246,16 +244,119 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   // root:442 size:4 -> candidate:13024  
   // Too low: 13024
 
+  // root:197 size:62 -> candidate:62
+  // root:976 size:46 -> candidate:2852
+  // root:691 size:43 -> candidate:122636  
+  // Correct: 122636
+
 }
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
+
+  // Example or full input?
+  int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
+  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
+
+  if (test_ix == 5) N = 1;
+  else if (test_ix == 6) N = 2;
+
   std::optional<std::string> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
   // Solve here
-  size_t candidate{};
-  return answer;
-}
+  const auto V = model.size();
+
+  // Edges weighted with 'distance'
+  const size_t E = V*(V-1)/2;
+  std::vector<std::pair<Edge,size_t>> we(E);
+  size_t ix{0}; // generate pair ix (combinatorial expression is no joke...)
+  for (size_t i=0;i<V;++i) {
+    for (size_t j=i+1;j<V;++j) {
+      if (ix>= we.size()) return std::format("Can't insert element {} into we of size {}",i*j,we.size());
+      we[ix] = std::make_pair(Edge{i,j},squared_distance(model[i],model[j]));
+      ++ix;
+    }
+  }
+
+  std::ranges::sort(we,[](auto const& lhs,auto const& rhs){
+    return (lhs.second < rhs.second);
+  });
+
+  for (auto const& [edge,dps] : we) {
+    aoc::print(
+       "\ndps:{} {} - {}"
+      ,dps 
+      ,to_string(model[edge.first])
+      ,to_string(model[edge.second]));
+  }
+
+  // Test?
+  switch (test_ix) {
+    case 1:
+    case 2:
+    case 3:
+    case 4: {
+      auto [edge,dps] = we[test_ix-1];
+      auto p1 = model[edge.first];
+      auto p2 = model[edge.second];
+      return std::format(
+        "{} and {}"
+        ,to_string(p1)
+        ,to_string(p2));
+    } break;
+    default: break;
+  }
+
+  // Union find on size (counts)
+  std::vector<unsigned> parents(V,0);
+  for (unsigned i=0;i<V;++i) parents[i] = i; // self parents = roots
+  std::vector<unsigned> counts(V,1); // all unions 1 element
+
+  auto find_root = [&parents](int x) {
+    int current = x;
+    while (parents[current] != current) {
+      current = parents[current]; // back track
+    }
+    return current;
+  };
+
+  unsigned component_count = V; // Start with V single member unions
+  Edge last_edge{};
+  for (unsigned e=0;e<E;++e) {
+    auto const& [edge,dps] = we[e];
+    auto const& [v1,v2] = edge;
+    auto r1 = find_root(v1);
+    auto r2 = find_root(v2);
+    if (r1 == r2) continue; // already same union (same root)
+    if (counts[r1] < counts[r2]) std::swap(r1,r2); // make '1' the larger one
+    // Make r1 the root of tree with root r2
+    parents[r2] = r1; // same root (makes all childs of r2 also find root r1 == joined)
+    counts[r1] += counts[r2]; // joint size
+    --component_count;
+    aoc::print(
+       "\nAfter {} and {} -> component_count:{}"
+      ,to_string(model[v1])
+      ,to_string(model[v2])
+      ,component_count);
+    if (component_count==1) {
+      last_edge = edge;
+      break;
+    }
+  }
+
+  auto p1 = model[last_edge.first];
+  auto p2 = model[last_edge.second];
+  aoc::print(
+     "\nLast edge {} and {} "
+    ,to_string(p1)
+    ,to_string(p2));
+  auto candidate = static_cast<uint64_t>(p1.x) * static_cast<uint64_t>(p2.x); // To small for 9271575747?
+  return std::format("{}",candidate);
+
+  //  681641155 too low
+  // 9271575747
+
+} // p2
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
   aoc::print(
