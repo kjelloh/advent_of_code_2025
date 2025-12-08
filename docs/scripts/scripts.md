@@ -73,8 +73,7 @@ Key observations so far:
 
 * We start with N unpaired nodes
 * We are to connect them in edge-length order low to high
-* An edge length is the eucledian 
-
+* An edge length is the eucledian distance 'square root of the sum of x,y,z diffs squared
 
 # day7 part 2
 
