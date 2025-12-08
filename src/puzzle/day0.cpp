@@ -7,17 +7,13 @@
 #include <algorithm>
 #include <set>
 #include <map>
+#include <sstream>
 
-using Grid = std::vector<std::string>;
+using INT = int64_t;
+using UINT = uint64_t;
 
-void print(Grid const& grid) {
-  int ix{0};
-  for (auto const& row : grid) {
-    aoc::print("\ngrid:{:4}[0..{:3}]: '{}' ", ix++,row.size()-1,row);
-  }
-}
-
-using Model = Grid;
+using Entry = std::string;
+using Model = std::vector<Entry>;
 Model parse(std::istream& in) {
   Model model{};
 
@@ -25,28 +21,30 @@ Model parse(std::istream& in) {
   int ix{0};
   while (std::getline(in, entry)) {
     aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
-    model.push_back(entry);
+    model.push_back(Entry(entry));
   }
   return model;
 }
 
-std::optional<size_t> p1(PuzzleArgs puzzle_args) {
-  std::optional<size_t> answer{};
-  std::ifstream in{puzzle_args.in_file_path()};
-  auto model = parse(in);
-  // Solve here
-  size_t candidate{};
-  return answer;
-}
+std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
-std::optional<size_t> p2(PuzzleArgs puzzle_args) {
-  std::optional<size_t> answer{};
   std::ifstream in{puzzle_args.in_file_path()};
   auto model = parse(in);
+
   // Solve here
-  size_t candidate{};
-  return answer;
-}
+  UINT candidate{};
+
+  return {};
+  // return std::format("Not yet fully implemented");
+  // return std::format("{}",candidate);
+
+} // p1
+
+std::optional<std::string> p2(PuzzleArgs puzzle_args) {
+  return {};
+  // return std::format("Not yet fully implemented");
+  // return std::format("{}",candidate);
+} // p2
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
   aoc::print(
@@ -56,16 +54,10 @@ std::optional<std::string> day(PuzzleArgs puzzle_args) {
   
   switch (puzzle_args.meta().m_part) {
     case 1: {
-      return p1(puzzle_args)
-        .transform([](auto answer){
-          return std::format("{}",answer);
-        });
+      return p1(puzzle_args);
     } break;
     case 2:
-      return p2(puzzle_args)
-        .transform([](auto answer){
-          return std::format("{}",answer);
-        });
+      return p2(puzzle_args);
       break;
   }
   return std::nullopt;
