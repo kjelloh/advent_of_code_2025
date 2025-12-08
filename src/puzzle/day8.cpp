@@ -85,7 +85,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   // Brute force?
   // Yes, seems feasable for part 1
   std::vector<
-    std::pair<Edge,int>> edges{};
+    std::pair<Edge,Integer>> edges{};
   for (int i=0;i<model.size();++i) {
     for (int j=i+1;j<model.size();++j) {
       auto pi = model[i];
@@ -195,30 +195,32 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     counts[first_root] += counts[second_root]; // carry over connected counts
 
 
-    print_vec("parents",parents,true);
-    print_vec("counts:",counts);
+    // print_vec("parents",parents,true);
+    // print_vec("counts:",counts);
   }
 
   // Examine how many unions we have (each union have a unique root in parents)
-  std::set<int> unique_parents{};
-  for (auto parent : parents) unique_parents.insert(find_root(parent));
+  std::set<int> roots{};
+  for (size_t node=0;node<parents.size();++node) roots.insert(find_root(node));
 
-  std::vector<int> sorted_parents(unique_parents.begin(),unique_parents.end());
-  std::ranges::sort(sorted_parents,[&counts](auto lhs,auto rhs){
+  std::vector<int> sorted_roots(roots.begin(),roots.end());
+  std::ranges::sort(sorted_roots,[&counts](auto lhs,auto rhs){
     return counts[lhs] > counts[rhs];
   });
+
+  print_vec("counts",counts);
 
   switch (test_ix) {
     case 5: // one edge
     case 6: // two edges
     case 7: /* 10 edges */  {
-      auto r0 = sorted_parents[0];
-      auto r1 = sorted_parents[1];
-      auto r2 = sorted_parents[2];
-      auto r3 = sorted_parents[3];
+      auto r0 = sorted_roots[0];
+      auto r1 = sorted_roots[1];
+      auto r2 = sorted_roots[2];
+      auto r3 = sorted_roots[3];
       return std::format(
         "{},{},{},{},{}"
-        ,unique_parents.size()
+        ,roots.size()
         ,counts[r0]
         ,counts[r1]
         ,counts[r2]
@@ -229,7 +231,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
   size_t candidate{1};
   for (int i=0;i<3;++i) {
-    auto root = sorted_parents[i];
+    auto root = sorted_roots[i];
     auto size = counts[root];
     candidate *= size;
     aoc::print("\nroot:{} size:{} -> candidate:{}",root,size,candidate);
@@ -237,7 +239,13 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
   answer = std::format("{}",candidate);
 
-  return answer;
+  return answer; 
+  
+  // root:861 size:814 -> candidate:814
+  // root:552 size:4 -> candidate:3256
+  // root:442 size:4 -> candidate:13024  
+  // Too low: 13024
+
 }
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
