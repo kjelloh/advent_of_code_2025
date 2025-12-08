@@ -138,15 +138,21 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   };
 
   int N = (std::string_view(puzzle_args.in_file_path().filename().string()).starts_with("ex"))?10:1000;
-  for (int i=0;i<N;++i) {
+  int connected_count = 0;
+  for (int i=0;i<edges.size();++i) {
     auto const& [edge,dps] = edges[i];
     auto& lhs_root = roots[edge.first];
     auto& rhs_root = roots[edge.second];
-    if (rhs_root == lhs_root) continue; // Already jointed
+    if (rhs_root == lhs_root) continue; // Skip
     rhs_root = lhs_root; // mutate in place (refs)
     ++ranks[lhs_root];
+    ++connected_count;
+
     print_vec("roots",roots);
     print_vec("ranks:",ranks);
+
+    if (connected_count < N) continue;
+    break;
   }
 
   // Examine how many unions we have (each union have a unique root in roots)
