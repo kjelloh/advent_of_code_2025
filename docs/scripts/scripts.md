@@ -104,6 +104,42 @@ Lets count the unions in our example.
 - Initialise the 'counts' vector to all 'ones'
   (in effect make each node the single element in their own one element union)
 
+My best shot in day8 part 2 was:
+
+```c++
+  // Union find on size (counts)
+  std::vector<unsigned> parents(V,0);
+  for (unsigned i=0;i<V;++i) parents[i] = i; // self parents = roots
+  std::vector<unsigned> counts(V,1); // all unions 1 element
+
+  auto find_root = [&parents](int x) {
+    int current = x;
+    while (parents[current] != current) {
+      current = parents[current]; // back track
+    }
+    return current;
+  };
+
+  unsigned component_count = V; // Start with V single member unions
+  for (unsigned e=0;e<E;++e) {
+    auto const& [edge,dps] = we[e];
+    auto const& [v1,v2] = edge;
+    auto r1 = find_root(v1);
+    auto r2 = find_root(v2);
+    if (r1 == r2) continue; // already same union (same root)
+    if (counts[r1] < counts[r2]) std::swap(r1,r2); // make '1' the larger one
+    parents[r2] = r1; // same root (makes all childs of r2 also find root r1 == joined)
+    counts[r1] += counts[r2]; // joint size
+    --component_count;
+    if (component_count==1) {
+      last_edge = edge;
+      break;
+    }
+  }
+```
+
+Come to think of it. For part 2 we don't need the union sizes?
+
 ## V*(V-1)/2 unique possible connections
 
 ```c++
@@ -224,7 +260,10 @@ ranks:  3   2         1           1           1
 - The size of the union wih root 0 is ranks[0] = 3.
 - The size of the union with root 2 is ranks[2] = 2.
 
-This is actually NOT how the Union Find shoudl work!
+This is actually NOT how the Union Find should work!
+
+- When we join we need to operate on roots (top parent)
+- When we count we also need to operate on roots (sum up counts for joined union roots)
 
 Darn!
 
