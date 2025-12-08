@@ -26,7 +26,7 @@ struct Point {
 };
 
 std::string to_string(Point p) {
-  return std::format("[{},{},{}]",p.x,p.y,p.z);  
+  return std::format("{},{},{}",p.x,p.y,p.z);  
 }
 
 auto squared_distance(Point lhs,Point rhs) {
@@ -98,14 +98,24 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       ,to_string(model[entry.first.second]));
   }
 
+  // Test?
+  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
+  switch (test_ix) {
+    case 1:
+    case 2:
+    case 3:
+    case 4: {
+      auto [edge,dps] = edges[test_ix-1];
+      auto p1 = model[edge.first];
+      auto p2 = model[edge.second];
+      return std::format(
+        "{} and {}"
+        ,to_string(p1)
+        ,to_string(p2));
+    } break;
+    default: break;
+  }
   if (puzzle_args.meta().m_maybe_test.value_or(0) == 1) {
-    auto [edge,dps] = edges[0];
-    auto p1 = model[edge.first];
-    auto p2 = model[edge.second];
-    return std::format(
-      "{} and {}"
-      ,to_string(p1)
-      ,to_string(p2));
   }
 
   std::map<Node,std::set<Node>> adjacent{};
