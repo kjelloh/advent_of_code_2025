@@ -87,7 +87,7 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
     }
   }
   std::ranges::sort(edges,[](auto const& lhs,auto const& rhs){
-    return (lhs.second < rhs.second);
+    return (lhs.second > rhs.second);
   });
 
   for (auto const& entry : edges) {
@@ -107,8 +107,32 @@ std::optional<size_t> p1(PuzzleArgs puzzle_args) {
   }
 
   // Split into disjoint subgraphs
+  std::vector<int> roots(model.size(),0);
+  for (int i=0;i<model.size();++i) roots[i] = i;
+  std::vector<int> ranks(model.size(),1);
 
-  size_t candidate{};
+  for (auto const& edge : edges) {
+    auto& lhs_root = roots[edge.first.first];
+    auto& rhs_root = roots[edge.first.second];
+    if (rhs_root == lhs_root) continue; // Already jointed
+    rhs_root = lhs_root; // mutate in place (refs)
+  }
+
+  // Examine how many unions we have (each union have a unique root in roots)
+  std::set<int> unique_roots{};
+  for (auto root : roots) unique_roots.insert(root);
+
+  std::vector<int> sorted_roots(unique_roots.begin(),unique_roots.end());
+  std::ranges::sort(sorted_roots);
+
+  size_t candidate{1};
+  for (int i=0;i<3;++i) {
+    auto root = sorted_roots[i];
+    auto size = ranks[root];
+    candidate *= size;
+    aoc::print("\nroot:{} size:{} -> candidate:{}",root,size,candidate);
+  }
+
   return answer;
 }
 

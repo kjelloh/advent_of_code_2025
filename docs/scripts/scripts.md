@@ -75,6 +75,103 @@ Key observations so far:
 * We are to connect them in edge-length order low to high
 * An edge length is the eucledian distance 'square root of the sum of x,y,z diffs squared
 
+## Union Find
+
+It seems we can apply a 'union find'?
+
+- Keep a vector that stores the 'root' of each node in our graph
+- Keep a vector that stores a 'rank' of each node in our graph
+
+Lets count the unions in our example.
+
+```text
+
+      0 --- 19    2 -- 13
+      |     |
+      |     |
+      7 ----/
+
+```
+
+- We init the roots to themselves: roots [0,1,2,3,...,19]
+- We init the ranks for all nodes to 1: ranks [1,1,1,...,1]
+- We now go over the edges in our graph
+- Edge 0-7: We update the root of rhs node 7 to the root of lhs node 0  
+
+```text
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         7           13          19
+ranks:  1   1         1           1           1
+
+Process edge: 0-7
+* root of 7 = root of 0
+* rank of root of 0 - increment
+
+
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           13          19
+ranks:  2   1         1           1           1
+
+```
+
+- Edge 2-13: Update the root of 13 to the root of 2
+
+```text
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           13          19
+ranks:  2   1         1           1           1
+
+Process edge: 2-13
+* root of 13 = root of 2
+* rank of root of 2 - increment
+
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           2          19
+ranks:  2   2         1           1           1
+
+```
+
+- Process edge 7-0: Already have the same roots = skip
+- Process edge 7-19: Update the root of 19 to the root of 7
+
+```text
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           13          19
+ranks:  2   1         1           1           1
+
+Process edge: 7-19
+* root of 19 = root of 7
+* rank of root of 7 - increment
+
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           2           0
+ranks:  3   2         1           1           1
+
+```
+
+- Edge 19-0: Already have the same root 0 = skip.
+- Edge 19-7: Already have the same root = 0 = skip.
+
+We can now examine the roots and ranks vectors to determine the number of disjoint unions as well as their sizes.
+
+```text
+                            1                   2
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+roots:  0   2         0           2           0
+ranks:  3   2         1           1           1
+```
+
+- Each union are now represented by a unique root.
+- We have the roots 0 and 2 = two disjunct unions.
+- The size of the union wih root 0 is ranks[0] = 3.
+- The size of the union with root 2 is ranks[2] = 2.
+
 # day7 part 2
 
 How many paths can a single particle take to reach the bottom row?
