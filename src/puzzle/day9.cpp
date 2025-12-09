@@ -21,9 +21,9 @@ public:
     std::istringstream iss{s};
     std::string number;
     std::getline(iss,number,',');
-    x = std::stoi(number);
+    x = std::stoll(number);
     std::getline(iss,number,',');
-    y = std::stoi(number);    
+    y = std::stoll(number);    
   }
 };
 
@@ -56,7 +56,7 @@ Model parse(std::istream& in) {
 }
 
 UINT spanned_area(Tile t1,Tile t2) {
-  return (std::abs(t2.x-t1.x + 1) * std::abs(t2.y-t1.y + 1));
+  return ((std::abs(t2.x-t1.x) +1)* (std::abs(t2.y-t1.y) +1));
 }
 
 std::optional<std::string> p1(PuzzleArgs puzzle_args) {
@@ -85,13 +85,20 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
        "\n{}: {} x {} = {}"
       ,ix++ 
       ,to_string(frame.t1)
-      ,to_string(frame.t1)
+      ,to_string(frame.t2)
       ,area);
   }
 
   auto iter = std::ranges::max_element(areaed_frames,[](auto const& lhs,auto const& rhs){
     return lhs.area < rhs.area;
   });
+
+  UINT max{};
+  for (auto const& [frame,area] : areaed_frames) {
+    max = std::max(max,area);
+  }
+
+  aoc::print("\nmax:{}",max);
 
   aoc::print(
      "\nmax:{} for {} - {}"
@@ -101,9 +108,12 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
   // max:4762764240 for 84968,83848 - 15781,15007
   // (15781-84968 + 1) * (15007-83848 +1)
-  // -69186 * -68840 = 4762764240
+  // -69186 * -68840 = 4 762 764 240 (order of 10^9)
+  // 2^64 = 1 844 674 407 370 955 xxx (order of 10^19)
+  // 2^32 = 4 294 967 296 (order of 10^9)
 
   candidate = iter->area; // 4762902267,4762764240 not correct
+                          //            4763040296
 
   // return {};
   // return std::format("Not yet fully implemented");
