@@ -1,3 +1,128 @@
+# day9 part 2
+
+We have a list of positions of red tiles on a 2D 'floor'. 
+
+Implicitally we also have green tiles between any neighbouring red tiles on the same row and also between neighbouring red tiles in the same column.
+
+Some (all?) red tiles with connecting green tiles makes up an enclosed area of tiles. Any such enclosure is also filled wih green tiles.
+
+Our task is now to pick two red tiles on this enclosure such that when used as corrners of a rectangle, this rectangle encloses only red or green tiles. And also such that we get the largest possible area of a rectangle with these properties.
+
+It seems we are to find the largest rectangle totally within the enclosure of the convex hull made up of red corner tiles?
+
+- A corner tile is one that can be connected to another red tile on the same row or in the same column.
+- It seems a corner tile with its edges to its connected corners models an 'L'?
+- Each corner 'L' can be one of four that differs in 90 degrees of rotation?
+- Do we care about corner 'L' rotations?
+
+One can queston - can we create a convex hull that uses all the red tiles?
+
+- We cant use red tiles that does not connect to two other red tiles.
+ 
+ Wait! Some red tiles connect to its neighbours in a straight line (does NOT create a corner)!
+
+ - At this stage I do not dare to propose we can ignore staright-line-red-tile-combos?
+ - We may need intermediate red tiles to anchor a rectangle?
+
+So what operations do we need to implement?
+
+And what known algorithms can we use to solve this problem?
+
+Also, have I understood enough of the intricasies of this problem to solve it?
+
+Wait! The red tiles may make up more than one enclosure of red and green tiles?
+
+- It seems we need a way to first identify all contigous enclosed areas?
+- Possibly eliminate smaller encolures that are totally within a larger enclosure?
+  (safe(?) and may be required to shrink search space for largest rectangle?)
+- Then we need to pick two red tiles on each circumfenced area for a rectangle candidate.
+- For each rectangle candidate we need to skip any rectangle that encloses non red or green tiles.
+- For each valid rectangle candidate we need to record its area.
+- When we have gone through all rectangle candidates we are to pich the candodate with the largest area.
+
+I wonder - can I pick red tiles to connect plus pick what neighbours to connect to and end up with different candidate hulls'?
+
+From part two problem statement we read:
+
+```text
+In your list, every red tile is connected to the red tile before and after it by a straight line of green tiles. The list wraps, so the first red tile is also connected to the last red tile. Tiles that are adjacent in your list will always be on either the same row or the same column.
+```
+
+- It seems each entry in the list defines a tile that share row or column with its adjacent tile entry?
+- Does this mean the list in fact strings the red tiles together into a hull?
+- YES - It sais '..the first red tile is also connected to the last red tile'.
+
+Can we do 'coordinate compression'?
+
+- It seems we can use 'coordinate compression' based on all edges being in one axies direcion only.
+- So we can map each adjacent pairs of tiles in the list to a range in x and y.
+- We now know Each such range is 'INSIDE' meaning consists of red start and end tiles 
+  and connecting green tiles.
+- It seems we can sort the x-ranges and y-ranges separatly?
+  They form 'bands' on the grid and we can still look for the overlapping bands
+  to get the true 'INSIDE' tiles.
+
+Let's examine our example:
+
+```text
+7,1
+11,1
+11,7
+9,7
+9,5
+2,5
+2,3
+7,3
+```
+
+- In x we have: 7,11,11,9,9,2,2,7 or sorted: 2,2,7,7,9,9,11,11
+- In y we have 1,1,7,7,5,5,3,3 or sorted: 1,1,3,3,5,5,7,7
+
+```text
+    0         1
+    0123456789012
+00
+ 1   " " " " 
+ 2  ="=#=#="=====
+ 3   " " " "
+ 4   " " " "
+ 5   " " " "
+ 6   " " " "
+ 7  =#=#="="=====
+ 8   " " " "
+ 9  ="="=#=#=====
+10   " " " "
+ 1  =#="="=#=====
+ 2   " " " "
+```
+
+The idea seems to be that we scan these ranges separatly and toggles OUTSIDE,INSIDE,OUTSIDE... as we encounter them. That is, we implicit the ranges between the initial INSIDE ranges and mark them as OUTSIDE.
+
+- A grid position x,y is now INSIDE of x is in an INSIDE x-range and y in INSIDE y-range.
+- That is, an overlap of INSIDE x-band and INSIDE y-band defines an INSIDE grid position.
+
+Our example is a bit obscure though in that they define overlapping ranges. Because our problem defines the border tiles to be included in the covered area.
+
+Let's study the x-range 'bands' defined by the 'borders' 2,2,7,7,9,9,11,11.
+
+```text
+    0         1
+    0123456789012
+    ---
+      ------
+           ---
+             ---
+               ----...
+    001111111111000..
+```
+
+It seems we need a 'compressed xy-matrix' with postitions representing our input inside ranges and intermediate outside ranges?
+
+- So we can transform inside-x borders 2,2,7,7,9,9,11,11 
+  to pairwise (-,2),(2,2),(2,7),(7,7),(7,9),(9,9),(9,11),(11,11),(11,+)
+  Compressed:   0     1     2     3     4     5     6       7       8
+
+
 # day8 part 1
 
 So todays problem seems ro be about connected graphs?

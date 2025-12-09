@@ -27,6 +27,10 @@ public:
   }
 };
 
+std::string to_string(Tile const& tile) {
+  return std::format("{},{}",tile.x,tile.y);
+}
+
 struct Frame {
   Tile t1;
   Tile t2;
@@ -36,10 +40,6 @@ struct FrameWithArea {
   Frame frame{};
   UINT area{};
 };
-
-std::string to_string(Tile const& tile) {
-  return std::format("{},{}",tile.x,tile.y);
-}
 
 using Model = std::vector<Tile>;
 
@@ -122,8 +122,48 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 } // p1
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
-  return {};
-  // return std::format("Not yet fully implemented");
+
+  std::ifstream in{puzzle_args.in_file_path()};
+  auto model = parse(in);
+
+  // Solve here
+  const UINT V = model.size();
+  UINT candidate{};
+
+  // Compress ranges to compressed matrix
+  std::vector<INT> xs(V);
+  std::vector<INT> ys(V);
+  for (size_t i=0;i<V;++i) {
+    xs[i] = model[i].x;
+    ys[i] = model[i].y;
+  }
+
+  std::ranges::sort(xs);
+  std::ranges::sort(ys);
+
+  const std::pair<INT,INT> X_BOUND(xs.front()-1,xs.back()+1);
+  const std::pair<INT,INT> Y_BOUND(ys.front()-1,ys.back()+1);
+
+  std::vector<std::pair<INT,INT>> compressed_x(V+1);
+  compressed_x[0] = std::make_pair(X_BOUND.first,xs[0]);
+  compressed_x[V] = std::make_pair(xs[V-1],X_BOUND.second);
+  std::vector<std::pair<INT,INT>> compressed_y(V+1);
+  compressed_y[0] = std::make_pair(Y_BOUND.first,ys[0]);
+  compressed_y[V] = std::make_pair(ys[V-1],Y_BOUND.second);
+  for (size_t i=1;i<V;++i) {
+    compressed_x[i] = std::make_pair(compressed_x[i-1].second,xs[i]);
+    compressed_y[i] = std::make_pair(compressed_y[i-1].second,ys[i]);
+  }
+
+  std::vector<std::vector<char>> compressed(
+     V+1
+    ,std::vector<char>(V+1)
+  );
+
+
+
+  // return {};
+  return std::format("Not yet fully implemented");
   // return std::format("{}",candidate);
 } // p2
 
