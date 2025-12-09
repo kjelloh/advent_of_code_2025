@@ -75,25 +75,21 @@ Let's examine our example:
 7,3
 ```
 
-- In x we have: 7,11,11,9,9,2,2,7 or sorted: 2,2,7,7,9,9,11,11
-- In y we have 1,1,7,7,5,5,3,3 or sorted: 1,1,3,3,5,5,7,7
+- In x (col) we have: 7,11,11,9,9,2,2,7 or sorted x: 2,2,7,7,9,9,11,11
+- In y (row) we have 1,1,7,7,5,5,3,3 or sorted y: 1,1,3,3,5,5,7,7
 
 ```text
-    0         1
-    0123456789012
-00
- 1   " " " " 
- 2  ="=#=#="=====
- 3   " " " "
- 4   " " " "
- 5   " " " "
- 6   " " " "
- 7  =#=#="="=====
- 8   " " " "
- 9  ="="=#=#=====
-10   " " " "
- 1  =#="="=#=====
- 2   " " " "
+yx- 0         1
+|   0123456789012
+00  .."...."."."..
+ 1  =="====#="=#==
+ 2  .."...."."."..
+ 3  ==#====#="="==
+ 4  .."...."."."..
+ 5  ==#===="=#="==
+ 6  .."...."."."..
+ 7  =="===="=#=#==
+ 8  .."...."."."..
 ```
 
 The idea seems to be that we scan these ranges separatly and toggles OUTSIDE,INSIDE,OUTSIDE... as we encounter them. That is, we implicit the ranges between the initial INSIDE ranges and mark them as OUTSIDE.
@@ -122,6 +118,73 @@ It seems we need a 'compressed xy-matrix' with postitions representing our input
   to pairwise (-,2),(2,2),(2,7),(7,7),(7,9),(9,9),(9,11),(11,11),(11,+)
   Compressed:   0     1     2     3     4     5     6       7       8
 
+Wait! Lets condense our knowledge.
+
+- We have a list of positions of red tiles on a large sparse floor (2D grid) of tiles.
+- Positions are given as x,y (column,row).
+- Each tile in our list 'connects' to its adjacent tile in the list with implied green tiles.
+- The listed tiles defies a closed loop (last and first tile also connects)
+- The red tiles are arranged so that green tiles span only rows or columns (no diagonals)
+- All tiles inside the loop of red and green tiles are also implicitally green.
+
+We are to pick two red tiles as corners of a rectangle that is as large as we can make it given some constraints.
+
+- The implied rectange, including its border, must only contain red or green tiles.
+
+Looking at the input data we can observe the following:
+
+- The count of red tiles range from around 10 (example) to around 500 (todays problem).
+- The floor grid positions are within 15x15 for the example. 
+- But the floor grid is in the range 100 000 x 100 000 in todays problem.
+
+So we need a way to 'compress' this problem.
+
+We can do this by 'striping' the floor grid based on ranges of tiles in x and y.
+
+- We 'stripe' by creating open ended ranges from the ones we know (connected red tiles)
+  with the gaps between also inserted.
+- We then make the stripes in each dimension unique.
+  (No x stripes overlap other x-stripes and no y-stripes overlap other y-stripes)
+- Now we have 'striped' the grid into 'blocks' instead of single tiles.
+- And the overlapping x and y 'on-stripes' define 'on-blocks'.
+
+The rectange we are looking for will now also be compressed into blocks in the compressed domain.
+
+- 'Stripes' in the grid-domain maps to indexes in the 'stripe domain'.
+- A rectangel with red tiles corners on the grid maps to a rectangle with index-coordinates
+  in the compressed domain.
+
+How can we write this algorithm?
+
+Lets make the example big with the red tiles (2,5),(4000,5),(4000,7000),(2,7000). Now how would the compressed 'stripe domain' look like?
+
+Make X stripes:
+
+- exact stripe for x = 2 → range [2], width = 1
+- gap stripe for 3..3999 → range (3..3999), width = 3997
+- exact stripe for x = 4000 → range [4000], width = 1
+
+So X stripes (compressed indices):
+
+- cx = 0 → real x = [2], width 1
+- cx = 1 → real x = [3..3999], width 3997
+- cx = 2 → real x = [4000], width 1
+
+make Y stripes:
+
+- exact stripe for y = 5 → height = 1
+- gap stripe for 6..6999 → height = 6994
+- exact stripe for y = 7000 → height = 1
+
+So Y stripes (compressed indices):
+
+- cy = 0 → real y = [5], height 1
+- cy = 1 → real y = [6..6999], height 6994
+- cy = 2 → real y = [7000], height 1
+
+Compressed grid size: 3 × 3 blocks.
+
+Seems promising!
 
 # day8 part 1
 
