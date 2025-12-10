@@ -259,7 +259,7 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
       State next = current;
 
       // Press button
-      next.value = press(btn,next.value);      
+      next.value = press(btn,next.value,is_part2);      
       next.press_count++;
 
       if (!visited.contains(next.value)) {
@@ -388,25 +388,41 @@ std::optional<std::string> test_p1(int i,int test_ix,Machine const& machine) {
 }
 
 std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
-  if (i==0 and test_ix==1) {
-    // If the current joltage levels were {0,1,2,3}, pushing the button (1,3) would change them to be {0,2,2,4}.
-    Joltage expected{0,2,2,4};
-    Joltage joltage{0,1,2,3};
-    auto next = press(machine.buttons[1],joltage,true);
-    if (next == expected) {
-      return std::format(
-         "Test {} next:{} is expected {} *PASSED*"
-        ,test_ix
-        ,to_string(next)
-        ,to_string(expected));
-    }
-    else {
-      return std::format(
-         "Test {} next:{} is NOT expected {} *failed*"
-        ,test_ix
-        ,to_string(next)
-        ,to_string(expected));
-    }
+  if (i==0) switch(test_ix) {
+
+    case 1: {
+      // If the current joltage levels were {0,1,2,3}, pushing the button (1,3) would change them to be {0,2,2,4}.
+      Joltage expected{0,2,2,4};
+      Joltage joltage{0,1,2,3};
+      auto next = press(machine.buttons[1],joltage,true);
+      if (next == expected) {
+        return std::format(
+          "Test {} next:{} is expected {} *PASSED*"
+          ,test_ix
+          ,to_string(next)
+          ,to_string(expected));
+      }
+      else {
+        return std::format(
+          "Test {} next:{} is NOT expected {} *failed*"
+          ,test_ix
+          ,to_string(next)
+          ,to_string(expected));
+      }
+    } break;
+    case 2: {
+      // Configuring the first machine's counters requires a minimum of 10 button presses. 
+      // One way to do this is by pressing (3) once, (1,3) three times, 
+      // (2,3) three times, (0,2) once, and (0,1) twice.
+      INT min_count = min_count_bfs(machine,true);
+      aoc::print("\nmin_count:{}",test_ix,min_count);
+      if (min_count == 10) {
+        return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
+      }
+      else {
+        return std::format("\ntest {} min_count:{} NOT expected 10 *failed*",test_ix,min_count);
+      }
+    } break;
   }
   return {};
 }
@@ -435,16 +451,26 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
       }
     }
 
-    candidate += min_count_bfs(machine);
+    candidate += min_count_bfs(machine,for_part2);
 
   }
 
-  if (test_ix == 7) {
-    // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
-    if (candidate == 7) {
-      return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
+  if (!for_part2) {
+    if (test_ix == 7) {
+      // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
+      if (candidate == 7) {
+        return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
+      }
     }
   }
+  else {
+    // if (test_ix == 2) {
+    //   if (candidate == 7) {
+    //     return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
+    //   }
+    // }
+  }
+
 
 
   // return {};
