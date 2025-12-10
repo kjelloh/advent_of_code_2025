@@ -147,13 +147,46 @@ Model parse(std::istream& in) {
   return model;
 }
 
+std::string to_string(Button const& button) {
+  std::string result{};
+  result.push_back('(');
+  bool first(true);
+  for (auto lx : button) {
+    if (!first) {
+      result.push_back(',');
+    }
+    result += std::to_string(lx);
+    first = false;
+  }
+  result.push_back(')');
+  return result;
+}
+
+std::string to_string(Buttons const& buttons) {
+  std::string result{};
+  bool first(true);
+  for (auto const& button : buttons) {
+    if (!first) {
+      result.push_back(' ');
+    }
+    first = false;
+  }
+  return result;
+}
+
 Lights press(unsigned bx,Lights state,Machine const& machine) {
   Lights result(state);
+  aoc::print(
+     "\npress({}:{},'{}')"
+    ,bx
+    ,to_string(machine.buttons[bx])
+    ,state);
   for (auto lx : machine.buttons[bx]) {
     bool l(result[lx] == '#');
     l = not l;
     result[lx] = (l)?'#':'.';
   }
+  aoc::print(" -> '{}'",result);
   return result;
 }
 
@@ -200,7 +233,27 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       } break;
       case 3: {
         // You could press all of the buttons except (1,3) once each, a total of 5 button presses.
-        return std::format("Not yet implemented");
+        std::string expected = machine.expected;
+        std::string lights(expected.size(),'.');
+        // lights = press(0,lights,machine);
+        // lights = press(2,lights,machine);
+        // lights = press(3,lights,machine);
+        // lights = press(4,lights,machine);
+        // lights = press(5,lights,machine);
+        for (int bx=0;bx<machine.buttons.size();++bx) {
+          if (bx != 1) lights = press(bx,lights,machine);
+        }
+
+        if (lights == expected) {
+          return std::format("Test {} *PASSED*",test_ix);
+        }
+        else {
+          return std::format(
+             "Test {} failed. indicator lights '{}' differs from expected: '{}'"
+            ,test_ix
+            ,lights
+            ,expected);
+        }
       } break;
       case 4: {
         // However, the fewest button presses required is 2. One way to do this is by pressing the last two buttons ((0,2) and (0,1)) once each.
