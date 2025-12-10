@@ -195,30 +195,41 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
   return press(machine.buttons[bx],state);
 }
 
+using Expected = std::vector<unsigned>;
 struct State {
-  State(size_t size) : lights(size,'.') {}
-  Lights lights;
+  Expected value;
   size_t press_count{};
-  bool operator==(Lights const& lights) {
-    return lights == this->lights;
+  State(size_t size) : value(size,0) {}
+  bool operator==(Expected const& expected) {
+    return value == expected;
   }
 };
+
+Expected to_expected(Lights const& lights) {
+  Expected result(lights.size(),0);
+  for (size_t i=0;i<lights.size();++i) {
+    result[i] = (lights[i]=='#')?1:0;
+  }
+  return result;
+}
 
 INT min_count_bfs(Machine const& machine) {
   INT min_count(-1);
 
-  State state(machine.lights.size());
+  Expected end = to_expected(machine.lights);
+
+  State state(end.size());
   std::queue<State> q;
-  std::unordered_set<Lights> visited;
+  std::set<Expected> visited;
 
   q.push(state);
-  visited.insert(state.lights);
+  visited.insert(state.value);
 
   while (!q.empty()) {
     State current = q.front();
     q.pop();
 
-    if (current == machine.lights) {
+    if (current == end) {
       min_count = current.press_count;
       break; // BFS first = shortest button press path
     }
@@ -227,11 +238,15 @@ INT min_count_bfs(Machine const& machine) {
     for (auto const& btn : machine.buttons) {
       State next = current;
 
-      next.lights = press(btn,current.lights);
+      for (auto bx : btn) {
+        ++next.value[bx]; 
+        next.value[bx] %= 2; // part 1
+      }
+      
       next.press_count++;
 
-      if (!visited.contains(next.lights)) {
-        visited.insert(next.lights);
+      if (!visited.contains(next.value)) {
+        visited.insert(next.value);
         q.push(next);
       }
     }
