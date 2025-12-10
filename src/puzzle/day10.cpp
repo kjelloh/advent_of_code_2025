@@ -19,7 +19,7 @@ using Buttons = std::vector<Button>;
 using Joltage = std::vector<unsigned>;
 
 struct Machine {
-  Lights expected;
+  Lights lights;
   std::vector<Button> buttons;
   Joltage joltage;
 
@@ -119,14 +119,14 @@ Joltage to_joltage(std::string_view sv) {
 }
 
 Machine to_machine(std::string_view sv) {
-  auto const& [expected,buttons,joltage] = to_sections_svs(sv);
+  auto const& [lights,buttons,joltage] = to_sections_svs(sv);
   aoc::print(
     "\nto_machine '{}' '{}' '{}'"
-    ,expected
+    ,lights
     ,buttons
     ,joltage);
   return Machine {
-    .expected = to_lights(expected)
+    .lights = to_lights(lights)
     ,.buttons = to_buttons(buttons)
     ,.joltage = to_joltage(joltage)
   };
@@ -142,8 +142,8 @@ Model parse(std::istream& in) {
     aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
     model.push_back(to_machine(entry));
     aoc::print(
-       "\nmachine: expected:'{}'"
-      ,model.back().expected);
+       "\nmachine: lights:'{}'"
+      ,model.back().lights);
   }
   return model;
 }
@@ -196,18 +196,18 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
 }
 
 struct State {
-  State(Lights const& expected) : lights(expected.size(),'.') {}
+  State(size_t size) : lights(size,'.') {}
   Lights lights;
   size_t press_count{};
-  bool operator==(std::string const& expected) {
-    return expected == lights;
+  bool operator==(Lights const& lights) {
+    return lights == this->lights;
   }
 };
 
 INT min_count_bfs(Machine const& machine) {
   INT min_count(-1);
 
-  State state(machine.expected);
+  State state(machine.lights.size());
   std::queue<State> q;
   std::unordered_set<Lights> visited;
 
@@ -218,7 +218,7 @@ INT min_count_bfs(Machine const& machine) {
     State current = q.front();
     q.pop();
 
-    if (current == machine.expected) {
+    if (current == machine.lights) {
       min_count = current.press_count;
       break; // BFS first = shortest button press path
     }
@@ -246,7 +246,7 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
       case 1: {
         // You could press the first three buttons once each, a total of 3 button presses.
-        std::string expected = machine.expected;
+        std::string expected = machine.lights;
         std::string lights(expected.size(),'.');
         lights = press(0,lights,machine);
         lights = press(1,lights,machine);
@@ -264,7 +264,7 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       } break;
       case 2: {
         // You could press (1,3) once, (2,3) once, and (0,1) twice, a total of 4 button presses.
-        std::string expected = machine.expected;
+        std::string expected = machine.lights;
         std::string lights(expected.size(),'.');
         lights = press(1,lights,machine);
         lights = press(3,lights,machine);
@@ -283,7 +283,7 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       } break;
       case 3: {
         // You could press all of the buttons except (1,3) once each, a total of 5 button presses.
-        std::string expected = machine.expected;
+        std::string expected = machine.lights;
         std::string lights(expected.size(),'.');
         // lights = press(0,lights,machine);
         // lights = press(2,lights,machine);
