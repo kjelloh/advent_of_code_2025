@@ -195,6 +195,51 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
   return press(machine.buttons[bx],state);
 }
 
+struct State {
+  State(Lights const& expected) : lights(expected.size(),'.') {}
+  Lights lights;
+  size_t press_count{};
+  bool operator==(std::string const& expected) {
+    return expected == lights;
+  }
+};
+
+INT min_count_bfs(Machine const& machine) {
+  INT min_count(-1);
+
+  State state(machine.expected);
+  std::queue<State> q;
+  std::unordered_set<Lights> visited;
+
+  q.push(state);
+  visited.insert(state.lights);
+
+  while (!q.empty()) {
+    State current = q.front();
+    q.pop();
+
+    if (current == machine.expected) {
+      min_count = current.press_count;
+      break; // BFS first = shortest button press path
+    }
+
+    // Explore options
+    for (auto const& btn : machine.buttons) {
+      State next = current;
+
+      next.lights = press(btn,current.lights);
+      next.press_count++;
+
+      if (!visited.contains(next.lights)) {
+        visited.insert(next.lights);
+        q.push(next);
+      }
+    }
+  }
+
+  return min_count;
+}
+
 std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
     if (test_ix > 0 and i==0) switch (test_ix) {
       // There are a few ways to correctly configure the first machine:
@@ -262,47 +307,7 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       } break;
       case 4: {
         // However, the fewest button presses required is 2. One way to do this is by pressing the last two buttons ((0,2) and (0,1)) once each.
-        struct State {
-          State(Lights const& expected) : lights(expected.size(),'.') {}
-          Lights lights;
-          size_t press_count{};
-          bool operator==(std::string const& expected) {
-            return expected == lights;
-          }
-        };
-
-        INT min_count(-1);
-
-        State state(machine.expected);
-        std::queue<State> q;
-        std::unordered_set<Lights> visited;
-
-        q.push(state);
-        visited.insert(state.lights);
-
-        while (!q.empty()) {
-          State current = q.front();
-          q.pop();
-
-          if (current == machine.expected) {
-            min_count = current.press_count;
-            break; // BFS first = shortes button press path
-          }
-
-          // Explore options
-          for (auto const& btn : machine.buttons) {
-            State next = current;
-
-            next.lights = press(btn,current.lights);
-            next.press_count++;
-
-            if (!visited.contains(next.lights)) {
-              visited.insert(next.lights);
-              q.push(next);
-            }
-          }
-        }
-
+        INT min_count = min_count_bfs(machine);
         aoc::print("\nmin_count:{}",test_ix,min_count);
         if (min_count == 2) {
           return std::format("\ntest {} min_count:{} expected 2 *PASSED*",test_ix,min_count);
@@ -316,11 +321,17 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
 
     if (test_ix > 0 and i==1) switch (test_ix) {
       // The second machine can be configured with as few as 3 button presses:
-
       // [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
       case 5: {
         // One way to achieve this is by pressing the last three buttons ((0,4), (0,1,2), and (1,2,3,4)) once each.
-        return std::format("Not yet implemented");
+        INT min_count = min_count_bfs(machine);
+        aoc::print("\nmin_count:{}",test_ix,min_count);
+        if (min_count == 3) {
+          return std::format("\ntest {} min_count:{} expected 3 *PASSED*",test_ix,min_count);
+        }
+        else {
+          return std::format("\ntest {} min_count:{} NOT expected 3 *failed*",test_ix,min_count);
+        }
       } break;
     };
 
@@ -330,11 +341,16 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       // [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
       case 6: {
         // The fewest presses required to correctly configure it is 2; one way to do this is by pressing buttons (0,3,4) and (0,1,2,4,5) once each.
-        return std::format("Not yet implemented");
+        INT min_count = min_count_bfs(machine);
+        aoc::print("\nmin_count:{}",test_ix,min_count);
+        if (min_count == 2) {
+          return std::format("\ntest {} min_count:{} expected 2 *PASSED*",test_ix,min_count);
+        }
+        else {
+          return std::format("\ntest {} min_count:{} NOT expected 2 *failed*",test_ix,min_count);
+        }
       } break;
     };
-
-    // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
 
   return {};    
 }
@@ -356,12 +372,21 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       return *test_result;
     }
 
+    candidate += min_count_bfs(machine);
+
+  }
+
+  if (test_ix == 7) {
+    // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
+    if (candidate == 7) {
+      return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
+    }
   }
 
 
-  return {};
+  // return {};
   // return std::format("Not yet fully implemented");
-  // return std::format("{}",candidate);
+  return std::format("{}",candidate);
 
 } // p1
 
