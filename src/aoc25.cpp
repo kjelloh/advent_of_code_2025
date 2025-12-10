@@ -45,7 +45,8 @@ int solve(AppArgs args) {
       if (do_break) break;
       std::print("\nSolving for [{}]",in_file_path.string());
       PuzzleArgs puzzle_args({
-         .m_debug = args.debug
+         .m_is_example = in_file_path.filename().string().starts_with("ex")
+        ,.m_debug = args.debug
         ,.m_part = part
         ,.m_maybe_test = args.maybe_test}
         ,in_file_path);

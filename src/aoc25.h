@@ -17,6 +17,7 @@ public:
 
   struct Meta {
     int m_part{1};
+    bool m_is_example{};
     bool m_debug{false};
     std::optional<int> m_maybe_test;
   };
