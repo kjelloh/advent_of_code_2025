@@ -1,3 +1,34 @@
+# day 10 part 1
+
+We are to press buttons on machines to correctly configure their indicator lights.
+
+Our input is a list of machine descriptions. Each descritpion contains an indicator lights diagram, a buttons wiring diagram and joltage requirements.
+
+For each machine we want to know the fewest button presses to get the required indocator lights configuration.
+
+- The indicator lights diagram is on the form [.##.]
+  - It is a list of lights requirements for light 0..N
+  - Each requirement is a single character '.' or '#'
+  - A '.' means the light is required to be off
+  - A '#' means the light is required to be on.
+- The buttons wiring diagram is on thh form (0,3,4)
+  - It is a list of indecies of which light it affects
+  - It affects the light by toggleing the lights current state on->off or off->on.
+- The joltage requirement is on the form {3,5,4,7}
+  - For this part the meaning of this list is left undefined
+
+Let's study an example machine description.
+
+```text
+[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+```
+
+- We have four lights required to be off,on,on,off (defined by '.##.')
+- We have 6 buttons as indicated by comma separated lists enclosed in (..)
+- We have the jolts requirement as a comma separated list enclosed in {..}
+
+How do we parse this?
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 
