@@ -196,7 +196,19 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
 }
 
 using Expected = std::vector<unsigned>;
+struct VectorHash {
+  size_t operator()(std::vector<unsigned> const& v) const noexcept
+  {
+    size_t seed = v.size();
 
+    for (unsigned x : v)
+    {
+      seed ^= std::hash<unsigned>{}(x) + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
+    }
+
+    return seed;
+  }
+};
 
 Expected press(Button const& button,Expected state,bool is_part2 = false) {
   Expected result(state);
@@ -235,19 +247,31 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
 
   State state(end.size());
   std::queue<State> q;
-  std::set<Expected> visited;
+  std::unordered_set<Expected,VectorHash> visited;
 
   q.push(state);
   visited.insert(state.value);
 
+  size_t count{};
   while (!q.empty()) {
+
     State current = q.front();
     q.pop();
 
-    for (int i=0;i<end.size();++i) {
-      if (current.value[i] > end[i]) continue; // skip on overflow
+    if (count++ % 10000 == 0) {
+      aoc::print(
+         "\n{}: {}:{}",count,to_string(current.value),current.press_count);
+      std::cout << std::flush;
     }
-    // if (current > end) continue;
+
+    bool overflow{};
+    for (int i=0;i<end.size();++i) {
+      if (current.value[i] > end[i]) {
+        overflow = true;
+        break;
+      }
+    }
+    if (overflow) continue;
 
     if (current == end) {
       min_count = current.press_count;
@@ -472,6 +496,8 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
 
   for (size_t i=0;i < model.size();++i) {
     auto const& machine = model[i];
+    
+    aoc::print("\nmachine:{} joltage:{}",i,to_string(machine.joltage));
 
     if (!for_part2) {
       if (auto test_result = test_p1(i,test_ix,machine)) {

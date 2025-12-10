@@ -29,6 +29,21 @@ Let's study an example machine description.
 
 How do we parse this?
 
+# day10 part 2
+
+In part 2 we are to press buttons to increment a ten position counter and hit the values given by the provided 'joltage'!
+
+```text
+So, a button wiring schematic like (1,3) means that each time you push that button, the second and fourth counters would each increase by 1. If the current joltage levels were {0,1,2,3}, pushing the button would change them to be {0,2,2,4}.
+```
+
+Can we solve this with our BFS from part 1?
+
+Short answer - NO!
+
+- The search space is up to 100^10 
+  (E.g., a joltage like {174,188,195,169,159,43,182,43} is around the order of 100^8)
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 
