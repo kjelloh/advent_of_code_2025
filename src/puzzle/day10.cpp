@@ -18,7 +18,7 @@ using Buttons = std::vector<Button>;
 using Joltage = std::vector<unsigned>;
 
 struct Machine {
-  Lights lights;
+  Lights expected;
   std::vector<Button> buttons;
   Joltage joltage;
 
@@ -118,14 +118,14 @@ Joltage to_joltage(std::string_view sv) {
 }
 
 Machine to_machine(std::string_view sv) {
-  auto const& [lights,buttons,joltage] = to_sections_svs(sv);
+  auto const& [expected,buttons,joltage] = to_sections_svs(sv);
   aoc::print(
     "\nto_machine '{}' '{}' '{}'"
-    ,lights
+    ,expected
     ,buttons
     ,joltage);
   return Machine {
-    .lights = to_lights(lights)
+    .expected = to_lights(expected)
     ,.buttons = to_buttons(buttons)
     ,.joltage = to_joltage(joltage)
   };
@@ -141,10 +141,20 @@ Model parse(std::istream& in) {
     aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
     model.push_back(to_machine(entry));
     aoc::print(
-       "\nmachine: lights:'{}'"
-      ,model.back().lights);
+       "\nmachine: expected:'{}'"
+      ,model.back().expected);
   }
   return model;
+}
+
+Lights press(unsigned bx,Lights state,Machine const& machine) {
+  Lights result(state);
+  for (auto lx : machine.buttons[bx]) {
+    bool l(result[lx] == '#');
+    l = not l;
+    result[lx] = (l)?'#':'.';
+  }
+  return result;
 }
 
 std::optional<std::string> p1(PuzzleArgs puzzle_args) {
@@ -164,6 +174,21 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
       case 1: {
         // You could press the first three buttons once each, a total of 3 button presses.
+        std::string expected = machine.expected;
+        std::string lights(expected.size(),'.');
+        lights = press(0,lights,machine);
+        lights = press(1,lights,machine);
+        lights = press(2,lights,machine);
+        if (lights == expected) {
+          return std::format("Test {} *PASSED*",test_ix);
+        }
+        else {
+          return std::format(
+             "Test {} failed. indicator lights '{}' differs from expected: '{}'"
+            ,test_ix
+            ,lights
+            ,expected);
+        }
         return std::format("Test {} not yet implemented",test_ix);
       } break;
       case 2: {
@@ -187,7 +212,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
     };
 
     if (test_ix > 0 and i==2) switch (test_ix) {
-      // The third machine has a total of six indicator lights that need to be configured correctly:
+      // The third machine has a total of six indicator expected that need to be configured correctly:
 
       // [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
       case 6: {
@@ -195,7 +220,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       } break;
     };
 
-    // So, the fewest button presses required to correctly configure the indicator lights on all of the machines is 2 + 3 + 2 = 7.
+    // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
 
   }
 
