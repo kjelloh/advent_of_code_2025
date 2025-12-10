@@ -36,15 +36,51 @@ std::tuple<std::string_view,std::string_view,std::string_view> to_sections_svs(s
 }
 
 std::vector<std::string_view> to_buttons_svs(std::string_view sv) {
-  return {};
+  // ' (3) (1,3) (2) (2,3) (0,2) (0,1)'
+  //      ^     ^   ^     ^     ^
+  std::vector<std::string_view> result{};
+  size_t begin{0};
+  aoc::print("\nto_buttons_svs:");
+  size_t pos{0};
+  while (pos < sv.size()) {
+    auto end = sv.find(')',pos);
+    result.push_back(sv.substr(pos,end-pos+1));
+    aoc::print(" '{}'",result.back());
+    pos = end+1;
+  }
+  return result;
 }
 
 Lights to_lights(std::string_view sv) {
-  return {};
+  // [.##.]
+  return Lights{sv.substr(1,sv.size()-2)};
 }
 
 Button to_button(std::string_view sv) {
-  return {};
+  // ' (1,3)'
+  // ' (3)'
+  Button result{};
+  aoc::print("\nto_button:");
+  auto begin = sv.find('(') + 1;
+  auto find_end = [&sv](size_t begin){
+    auto pos = sv.find(',',begin);
+    if (pos == std::string_view::npos) pos = sv.find(')',begin);
+    return pos;
+  };
+  auto end = find_end(begin);
+  while (begin < sv.size()) {
+    try {
+      std::string val(sv.substr(begin,end-begin));
+      aoc::print(" '{}'",val);
+      result.push_back(std::stoi(val));
+    }
+    catch (std::exception const& e) {
+      std::print("\nto_button: Excpetion - {}",e.what());
+    }
+    begin = end+1;
+    end = find_end(begin);
+  }
+  return result;
 }
 
 Buttons to_buttons(std::string_view sv) {
@@ -57,7 +93,28 @@ Buttons to_buttons(std::string_view sv) {
 }
 
 Joltage to_joltage(std::string_view sv) {
-  return {};
+  Joltage result{};
+  aoc::print("\nto_joltage:");
+  auto begin = sv.find('{') + 1;
+  auto find_end = [&sv](size_t begin){
+    auto pos = sv.find(',',begin);
+    if (pos == std::string_view::npos) pos = sv.find('}',begin);
+    return pos;
+  };
+  auto end = find_end(begin);
+  while (begin < sv.size()) {
+    try {
+      std::string val(sv.substr(begin,end-begin));
+      aoc::print(" '{}'",val);
+      result.push_back(std::stoi(val));
+    }
+    catch (std::exception const& e) {
+      std::print("\to_joltage: Excpetion - {}",e.what());
+    }
+    begin = end+1;
+    end = find_end(begin);
+  }
+  return result;
 }
 
 Machine to_machine(std::string_view sv) {
@@ -83,6 +140,9 @@ Model parse(std::istream& in) {
   while (std::getline(in, entry)) {
     aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
     model.push_back(to_machine(entry));
+    aoc::print(
+       "\nmachine: lights:'{}'"
+      ,model.back().lights);
   }
   return model;
 }
