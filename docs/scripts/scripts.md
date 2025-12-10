@@ -44,6 +44,20 @@ Short answer - NO!
 - The search space is up to 100^10 
   (E.g., a joltage like {174,188,195,169,159,43,182,43} is around the order of 100^8)
 
+What observations can we do about the part 2 problem to help us solve it?
+
+- The way 'buttons' increment 'counters' sugests this is now an arithmetic problem?
+- We are to 'sum up' buttons to get the end sum represented by joltage?
+- We are looking for n0*buttons[0] + n1*buttons[1] + ... = joltage.
+
+It seems this equation has only one single solution?
+
+AHA! This is in fact a vector equation!
+
+- We have 10 unknowns (buttons can affect counters 0..9)
+- We get one equation per member in 'joltage'
+  (E.g., 8 for joltage {174,188,195,169,159,43,182,43})
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 

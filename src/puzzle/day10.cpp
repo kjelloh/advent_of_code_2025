@@ -196,19 +196,6 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
 }
 
 using Expected = std::vector<unsigned>;
-struct VectorHash {
-  size_t operator()(std::vector<unsigned> const& v) const noexcept
-  {
-    size_t seed = v.size();
-
-    for (unsigned x : v)
-    {
-      seed ^= std::hash<unsigned>{}(x) + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
-    }
-
-    return seed;
-  }
-};
 
 Expected press(Button const& button,Expected state,bool is_part2 = false) {
   Expected result(state);
@@ -247,7 +234,7 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
 
   State state(end.size());
   std::queue<State> q;
-  std::unordered_set<Expected,VectorHash> visited;
+  std::set<Expected> visited;
 
   q.push(state);
   visited.insert(state.value);
@@ -264,15 +251,6 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
       std::cout << std::flush;
     }
 
-    bool overflow{};
-    for (int i=0;i<end.size();++i) {
-      if (current.value[i] > end[i]) {
-        overflow = true;
-        break;
-      }
-    }
-    if (overflow) continue;
-
     if (current == end) {
       min_count = current.press_count;
       break; // BFS first = shortest button press path
@@ -285,6 +263,17 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
       // Press button
       next.value = press(btn,next.value,is_part2);      
       next.press_count++;
+
+      if (is_part2) {
+        bool overflow{};
+        for (int i=0;i<end.size();++i) {
+          if (current.value[i] > end[i]) {
+            overflow = true;
+            break;
+          }
+        }
+        if (overflow) continue;
+      }
 
       if (!visited.contains(next.value)) {
         visited.insert(next.value);
@@ -546,6 +535,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 } // p1
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
+  if (!puzzle_args.meta().m_is_example) return "TODO: Implement arithmetic solver for full input to part 2";
   return solve(puzzle_args,true);
 } // p2
 
