@@ -92,7 +92,7 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
   aoc::print(
-    "\nday part:{} debug:{}"
+    "\nday11 part:{} debug:{}"
     ,puzzle_args.meta().m_part
     ,puzzle_args.meta().m_debug);
   
