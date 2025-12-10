@@ -424,6 +424,39 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       }
     } break;
   }
+
+  if (i==1) switch(test_ix) {
+
+    case 3: {
+      // Configuring the second machine's counters requires a minimum of 12 button presses. 
+      // One way to do this is by pressing (0,2,3,4) twice, (2,3) five times, and (0,1,2) five times.
+      INT min_count = min_count_bfs(machine,true);
+      aoc::print("\nmin_count:{}",test_ix,min_count);
+      if (min_count == 12) {
+        return std::format("\ntest {} min_count:{} expected 12 *PASSED*",test_ix,min_count);
+      }
+      else {
+        return std::format("\ntest {} min_count:{} NOT expected 12 *failed*",test_ix,min_count);
+      }
+    } break;
+  }
+
+  if (i==2) switch(test_ix) {
+
+    case 4: {
+      // Configuring the third machine's counters requires a minimum of 11 button presses. 
+      // One way to do this is by pressing (0,1,2,3,4) five times, (0,1,2,4,5) five times, and (1,2) once.    
+      INT min_count = min_count_bfs(machine,true);
+      aoc::print("\nmin_count:{}",test_ix,min_count);
+      if (min_count == 11) {
+        return std::format("\ntest {} min_count:{} expected 11 *PASSED*",test_ix,min_count);
+      }
+      else {
+        return std::format("\ntest {} min_count:{} NOT expected 11 *failed*",test_ix,min_count);
+      }
+    } break;
+  }
+  
   return {};
 }
 
@@ -464,11 +497,13 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
     }
   }
   else {
-    // if (test_ix == 2) {
-    //   if (candidate == 7) {
-    //     return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
-    //   }
-    // }
+    if (test_ix == 7) {
+      // So, the fewest button presses required to correctly configure the joltage level counters 
+      // on all of the machines is 10 + 12 + 11 = 33.    
+      if (candidate == 33) {
+        return std::format("Test {} candidate:{} *PASSED*",test_ix,candidate);
+      }
+    }
   }
 
 
