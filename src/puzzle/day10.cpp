@@ -25,7 +25,14 @@ struct Machine {
 };
 
 std::tuple<std::string_view,std::string_view,std::string_view> to_sections_svs(std::string_view sv) {
-  return {sv,sv,sv};
+  // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+  //       ^                               ^
+  auto pos1 = sv.find(']')+1;
+  auto pos2 = sv.find('{');  
+  return {
+    sv.substr(0,pos1)
+    ,sv.substr(pos1,pos2-pos1 -1)
+    ,sv.substr(pos2)};  
 }
 
 std::vector<std::string_view> to_buttons_svs(std::string_view sv) {
@@ -55,6 +62,11 @@ Joltage to_joltage(std::string_view sv) {
 
 Machine to_machine(std::string_view sv) {
   auto const& [lights,buttons,joltage] = to_sections_svs(sv);
+  aoc::print(
+    "\nto_machine '{}' '{}' '{}'"
+    ,lights
+    ,buttons
+    ,joltage);
   return Machine {
     .lights = to_lights(lights)
     ,.buttons = to_buttons(buttons)
