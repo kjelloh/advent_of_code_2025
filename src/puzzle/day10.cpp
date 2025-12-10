@@ -355,7 +355,7 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
   return {};    
 }
 
-std::optional<std::string> p1(PuzzleArgs puzzle_args) {
+std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
 
   auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
 
@@ -388,12 +388,15 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   // return std::format("Not yet fully implemented");
   return std::format("{}",candidate);
 
+} // solve
+
+
+std::optional<std::string> p1(PuzzleArgs puzzle_args) {
+  return solve(puzzle_args); // 520
 } // p1
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
-  return {};
-  // return std::format("Not yet fully implemented");
-  // return std::format("{}",candidate);
+  return solve(puzzle_args,true);
 } // p2
 
 std::optional<std::string> day(PuzzleArgs puzzle_args) {
