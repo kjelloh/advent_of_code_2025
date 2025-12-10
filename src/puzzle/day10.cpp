@@ -8,6 +8,7 @@
 #include <set>
 #include <map>
 #include <sstream>
+#include <unordered_set>
 
 using INT = int64_t;
 using UINT = uint64_t;
@@ -174,20 +175,24 @@ std::string to_string(Buttons const& buttons) {
   return result;
 }
 
-Lights press(unsigned bx,Lights state,Machine const& machine) {
+Lights press(Button const& button,Lights state) {
   Lights result(state);
   aoc::print(
-     "\npress({}:{},'{}')"
-    ,bx
-    ,to_string(machine.buttons[bx])
+     "\npress({},'{}')"
+    ,to_string(button)
     ,state);
-  for (auto lx : machine.buttons[bx]) {
+  for (auto lx : button) {
     bool l(result[lx] == '#');
     l = not l;
     result[lx] = (l)?'#':'.';
   }
   aoc::print(" -> '{}'",result);
   return result;
+}
+
+
+Lights press(unsigned bx,Lights state,Machine const& machine) {
+  return press(machine.buttons[bx],state);
 }
 
 std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
@@ -257,7 +262,55 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
       } break;
       case 4: {
         // However, the fewest button presses required is 2. One way to do this is by pressing the last two buttons ((0,2) and (0,1)) once each.
-        return std::format("Not yet implemented");
+        struct State {
+          State(Lights const& expected) : lights(expected.size(),'.') {}
+          Lights lights;
+          size_t press_count{};
+          bool operator==(std::string const& expected) {
+            return expected == lights;
+          }
+        };
+
+        INT min_count(-1);
+
+        State state(machine.expected);
+        std::queue<State> q;
+        std::unordered_set<Lights> visited;
+
+        q.push(state);
+        visited.insert(state.lights);
+
+        while (!q.empty()) {
+          State current = q.front();
+          q.pop();
+
+          if (current == machine.expected) {
+            min_count = current.press_count;
+            break; // BFS first = shortes button press path
+          }
+
+          // Explore options
+          for (auto const& btn : machine.buttons) {
+            State next = current;
+
+            next.lights = press(btn,current.lights);
+            next.press_count++;
+
+            if (!visited.contains(next.lights)) {
+              visited.insert(next.lights);
+              q.push(next);
+            }
+          }
+        }
+
+        aoc::print("\nmin_count:{}",test_ix,min_count);
+        if (min_count == 2) {
+          return std::format("\ntest {} min_count:{} expected 2 *PASSED*",test_ix,min_count);
+        }
+        else {
+          return std::format("\ntest {} min_count:{} NOT expected 2 *failed*",test_ix,min_count);
+        }
+
       } break;
     }
 
