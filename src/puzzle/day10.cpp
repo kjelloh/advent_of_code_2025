@@ -388,6 +388,26 @@ std::optional<std::string> test_p1(int i,int test_ix,Machine const& machine) {
 }
 
 std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
+  if (i==0 and test_ix==1) {
+    // If the current joltage levels were {0,1,2,3}, pushing the button (1,3) would change them to be {0,2,2,4}.
+    Joltage expected{0,2,2,4};
+    Joltage joltage{0,1,2,3};
+    auto next = press(machine.buttons[1],joltage,true);
+    if (next == expected) {
+      return std::format(
+         "Test {} next:{} is expected {} *PASSED*"
+        ,test_ix
+        ,to_string(next)
+        ,to_string(expected));
+    }
+    else {
+      return std::format(
+         "Test {} next:{} is NOT expected {} *failed*"
+        ,test_ix
+        ,to_string(next)
+        ,to_string(expected));
+    }
+  }
   return {};
 }
 
