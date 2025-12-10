@@ -196,6 +196,18 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
 }
 
 using Expected = std::vector<unsigned>;
+
+
+Expected press(Button const& button,Expected state,bool is_part2 = false) {
+  Expected result(state);
+  // Press button
+  for (auto bx : button) {
+    ++result[bx]; 
+    if (!is_part2) result[bx] %= 2; // part 1
+  }
+  return result;
+}
+
 struct State {
   Expected value;
   size_t press_count{};
@@ -213,10 +225,13 @@ Expected to_expected(Lights const& lights) {
   return result;
 }
 
-INT min_count_bfs(Machine const& machine) {
+INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
   INT min_count(-1);
 
   Expected end = to_expected(machine.lights);
+  if (is_part2) {
+    end = machine.joltage;
+  }
 
   State state(end.size());
   std::queue<State> q;
@@ -229,6 +244,11 @@ INT min_count_bfs(Machine const& machine) {
     State current = q.front();
     q.pop();
 
+    for (int i=0;i<end.size();++i) {
+      if (current.value[i] > end[i]) continue; // skip on overflow
+    }
+    // if (current > end) continue;
+
     if (current == end) {
       min_count = current.press_count;
       break; // BFS first = shortest button press path
@@ -238,11 +258,8 @@ INT min_count_bfs(Machine const& machine) {
     for (auto const& btn : machine.buttons) {
       State next = current;
 
-      for (auto bx : btn) {
-        ++next.value[bx]; 
-        next.value[bx] %= 2; // part 1
-      }
-      
+      // Press button
+      next.value = press(btn,next.value);      
       next.press_count++;
 
       if (!visited.contains(next.value)) {
@@ -255,7 +272,7 @@ INT min_count_bfs(Machine const& machine) {
   return min_count;
 }
 
-std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
+std::optional<std::string> test_p1(int i,int test_ix,Machine const& machine) {
     if (test_ix > 0 and i==0) switch (test_ix) {
       // There are a few ways to correctly configure the first machine:
       // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
@@ -370,6 +387,10 @@ std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
   return {};    
 }
 
+std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
+  return {};
+}
+
 std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
 
   auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
@@ -383,8 +404,15 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   for (size_t i=0;i < model.size();++i) {
     auto const& machine = model[i];
 
-    if (auto test_result = test(i,test_ix,machine)) {
-      return *test_result;
+    if (!for_part2) {
+      if (auto test_result = test_p1(i,test_ix,machine)) {
+        return *test_result;
+      }
+    }
+    else {
+      if (auto test_result = test_p2(i,test_ix,machine)) {
+        return *test_result;
+      }
     }
 
     candidate += min_count_bfs(machine);
