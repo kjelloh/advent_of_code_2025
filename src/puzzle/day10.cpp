@@ -157,18 +157,7 @@ Lights press(unsigned bx,Lights state,Machine const& machine) {
   return result;
 }
 
-std::optional<std::string> p1(PuzzleArgs puzzle_args) {
-
-  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
-
-  std::ifstream in{puzzle_args.in_file_path()};
-  auto model = parse(in);
-
-  // Solve here
-  UINT candidate{};
-
-  for (size_t i=0;i < model.size();++i) {
-    auto const& machine = model[i];
+std::optional<std::string> test(int i,int test_ix,Machine const& machine) {
     if (test_ix > 0 and i==0) switch (test_ix) {
       // There are a few ways to correctly configure the first machine:
       // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
@@ -189,16 +178,33 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
             ,lights
             ,expected);
         }
-        return std::format("Test {} not yet implemented",test_ix);
       } break;
       case 2: {
         // You could press (1,3) once, (2,3) once, and (0,1) twice, a total of 4 button presses.
+        std::string expected = machine.expected;
+        std::string lights(expected.size(),'.');
+        lights = press(1,lights,machine);
+        lights = press(3,lights,machine);
+        lights = press(5,lights,machine);
+        lights = press(5,lights,machine);
+        if (lights == expected) {
+          return std::format("Test {} *PASSED*",test_ix);
+        }
+        else {
+          return std::format(
+             "Test {} failed. indicator lights '{}' differs from expected: '{}'"
+            ,test_ix
+            ,lights
+            ,expected);
+        }
       } break;
       case 3: {
         // You could press all of the buttons except (1,3) once each, a total of 5 button presses.
+        return std::format("Not yet implemented");
       } break;
       case 4: {
         // However, the fewest button presses required is 2. One way to do this is by pressing the last two buttons ((0,2) and (0,1)) once each.
+        return std::format("Not yet implemented");
       } break;
     }
 
@@ -208,6 +214,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       // [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
       case 5: {
         // One way to achieve this is by pressing the last three buttons ((0,4), (0,1,2), and (1,2,3,4)) once each.
+        return std::format("Not yet implemented");
       } break;
     };
 
@@ -217,10 +224,31 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
       // [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
       case 6: {
         // The fewest presses required to correctly configure it is 2; one way to do this is by pressing buttons (0,3,4) and (0,1,2,4,5) once each.
+        return std::format("Not yet implemented");
       } break;
     };
 
     // So, the fewest button presses required to correctly configure the indicator expected on all of the machines is 2 + 3 + 2 = 7.
+
+  return {};    
+}
+
+std::optional<std::string> p1(PuzzleArgs puzzle_args) {
+
+  auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
+
+  std::ifstream in{puzzle_args.in_file_path()};
+  auto model = parse(in);
+
+  // Solve here
+  UINT candidate{};
+
+  for (size_t i=0;i < model.size();++i) {
+    auto const& machine = model[i];
+
+    if (auto test_result = test(i,test_ix,machine)) {
+      return *test_result;
+    }
 
   }
 
