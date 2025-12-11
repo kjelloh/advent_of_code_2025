@@ -2,7 +2,7 @@
 
 We are to process a list of connected devices and count all the paths we can take from the start device to end end device.
 
-We can solve this problem by representing the devices in graph.
+We can solve this problem by representing the devices in a graph.
 
 And we can model the graph with an 'adjacency list'.
 
@@ -24,6 +24,55 @@ We should perform a DFS (depth first search).
 A BFS (breath first search) would be good for finding the shortest path.
 
 - A BSF can exit early. A DFS exit 'late' (at end found)
+- A BFS grow in memory while expanding (must track all examined paths)
+  (BFS requires holding all frontier paths, which grows exponentially)
+- A DFS grow in stack but only current path at any time
+- DFS may need a per-path visited set (to block against cycles)
+  (Not the global visited you use in BFS.)
+
+# day 11 part 2
+
+We have a graph of connected devices and wants to count all paths from start to end that also passes through two specific devices 'dac' and 'fft'.
+
+How can we solve this problem?
+
+It seems we shall count the 'end' only if we have encountered the wanted devices on the way?
+
+- Keep a state on our way
+- Mark in the state when we find the required devices
+- At end, count it only of both devices was marked as found getting there
+
+Or, we can divide the search to sub-searches going through 'dac' and 'fft' in any order?
+
+- Count the patsh start -> fft -> dac -end plus start -> dac -> fft -> end
+
+I tested the 'flag' approach but observed the following:
+
+- The search space is HUGE!
+  (Keeps hitting end miljon of times never passing 'dac' nor 'fft')
+
+I ran some diagnostics on the graph.
+
+- Devices (vertices) V:574 and connections (edges) E:1650
+- Shortest path 'svr' -> 'out' = 29
+- Shortest path 'fft' -> 'dac' = 15
+- Shortest path 'dac' -> 'fft' = -1
+
+AHA! The signal goes from fft to dac (not the orher way around). And the shortest path is 15 connections.
+
+Darn! Thats it :). All we need now is:
+
+- Shortest path 'svr' -> 'fft' = 8
+- Shortest path 'dac' -> 'out' = 9
+
+So shortes path is svr - 8 -> fft - 15 -> dac - 9 -> out = 1080?
+
+On the other hand - No!
+
+- Multiplying the path count for each sub-path
+  works ONLY if the sub-paths are independent.
+
+I tried and Aoc told me my answer was *too low* indicating we have more ways to get from start to end.
 
 # day 10 part 1
 

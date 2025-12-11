@@ -73,27 +73,79 @@ std::optional<std::string> test_p2(int i,int test_ix) {
   return {};    
 }
 
+namespace diagnostics {
+  int shortest_path_bfs(
+     const Model& graph
+    ,const std::string& start
+    ,const std::string& end) {
+
+    std::queue<std::pair<std::string, int>> q;
+    std::set<std::string> visited;
+    q.push({start, 0});
+    visited.insert(start);
+    
+    while (!q.empty()) {
+      auto [current, dist] = q.front();
+      q.pop();
+      
+      if (current == end) return dist;
+      
+      if (graph.contains(current)) {
+        for (const auto& neighbor : graph.at(current)) {
+          if (!visited.contains(neighbor)) {
+              visited.insert(neighbor);
+              q.push({neighbor, dist + 1});
+          }
+        }
+      }
+    }
+    return -1; // Not reachable
+  }
+} // diagnostics
+
 int count_to_target_dfs(
    const Model& graph
   ,const std::string& current
   ,const std::string& target
-  ,std::set<std::string>& visited) {
+  ,std::set<std::string>& visited
+  ,bool visited_dac = true
+  ,bool visited_fft = true) {
 
-  if (current == target)
-      return 1;
+  visited_dac |= (current == "dac");
+  visited_fft |= (current == "fft");
+
+  static UINT call_count{};
+  if (call_count++ % 100000 == 0) {
+    aoc::print("\n{}: {},{}",call_count,visited_dac,visited_fft);
+    std::cout << std::flush;
+  }
+
+  if (current == target) {
+    return (visited_dac and visited_fft)?1:0;
+  }
 
   int total = 0;
   visited.insert(current);
 
-  for (const auto& neighbor : graph.at(current)) {
+  if (graph.contains(current)) {
+    for (const auto& neighbor : graph.at(current)) {
+      // Block against cycles (we have not been here yet)
       if (!visited.contains(neighbor)) {
-          total += count_to_target_dfs(graph, neighbor, target, visited);
+          total += count_to_target_dfs(
+             graph
+            ,neighbor
+            ,target
+            ,visited
+            ,visited_dac
+            ,visited_fft);
       }
+    }
   }
 
   visited.erase(current);
   return total;
 }
+
 
 std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
 
@@ -106,11 +158,116 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   std::string start("you");
   std::string end("out");
   std::set<std::string> visited{};
-  UINT candidate = count_to_target_dfs(model,start,end,visited);
+  UINT candidate{};
+  
+  if (for_part2) {
+    start = "svr";
+
+    // We need to know more about the graph to tackle this problem
+    auto const& graph = model;
+    int node_count = graph.size();
+    int edge_count = 0;
+    for (const auto& [node, neighbors] : graph) {
+        edge_count += neighbors.size();
+    }
+    aoc::print("\nV:{} E:{}",node_count,edge_count); // V:574 E:1650
+
+    {
+      auto sp = diagnostics::shortest_path_bfs(
+        graph
+        ,start
+        ,end);
+      aoc::print(
+        "\nShortest path '{}' -> '{}' = {}"
+        ,start
+        ,end
+        ,sp);
+    }
+
+    {
+      auto start = "fft";
+      auto end = "dac";
+      auto sp = diagnostics::shortest_path_bfs(
+        graph
+        ,start
+        ,end);
+      aoc::print(
+        "\nShortest path '{}' -> '{}' = {}"
+        ,start
+        ,end
+        ,sp);
+    }
+    {
+      auto start = "dac";
+      auto end = "fft";
+      auto sp = diagnostics::shortest_path_bfs(
+        graph
+        ,start
+        ,end);
+      aoc::print(
+        "\nShortest path '{}' -> '{}' = {}"
+        ,start
+        ,end
+        ,sp);
+    }
+    {
+      auto start = "svr";
+      auto end = "fft";
+      auto sp = diagnostics::shortest_path_bfs(
+        graph
+        ,start
+        ,end);
+      aoc::print(
+        "\nShortest path '{}' -> '{}' = {}"
+        ,start
+        ,end
+        ,sp);
+    }
+    {
+      auto start = "dac";
+      auto sp = diagnostics::shortest_path_bfs(
+        graph
+        ,start
+        ,end);
+      aoc::print(
+        "\nShortest path '{}' -> '{}' = {}"
+        ,start
+        ,end
+        ,sp);
+    }
+
+      auto start_to_fft = diagnostics::shortest_path_bfs(
+          graph
+          ,start
+          ,"fft");
+      auto fft_to_dac = diagnostics::shortest_path_bfs(
+        graph
+        ,"fft"
+        ,"dac");
+      auto dac_to_end = diagnostics::shortest_path_bfs(
+        graph
+        ,"dac"
+        ,end);
+      candidate = start_to_fft*fft_to_dac*dac_to_end;
+      std::print(
+        "\n{} - {} -> {} - {} -> {} - {} -> {} = {}"
+        ,start
+        ,start_to_fft
+        ,"fft"
+        ,fft_to_dac
+        ,"dac"
+        ,dac_to_end
+        ,end
+        ,candidate);
+  }
+  else {
+    candidate = count_to_target_dfs(model,start,end,visited);
+  }
 
   // return {};
   // return std::format("Not yet fully implemented");
   return std::format("{}",candidate);
+    // 1080 is too low
 
 } // solve
 
