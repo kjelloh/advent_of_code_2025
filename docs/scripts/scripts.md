@@ -1,3 +1,30 @@
+# day 11 part 1
+
+We are to process a list of connected devices and count all the paths we can take from the start device to end end device.
+
+We can solve this problem by representing the devices in graph.
+
+And we can model the graph with an 'adjacency list'.
+
+```c++
+using AdjacencyList = std::map<std::string,std::set<std::string>>;
+using Model = AdjacencyList;
+```
+
+Should we search for the paths 'breatch first' or 'depth first'?
+
+We should perform a DFS (depth first search).
+
+- We can implement DFS using recursion for each neighbour we examine
+- With recursion the current examined path is mirrored
+  by the current call stack.
+- Backtracking from an exhausted path becomes a call return.
+- We can sum when branching and return '1' for reaching end.
+
+A BFS (breath first search) would be good for finding the shortest path.
+
+- A BSF can exit early. A DFS exit 'late' (at end found)
+
 # day 10 part 1
 
 We are to press buttons on machines to correctly configure their indicator lights.

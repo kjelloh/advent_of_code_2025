@@ -13,8 +13,8 @@
 using INT = int64_t;
 using UINT = uint64_t;
 
-using Entry = std::string;
-using Model = std::vector<Entry>;
+using AdjacencyList = std::map<std::string,std::set<std::string>>;
+using Model = AdjacencyList;
 Model parse(std::istream& in) {
   Model model{};
 
@@ -22,7 +22,15 @@ Model parse(std::istream& in) {
   int ix{0};
   while (std::getline(in, entry)) {
     aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
-    model.push_back(Entry(entry));
+    std::istringstream iss{entry};
+    std::string parent;
+    std::getline(iss, parent, ':');
+    aoc::print(" ==> '{}' -> ",parent);
+    std::string child;
+    while (iss >> child) {
+      model[parent].insert(child);
+      aoc::print(" '{}'",child);
+    }
   }
   return model;
 }
@@ -65,6 +73,28 @@ std::optional<std::string> test_p2(int i,int test_ix) {
   return {};    
 }
 
+int count_to_target_dfs(
+   const Model& graph
+  ,const std::string& current
+  ,const std::string& target
+  ,std::set<std::string>& visited) {
+
+  if (current == target)
+      return 1;
+
+  int total = 0;
+  visited.insert(current);
+
+  for (const auto& neighbor : graph.at(current)) {
+      if (!visited.contains(neighbor)) {
+          total += count_to_target_dfs(graph, neighbor, target, visited);
+      }
+  }
+
+  visited.erase(current);
+  return total;
+}
+
 std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
 
   auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
@@ -73,11 +103,14 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   auto model = parse(in);
 
   // Solve here
-  UINT candidate{};
+  std::string start("you");
+  std::string end("out");
+  std::set<std::string> visited{};
+  UINT candidate = count_to_target_dfs(model,start,end,visited);
 
-  return {};
+  // return {};
   // return std::format("Not yet fully implemented");
-  // return std::format("{}",candidate);
+  return std::format("{}",candidate);
 
 } // solve
 
