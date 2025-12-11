@@ -107,7 +107,7 @@ namespace diagnostics {
     ,const std::string& node
     ,std::set<std::string>& visited
     ,std::set<std::string>& rec_stack) {
-    
+
     visited.insert(node);
     rec_stack.insert(node);
     
@@ -151,7 +151,6 @@ int count_to_target_dfs(
    const Model& graph
   ,const std::string& current
   ,const std::string& target
-  ,std::set<std::string>& visited
   ,bool visited_dac = true
   ,bool visited_fft = true) {
 
@@ -169,24 +168,17 @@ int count_to_target_dfs(
   }
 
   int total = 0;
-  visited.insert(current);
 
   if (graph.contains(current)) {
     for (const auto& neighbor : graph.at(current)) {
-      // Block against cycles (we have not been here yet)
-      if (!visited.contains(neighbor)) {
-          total += count_to_target_dfs(
-             graph
-            ,neighbor
-            ,target
-            ,visited
-            ,visited_dac
-            ,visited_fft);
-      }
+        total += count_to_target_dfs(
+            graph
+          ,neighbor
+          ,target
+          ,visited_dac
+          ,visited_fft);
     }
   }
-
-  visited.erase(current);
   return total;
 }
 
@@ -201,7 +193,6 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   // Solve here
   std::string start("you");
   std::string end("out");
-  std::set<std::string> visited{};
   UINT candidate{};
   
   if (for_part2) {
@@ -289,7 +280,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
     }
   }
   else {
-    candidate = count_to_target_dfs(model,start,end,visited);
+    candidate = count_to_target_dfs(model,start,end);
   }
 
   // return {};
