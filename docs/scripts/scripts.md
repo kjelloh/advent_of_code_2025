@@ -96,6 +96,15 @@ I used an off-the shelf 'has cycles' algorithm.
 
 Ok, so if we trust this code the graph has no cycles. GREAT!
 
+Wait! No cycles mean the sub-path approach should work?!
+
+What whent wrong?
+
+DARN! I need to count all possible paths!
+
+Sure enough - 2512 * 8995504 * 15459 = 349322478796032 (for my input).
+
+Although the part 1 dfs needed memoisation to get though the huge search space.
 
 # day 10 part 1
 

@@ -147,27 +147,33 @@ namespace diagnostics {
   }  
 } // diagnostics
 
-int count_to_target_dfs(
+UINT count_to_target_dfs(
    const Model& graph
   ,const std::string& current
   ,const std::string& target
-  ,bool visited_dac = true
-  ,bool visited_fft = true) {
+  ,std::map<std::string,size_t>& memo) {
 
-  visited_dac |= (current == "dac");
-  visited_fft |= (current == "fft");
+  UINT total = 0;
 
   static UINT call_count{};
+
   if (call_count++ % 100000 == 0) {
-    aoc::print("\n{}: {},{}",call_count,visited_dac,visited_fft);
+    aoc::print(
+       "\n{}: '{}' -> '{} {} "
+      ,call_count
+      ,current
+      ,target
+      ,total);
     std::cout << std::flush;
   }
 
   if (current == target) {
-    return (visited_dac and visited_fft)?1:0;
+    return 1;
   }
 
-  int total = 0;
+  if (memo.contains(current)) {
+    return memo[current];
+  }
 
   if (graph.contains(current)) {
     for (const auto& neighbor : graph.at(current)) {
@@ -175,11 +181,20 @@ int count_to_target_dfs(
             graph
           ,neighbor
           ,target
-          ,visited_dac
-          ,visited_fft);
+          ,memo);
     }
   }
+  memo[current] = total;
   return total;
+}
+
+UINT count_to_target_dfs(
+   const Model& graph
+  ,const std::string& start
+  ,const std::string& end) {
+
+  std::map<std::string,size_t> memo{};
+  return count_to_target_dfs(graph,start,end,memo);
 }
 
 
@@ -278,6 +293,18 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         ,puzzle_args.in_file_path().filename().string()
         ,has_cycles);
     }
+
+    // No cycles
+    auto svr_to_fft_count = count_to_target_dfs(model,"svr","fft");
+    auto fft_to_dac_count = count_to_target_dfs(model,"fft","dac");
+    auto dac_to_out_count = count_to_target_dfs(model,"dac","out");
+    candidate = svr_to_fft_count * fft_to_dac_count * dac_to_out_count;
+    aoc::print(
+       "\n{} * {} * {} = {}"
+      ,svr_to_fft_count
+      ,fft_to_dac_count
+      ,dac_to_out_count
+      ,candidate);
   }
   else {
     candidate = count_to_target_dfs(model,start,end);
