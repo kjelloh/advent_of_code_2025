@@ -60,19 +60,42 @@ I ran some diagnostics on the graph.
 
 AHA! The signal goes from fft to dac (not the orher way around). And the shortest path is 15 connections.
 
-Darn! Thats it :). All we need now is:
+Darn! Thats it? All we need now is:
 
 - Shortest path 'svr' -> 'fft' = 8
 - Shortest path 'dac' -> 'out' = 9
 
 So shortes path is svr - 8 -> fft - 15 -> dac - 9 -> out = 1080?
 
-On the other hand - No!
+I tried and Aoc told me my answer was *too low* indicating we have more ways to get from start to end.
+
+So - No!
 
 - Multiplying the path count for each sub-path
   works ONLY if the sub-paths are independent.
+- And the 'too low' answer tells us this is NOT the case.
 
-I tried and Aoc told me my answer was *too low* indicating we have more ways to get from start to end.
+So what are our options now to extract all the possible paths from this vast space of invalid paths available?
+
+I wonder, can we asume we have no cycles? That is, are there devices that have multipple inputs that ma take in a signal stemming from something it itself outputs? I fail to see we can be sure this is not the case. The problem forumation states
+
+- You glance around the room and see a tangle of cables and devices running from the server rack to the reactor.
+- ... a device followed by a list of the devices to which its outputs are attached.
+- Data only ever flows from a device through its outputs; it can't flow backwards.
+
+We need to know:
+
+- Does any device have multipple inputs (I assume this is common?)
+- Does any path from the output of a device lead back to another input on the same device (I asume this in theory can make sense?)
+
+How can we get an aswer to these questions?
+
+I used an off-the shelf 'has cycles' algorithm.
+
+- in.txt has cycles:false 
+
+Ok, so if we trust this code the graph has no cycles. GREAT!
+
 
 # day 10 part 1
 

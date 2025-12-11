@@ -101,6 +101,50 @@ namespace diagnostics {
     }
     return -1; // Not reachable
   }
+
+  bool has_cycle_from(
+     const Model& graph
+    ,const std::string& node
+    ,std::set<std::string>& visited
+    ,std::set<std::string>& rec_stack) {
+    
+    visited.insert(node);
+    rec_stack.insert(node);
+    
+    if (graph.contains(node)) {
+      for (const auto& neighbor : graph.at(node)) {
+        // If neighbor is in recursion stack, we found a cycle!
+        if (rec_stack.contains(neighbor)) {
+          return true;
+        }
+        
+        // If not visited, recurse
+        if (!visited.contains(neighbor)) {
+          if (has_cycle_from(graph, neighbor, visited, rec_stack)) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    rec_stack.erase(node);  // Remove from recursion stack
+    return false;
+  }
+
+  bool graph_has_cycles(const Model& graph) {
+    std::set<std::string> visited;
+    std::set<std::string> rec_stack;
+    
+    for (const auto& [node, _] : graph) {
+      if (!visited.contains(node)) {
+        if (has_cycle_from(graph, node, visited, rec_stack)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }  
 } // diagnostics
 
 int count_to_target_dfs(
@@ -236,29 +280,13 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         ,sp);
     }
 
-      auto start_to_fft = diagnostics::shortest_path_bfs(
-          graph
-          ,start
-          ,"fft");
-      auto fft_to_dac = diagnostics::shortest_path_bfs(
-        graph
-        ,"fft"
-        ,"dac");
-      auto dac_to_end = diagnostics::shortest_path_bfs(
-        graph
-        ,"dac"
-        ,end);
-      candidate = start_to_fft*fft_to_dac*dac_to_end;
-      std::print(
-        "\n{} - {} -> {} - {} -> {} - {} -> {} = {}"
-        ,start
-        ,start_to_fft
-        ,"fft"
-        ,fft_to_dac
-        ,"dac"
-        ,dac_to_end
-        ,end
-        ,candidate);
+    {
+      auto has_cycles = diagnostics::graph_has_cycles(graph);
+      aoc::print(
+         "\n{} has cycles:{} "
+        ,puzzle_args.in_file_path().filename().string()
+        ,has_cycles);
+    }
   }
   else {
     candidate = count_to_target_dfs(model,start,end,visited);
