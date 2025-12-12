@@ -119,7 +119,83 @@ until all shapes fit
       do pick + placement overlap?
 ```
 
+Ok, that is all fine and dandy. But how do we implement it.
 
+Maybe we can understand this better if we imagine how we would do this in the physical world? Lets asume this is in fact a jigsaw puzzle.
+
+- We have an empty frame of size M x N.
+- We have six bowls, one for each shape of piece.
+- Each bowl contains the number of pieces of that shape we are to fit into the frame.
+- Now we are to try and fit all the pieces in all the bowls into the frame.
+
+Gosh! What a taunting task!
+
+- First we pick a piece from one of the bowls and place it somewhere in the frame.
+  - We can rotate it four ways (0,90,180 and 270 degrees).
+  - We can flip it around an up-down-axis or left-right axis.
+  - We can place it anywhere inside the frame in (M-3+1) x (N-3+1) positions
+    (A 3x3 piece can be placed at (2x2) different positions in a 4x4 frame)
+- Then we can pick a secoond piece.
+  - We now have to try all the rotations, flips and positions until it fits.
+- The we can pich the third piece and repeat the process for the seocnd piece
+- We continu with this until the piece we picked can't be made to fit however we rotate, flip or place it
+
+What do we do when the piece we picked can't be made to fit?
+
+It seems we have to back-track?
+  - We can remove the last piece we was able to place and try another one?
+  - If we find a new piece that fit we can contine after that one.
+  - If not, we have to remove yet a piece and continue from there.
+
+It seems we need to be very careful to keep track what pieces we have tried at each stage?
+
+Consider the total number of pieces is N.
+
+Then N is the sum of the counts of pieces in each bowl, let's call them N0..N5.
+
+When we try to fit piece k+2 and fail, we need to remove piece k+1 and go back to our frame with k pieces.
+
+When we come back to a frame with k pieces we need to know some stuff to be able to try a new piece.
+
+- We need to know in what order we have tried the k pieces in the frame.
+- We need to know how many pieces of each shape we have left to place
+- We need to know what rotaion, flip and position of each of the k pieces we have placed.
+
+Wait! We can't just remove the k+1 piece. We must first first try all remaining rotations, flips and positions in the frame to see if we can make it fit in some other way?
+
+I wonder, can we instead imagine we generate all 4x2 = 8 orientations of each of the pieces in each bowl? That is, imagine they are different pieces instead of picking one and turn and flip it?
+
+- I think this is a bad idea?
+- We care about the count of the pieces in each bowl.
+- If we multiply this by eight we obfuscate how many from that bowl to fit into the frame?
+- In that sense it is better to keep track of the orientations and placement positions as a separate chain of operations?
+
+Ok, So we have placed k+1 pieces and we fail to fit k+2 pieces. So we remove the k+1 piece we placed.
+
+- If there are more rotaions, flips and placement positions to try we continue with that.
+- To be able to do this we need to remember what rotaions, flips and positions we have tried so far for this piece.
+
+Maybe it is enough to know the 'state' for piece k to now what next 'state' to try?
+
+What If the state is the shape, the rotation, the flip and the placement position?
+
+We can then generate the next state to try as:
+
+- If untried positions, try the next possible position.
+- Else if untried flips, try the other flip
+- Else if untried rotations, try the next rotation
+- Else there is no way to fit this piece and we have to remove it.
+
+It seems we would be tempted to implement a queue-of-state based search?
+
+We want to fail fast. Does this mean we should go for a Depth first search?
+
+- No. Fail fast does not help us.
+
+It seems we actually want to succeed fast? So this would mean we want to breadth first search? 
+
+
+  
 
 # day 11 part 1
 
