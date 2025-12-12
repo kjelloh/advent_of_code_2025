@@ -38,6 +38,55 @@ struct Shape {
   auto operator<=>(Shape const& other) const = default;
 };
 
+struct Size {
+  unsigned w;
+  unsigned l;
+};
+
+struct Frame {
+  unsigned w;
+  unsigned l;
+  std::string flat;
+  Frame(Size size) 
+    :  w(size.w)
+      ,l(size.l)
+      ,flat(w*l,'.') {}
+  Frame(Frame const& other)
+    :  flat(other.flat)
+      ,w(other.w)
+      ,l(other.l) {}
+  char& at(int r,int c) {
+    return flat[r*w+c];
+  }
+  char const& at(int r,int c) const {
+    return flat[r*w+c];
+  }
+  std::string_view const row(int r) const {
+    return {&at(r,0),w};
+  }
+  bool place(unsigned pr,unsigned pc,Shape const& shape) {
+    Frame next(*this);
+    for (unsigned r = 0;r<L;++r) {
+      for (unsigned c = 0;c<W;++c) {
+        auto prr = pr+r;
+        auto pcc = pc+c;
+        auto pch = this->at(prr,pcc);
+        auto sch = shape.at(r,c);
+        if (sch == '#') {
+          if (pch == '#') return false;
+          next.at(prr,pcc) = '#';
+        }
+        // '.' + '.' fits
+        // '.' + '#' fits
+        // '#' + '.' fits
+        // '#' + '#' collides
+      }
+    }
+    this->flat = std::move(next.flat);
+    return true;
+  } // place
+};
+
 Shape make_shape(std::array<std::string,L> rows) {
   Shape result{};
   for (unsigned r=0;r<L;++r) result.add_row(r,rows[r]);
@@ -113,21 +162,19 @@ ShapeOptions to_shape_options(Shape shape) {
   return ShapeOptions(unique.begin(),unique.end());;
 }
 
-struct Size {
-  unsigned w;
-  unsigned l;
-};
 using Quantaties = std::array<unsigned,N>;
+
 struct Region {
   Size s;
   Quantaties q;
 };
+
 struct Model {
   std::array<Shape,N> shapes;
   std::vector<Region> regions;
 };
 
-// Specialize std::formatter for Shape
+// Formatters
 template<>
 struct std::formatter<Shape> {
 
@@ -146,6 +193,26 @@ struct std::formatter<Shape> {
         return out;
     }
 };
+
+template<>
+struct std::formatter<Frame> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Frame  frame, FmtContext& ctx) const {
+        auto out = ctx.out();        
+        for (std::size_t i = 0; i < frame.l; ++i) {
+            if (i>0) std::format_to(out,"\n");
+            std::format_to(out,"{}",frame.row(i));
+        }
+        return out;
+    }
+};
+
 
 Model parse(std::istream& in) {
   Model model{};
@@ -270,14 +337,26 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
         const auto c4 = region0.q[4];
         const unsigned n4 = shape_options_4.size();
 
-        unsigned placed{0};
-        unsigned attempt{0};
-        while (placed < c4) {
-          auto i4 = attempt % n4;
-          auto const& candidate = shape_options_4[i];
-          // DARN! We need a bfs algorithm to explore the combinatorial space
-          ++placed;
+        Frame frame(region0.s);
+        unsigned placed{};
+
+        // for option in options
+        for (unsigned i=0;i<n4;++i) {
+          auto const& shape = shape_options_4[i];
+
+          // for r,c in frame
+          for (unsigned r=0;r<l-L+1;++r) {
+            for (unsigned c=0;c<w-W+1;++c) {
+              if (frame.place(r,c,shape)) {
+                if ((++placed) == c4) goto done;
+              }
+            }
+          }
         }
+        done:
+
+        aoc::print("\nplaced:{}",placed);
+        aoc::print("\n{}",frame);
 
         return std::format("Test {} not yet implemented",test_ix);
 
