@@ -34,7 +34,15 @@ struct Shape {
     for (unsigned i=0;i<W;++i) this->at(r,i) = s[i];
     return *this;
   }
+  auto operator<=>(Shape const& other) const = default;
 };
+
+Shape make_shape(std::array<std::string,L> rows) {
+  Shape result{};
+  for (unsigned r=0;r<L;++r) result.add_row(r,rows[r]);
+  return result;
+}
+
 struct Size {
   unsigned w;
   unsigned l;
@@ -169,6 +177,14 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
           return std::format("Expected {}x{} to be 4x4",w,l);
         }
         std::print("\n{}",model.shapes[4]);
+        auto expected = make_shape({
+           "###"
+          ,"#.."
+          ,"###"
+        });
+        if (model.shapes[4] != expected) {
+          return std::format("Test {}: Not expected shape *failed*",test_ix);
+        }
         return std::format("Test {} not yet implemented",test_ix);
 
       } break;
