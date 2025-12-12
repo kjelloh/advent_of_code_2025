@@ -21,6 +21,7 @@ const unsigned N = 6;
 
 struct Shape {
   std::string flat;
+  Shape() : flat(L*W,'.') {}
   char& at(int r,int c) {
     return flat[r*W+c];
   }
@@ -40,6 +41,75 @@ struct Shape {
 Shape make_shape(std::array<std::string,L> rows) {
   Shape result{};
   for (unsigned r=0;r<L;++r) result.add_row(r,rows[r]);
+  return result;
+}
+
+Shape to_left_rotated(Shape const& shape, int quarters) {
+  quarters = quarters % 4;
+  if (quarters < 0) quarters += 4; // handle negative rotations
+  
+  Shape result{};
+  
+  switch (quarters) {
+    case 0: 
+      result = shape;
+      break;
+    case 1:  // 90° left
+      for (int r = 0; r < L; ++r) {
+        for (int c = 0; c < W; ++c) {
+          result.at(W-c-1, r) = shape.at(r, c);
+        }
+      }
+      break;
+    case 2:  // 180°
+      for (int r = 0; r < L; ++r) {
+        for (int c = 0; c < W; ++c) {
+          result.at(L-r-1, W-c-1) = shape.at(r, c);
+        }
+      }
+      break;
+    case 3:  // 270° left (= 90° right)
+      for (int r = 0; r < L; ++r) {
+        for (int c = 0; c < W; ++c) {
+          result.at(c, L-r-1) = shape.at(r, c);
+        }
+      }
+      break;
+  }
+  return result;
+}
+
+Shape to_flipped_vertically(Shape const& shape) {
+  Shape result{};
+  for (int r=0;r<L;++r) {
+    for (int c=0;c<W;++c) {
+      result.at(r,W-c-1) = shape.at(r,c);
+    }
+  }
+  return result;
+}
+
+Shape to_flipped_horisontally(Shape const& shape) {
+  Shape result{};
+  for (int r=0;r<L;++r) {
+    for (int c=0;c<W;++c) {
+      result.at(L-r-1,c) = shape.at(r,c);
+    }
+  }
+  return result;
+}
+
+using ShapeOptions = std::set<Shape>; // unique options
+ShapeOptions to_shape_options(Shape shape) {
+  ShapeOptions result{};
+  
+  for (int i = 0; i < 4; ++i) {
+    Shape rotated = to_left_rotated(shape, i);
+    result.insert(rotated);
+    result.insert(to_flipped_horisontally(rotated));
+    result.insert(to_flipped_vertically(rotated));
+  }
+  
   return result;
 }
 
@@ -185,6 +255,13 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
         if (model.shapes[4] != expected) {
           return std::format("Test {}: Not expected shape *failed*",test_ix);
         }
+
+        auto shape_options = to_shape_options(model.shapes[4]);
+        aoc::print("\nshape_options:{}",shape_options.size());
+        for (auto const& shape : shape_options) {
+          aoc::print("\n\n{}",shape);
+        }
+
         return std::format("Test {} not yet implemented",test_ix);
 
       } break;
