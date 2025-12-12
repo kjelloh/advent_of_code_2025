@@ -37,6 +37,7 @@ Model parse(std::istream& in) {
   Model model{};
 
   int state{0};
+  int sx{};
   int ix{};
   std::string entry;
   int lx{0};
@@ -48,7 +49,9 @@ Model parse(std::istream& in) {
       processed = false;;
       switch (state) {
         case 0: {
+          ix = 0;
           if (entry.find('x') == std::string::npos) {
+            sx = entry[0] - '0';
             state = 1;
             processed = true;
           }
@@ -61,12 +64,37 @@ Model parse(std::istream& in) {
             state = 0;
           }
           else {
-            aoc::print(" shape");
+            aoc::print(" shape {}[{}]",sx,ix);
+            for (size_t i=0;i<W;++i) {
+              model.shapes[sx][ix][i] = entry[i];
+            }
+            ++ix;
           }
           processed = true;
         } break;
         case 2: {
           aoc::print(" region");
+          auto split = entry.find('x');
+          auto end = entry.find(':',split);
+          Size size{
+             .w = static_cast<unsigned>(std::stoi(entry.substr(0,split)))
+            ,.l = static_cast<unsigned>(std::stoi(entry.substr(split+1,end)))};
+          aoc::print(" {}x{}",size.w,size.l);
+
+          std::istringstream iss(entry.substr(end+2));
+          unsigned count;
+          int i = 0;
+          Quantaties q;
+          while (iss >> count) {
+            q[i] = count;
+            aoc::print(" q[{}]={}",i,q[i]);
+            ++i;
+          }
+          model.regions.push_back(Region{
+             .s = size
+            ,.q = q
+          });
+          aoc::print(" {}",model.regions.size());
           processed = true;
         } break;
       } // switch state
