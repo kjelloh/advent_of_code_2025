@@ -19,7 +19,22 @@ const unsigned W = 3;
 const unsigned L = 3;
 const unsigned N = 6;
 
-using Shape = std::array<std::array<char,W>,L>;
+struct Shape {
+  std::string flat;
+  char& at(int r,int c) {
+    return flat[r*W+c];
+  }
+  char const& at(int r,int c) const {
+    return flat[r*W+c];
+  }
+  std::string_view const row(int r) const {
+    return {&at(r,0),W};
+  }
+  Shape& add_row(int r,std::string s) {
+    for (unsigned i=0;i<W;++i) this->at(r,i) = s[i];
+    return *this;
+  }
+};
 struct Size {
   unsigned w;
   unsigned l;
@@ -48,9 +63,7 @@ struct std::formatter<Shape> {
         auto out = ctx.out();        
         for (std::size_t i = 0; i < L; ++i) {
             if (i>0) std::format_to(out,"\n");
-            for (std::size_t j = 0; j < W; ++j) {
-              std::format_to(out,"{}",shape[i][j]);
-            }
+            std::format_to(out,"{}",shape.row(i));
         }
         return out;
     }
@@ -89,7 +102,7 @@ Model parse(std::istream& in) {
           else {
             aoc::print(" shape {}[{}]",sx,ix);
             for (size_t i=0;i<W;++i) {
-              model.shapes[sx][ix][i] = entry[i];
+              model.shapes[sx].add_row(ix,entry);
             }
             ++ix;
           }
@@ -156,6 +169,7 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
           return std::format("Expected {}x{} to be 4x4",w,l);
         }
         std::print("\n{}",model.shapes[4]);
+        return std::format("Test {} not yet implemented",test_ix);
 
       } break;
     }
