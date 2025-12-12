@@ -10,6 +10,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <array>
+#include <format>
 
 using INT = int64_t;
 using UINT = uint64_t;
@@ -31,6 +32,28 @@ struct Region {
 struct Model {
   std::array<Shape,N> shapes;
   std::vector<Region> regions;
+};
+
+// Specialize std::formatter for Shape
+template<>
+struct std::formatter<Shape> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Shape  shape, FmtContext& ctx) const {
+        auto out = ctx.out();        
+        for (std::size_t i = 0; i < L; ++i) {
+            if (i>0) std::format_to(out,"\n");
+            for (std::size_t j = 0; j < W; ++j) {
+              std::format_to(out,"{}",shape[i][j]);
+            }
+        }
+        return out;
+    }
 };
 
 Model parse(std::istream& in) {
@@ -94,7 +117,7 @@ Model parse(std::istream& in) {
              .s = size
             ,.q = q
           });
-          aoc::print(" {}",model.regions.size());
+          // aoc::print(" {}",model.regions.size());
           processed = true;
         } break;
       } // switch state
@@ -103,9 +126,37 @@ Model parse(std::istream& in) {
   return model;
 }
 
-std::optional<std::string> test_p1(int i,int test_ix) {
+std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
+    aoc::print("\ntest_p1 {}:{}",i,test_ix);
     if (test_ix > 0 and i==0) switch (test_ix) {
+        return "TEST!";
+
       case 1: {
+        // 4x4: 0 0 0 0 2 0
+
+        // The first region is 4x4:
+
+        // ....
+        // ....
+        // ....
+        // ....
+        // In it, you need to determine whether you could fit two presents that have shape index 4:
+
+        // ###
+        // #..
+        // ###
+        // After some experimentation, it turns out that you can fit both presents in this region. Here is one way to do it, using A to represent one present and B to represent the other:
+
+        // AAA.
+        // ABAB
+        // ABAB
+        // .BBB
+        auto [w,l] = model.regions[i].s; 
+        if (w != 4 or l != 4) {
+          return std::format("Expected {}x{} to be 4x4",w,l);
+        }
+        std::print("\n{}",model.shapes[4]);
+
       } break;
     }
 
@@ -122,7 +173,7 @@ std::optional<std::string> test_p1(int i,int test_ix) {
   return {};    
 }
 
-std::optional<std::string> test_p2(int i,int test_ix) {
+std::optional<std::string> test_p2(Model const& model, int i,int test_ix) {
     if (test_ix > 0 and i==0) switch (test_ix) {
       case 1: {
       } break;
@@ -150,6 +201,20 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
 
   // Solve here
   UINT candidate{};
+
+  for (size_t i=0;i<model.regions.size();++i) {
+    aoc::print("\nSolve for region:{}",i);
+    if (for_part2) {
+      if (auto test_result = test_p2(model,i,test_ix)) {
+        return *test_result;
+      }
+    }
+    else {
+      if (auto test_result = test_p1(model, i,test_ix)) {
+        return *test_result;
+      }
+    }
+  }
 
   return {};
   // return std::format("Not yet fully implemented");
