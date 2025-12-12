@@ -1,3 +1,126 @@
+# day 12 part 1
+
+We have six 3x3 shapes and whants to know if we can fit them into a widht x length box with the quantaties provided. A shape 'fits' if it can be placed in te box without overlapping with any other shape. But we are allowed to turn and flip the shape to make it fit.
+
+For example:
+
+A shape can look like:
+
+```text
+###
+##.
+##.
+```
+
+Where the '#' defines positions occupied by the shape.
+
+```text
+4x4: 0 0 0 0 2 0
+```
+
+This 'region' is 4 x 4 in size. And we are to fit:
+
+- 0 of shape 0
+- 0 of shape 1
+- 0 of shape 2
+- 0 of shape 3
+- 2 of shape 4
+- 0 of shape 5
+
+Our full unput contains e.g.,:
+
+```text
+40x48: 34 38 38 31 28 38
+```
+
+Means we have box 40 x 48 where we to fit:
+
+- 34 of shape 0
+- 38 of shape 1
+- 38 of shape 2
+- 31 of shape 3
+- 28 of shape 4
+- 38 of shape 5
+
+Quite a feat?!!
+
+What algorithm do we need to implement to fit shapes into regions as required?
+
+It seems for a given region we need to:
+
+- Pick the given quantaties of each shape to fit
+- For the given quantaties try all possible options to arrange the shapes into the box
+- Exhaust all combinations before we know if any work?
+
+But this is a combinatorial explosion, is it not?
+
+- In a 4 x 4 grid we can translate a 3 x 3 shape into four positions.
+  - two possible width positions left and right
+  - two possible height position top or bottom.
+
+Wait! We only care about the actual shape size (defined by '#')
+
+- Yes. But looking and example and input all shapes actually occipies a 3x3 space.
+
+So in general a 3x3 shape must be tried against width - 3 + 1 left-right translations and height - 3 + 1 top-bottom translations.
+
+- In a 12 x 5 box we have to try (12 -3 + 1) times (5 - 3 + 1) = 10 x 3 = 30 positions!
+
+- Worst case (width-3+1) x (height-3+1)x4x2 translations to try for each shape
+- Then - We are to fit cn counts of shape n = 0..5 into the box
+- For 2 of shape 0 and 2 of shape 1 this is a total of four shapes to fit.
+- In general, given the shape counts we have c0+c1+c2+..+cn shapes to fit.
+
+We also have to try 4 rotations for  each 2 flips.
+
+- So worst case an additional 8 shape optiions for each shape?
+- Gives us a total of (shape options) x (shape counts) x (translations)
+- Or rather (c0 x options0 + c1 x options1 ... cn x optionsn) x (translations)
+
+- But a shape may be rotational symetric?
+- A shape may also be flip-symetric?
+
+Take the shape:
+
+```text
+###
+.#.
+###
+```
+
+- It is the same shape after 2 quarter rotations.
+- It is the same flipped vertically and horizontally
+- We can make one option for this shape by rotatting it a single quarter turn.
+
+It seems we should try to prune the shape options to a unique set before trying to fit them?
+
+```sh
+for each shape in shapes
+  for each rotation
+    add to shape_set[shape] if unique
+  for each flip
+    add to shape_set[shape] if unique    
+```
+
+We now have a set of unique options for each shape.
+
+We now have to fit sum(cn) of shapes into the box.
+
+- We know the count to fit for each shape.
+- But we have to try any combination of options for each shape!
+- So worst case for shape n we have cn x options to try for that shape.
+- And for each such pick we must see if we can also fit a pick from the next shape.
+- And the next, and the next... GOSH!
+
+```sh
+until all shapes fit
+  for each combination of picks of shapes
+    for each combination of placements
+      do pick + placement overlap?
+```
+
+
+
 # day 11 part 1
 
 We are to process a list of connected devices and count all the paths we can take from the start device to end end device.
