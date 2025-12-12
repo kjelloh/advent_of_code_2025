@@ -99,18 +99,18 @@ Shape to_flipped_horisontally(Shape const& shape) {
   return result;
 }
 
-using ShapeOptions = std::set<Shape>; // unique options
-ShapeOptions to_shape_options(Shape shape) {
-  ShapeOptions result{};
-  
+using ShapeOptions = std::vector<Shape>; // unique options
+ShapeOptions to_shape_options(Shape shape) {  
+  std::set<Shape> unique{};
   for (int i = 0; i < 4; ++i) {
     Shape rotated = to_left_rotated(shape, i);
-    result.insert(rotated);
-    result.insert(to_flipped_horisontally(rotated));
-    result.insert(to_flipped_vertically(rotated));
+    unique.insert(rotated);
+    unique.insert(to_flipped_horisontally(rotated));
+    unique.insert(to_flipped_vertically(rotated));
   }
   
-  return result;
+
+  return ShapeOptions(unique.begin(),unique.end());;
 }
 
 struct Size {
@@ -256,10 +256,27 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
           return std::format("Test {}: Not expected shape *failed*",test_ix);
         }
 
-        auto shape_options = to_shape_options(model.shapes[4]);
-        aoc::print("\nshape_options:{}",shape_options.size());
-        for (auto const& shape : shape_options) {
+        auto const& shapes = model.shapes;
+        auto const& region0 = model.regions[0];
+
+        auto shape_options_4 = to_shape_options(shapes[4]);
+
+        // Log
+        aoc::print("\nshape_options:{}",shape_options_4.size());
+        for (auto const& shape : shape_options_4) {
           aoc::print("\n\n{}",shape);
+        }
+
+        const auto c4 = region0.q[4];
+        const unsigned n4 = shape_options_4.size();
+
+        unsigned placed{0};
+        unsigned attempt{0};
+        while (placed < c4) {
+          auto i4 = attempt % n4;
+          auto const& candidate = shape_options_4[i];
+          // DARN! We need a bfs algorithm to explore the combinatorial space
+          ++placed;
         }
 
         return std::format("Test {} not yet implemented",test_ix);
