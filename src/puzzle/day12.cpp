@@ -38,6 +38,12 @@ struct Shape {
   auto operator<=>(Shape const& other) const = default;
 };
 
+Shape make_shape(std::array<std::string,L> rows) {
+  Shape result{};
+  for (unsigned r=0;r<L;++r) result.add_row(r,rows[r]);
+  return result;
+}
+
 struct Size {
   unsigned w;
   unsigned l;
@@ -85,10 +91,35 @@ struct Frame {
     this->flat = std::move(next.flat);
     return true;
   } // place
-};
+  Frame& add_row(int r,std::string_view s) {
+    for (unsigned c=0;c<w;++c) this->at(r,c) = s[c];
+    return *this;
+  }
 
-Shape make_shape(std::array<std::string,L> rows) {
-  Shape result{};
+  bool operator==(Frame const& other) const {
+    // All non '.' positions match
+    if (this->w != other.w or this->l != other.l) return false;
+    for (unsigned r = 0;r<l;++r) {
+      for (unsigned c=0;c<w;++c) {
+        if (this->at(r,c) == '.' and other.at(r,c) != '.') return false;
+        if (this->at(r,c) != '.' and other.at(r,c) == '.') return false;
+      }
+    }
+    return true;
+  }
+
+}; // Frame
+
+Frame make_frame(auto const& s) {
+  std::istringstream iss(s);
+  std::vector<std::string> rows{};
+  std::string row;
+  while (std::getline(iss,row)) {
+    rows.push_back(row);
+  }
+  const auto W = rows[0].size();
+  const auto L = rows.size();
+  Frame result(Size(W,L));
   for (unsigned r=0;r<L;++r) result.add_row(r,rows[r]);
   return result;
 }
@@ -285,10 +316,7 @@ Model parse(std::istream& in) {
 }
 
 std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
-    aoc::print("\ntest_p1 {}:{}",i,test_ix);
     if (test_ix > 0 and i==0) switch (test_ix) {
-        return "TEST!";
-
       case 1: {
         // 4x4: 0 0 0 0 2 0
 
@@ -309,18 +337,23 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
         // ABAB
         // ABAB
         // .BBB
-        auto [w,l] = model.regions[i].s; 
-        if (w != 4 or l != 4) {
-          return std::format("Expected {}x{} to be 4x4",w,l);
+        {
+          auto [w,l] = model.regions[i].s; 
+          if (w != 4 or l != 4) {
+            return std::format("Expected {}x{} to be 4x4",w,l);
+          }
         }
-        std::print("\n{}",model.shapes[4]);
-        auto expected = make_shape({
-           "###"
-          ,"#.."
-          ,"###"
-        });
-        if (model.shapes[4] != expected) {
-          return std::format("Test {}: Not expected shape *failed*",test_ix);
+
+        {
+          std::print("\n{}",model.shapes[4]);
+          auto expected = make_shape({
+            "###"
+            ,"#.."
+            ,"###"
+          });
+          if (model.shapes[4] != expected) {
+            return std::format("Test {}: Not expected shape *failed*",test_ix);
+          }
         }
 
         auto const& shapes = model.shapes;
@@ -345,8 +378,8 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
           auto const& shape = shape_options_4[i];
 
           // for r,c in frame
-          for (unsigned r=0;r<l-L+1;++r) {
-            for (unsigned c=0;c<w-W+1;++c) {
+          for (unsigned r=0;r<frame.l-L+1;++r) {
+            for (unsigned c=0;c<frame.w-W+1;++c) {
               if (frame.place(r,c,shape)) {
                 if ((++placed) == c4) goto done;
               }
@@ -358,6 +391,19 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
         aoc::print("\nplaced:{}",placed);
         aoc::print("\n{}",frame);
 
+        auto expected = make_frame(R"(AAA.
+ABAB
+ABAB
+.BBB
+)");
+
+        if (frame == expected) {
+          return std::format("Populated frame == expected - *PASSED*");
+        }
+        else {
+          return std::format("Populated frame != expected - *failed*");
+        }
+
         return std::format("Test {} not yet implemented",test_ix);
 
       } break;
@@ -365,6 +411,31 @@ std::optional<std::string> test_p1(Model const& model,int i,int test_ix) {
 
     if (test_ix > 0 and i==1) switch (test_ix) {
       case 2: {
+        // The second region, 12x5: 1 0 1 0 2 2, is 12 units wide and 5 units long. 
+        // In that region, you need to try to fit one present with shape index 0, 
+        // one present with shape index 2, two presents with shape index 4, 
+        // and two presents with shape index 5.
+
+        // It turns out that these presents can all fit in this region. 
+        // Here is one way to do it, again using different capital letters 
+        // to represent all the required presents:
+
+        // ....AAAFFE.E
+        // .BBBAAFFFEEE
+        // DDDBAAFFCECE
+        // DBBB....CCC.
+        // DDD.....C.C.
+
+        auto expected = make_frame(R"(....AAAFFE.E
+.BBBAAFFFEEE
+DDDBAAFFCECE
+DBBB....CCC.
+DDD.....C.C.)");
+
+        aoc::print("\nexpected\n{}",expected);
+
+
+
       } break;
     };
 
