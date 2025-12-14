@@ -9,6 +9,7 @@
 #include <map>
 #include <sstream>
 #include <unordered_set>
+#include <z3++.h>
 
 using INT = int64_t;
 using UINT = uint64_t;
@@ -400,6 +401,54 @@ std::optional<std::string> test_p1(int i,int test_ix,Machine const& machine) {
   return {};    
 }
 
+INT min_count_ilp(Machine const& machine) {
+
+  INT answer{};
+  auto const& expected = machine.joltage;
+  auto const& buttons = machine.buttons;
+
+  // Use Z3 solver to find bs = min set of buttons, so that sum(bs) = expected
+  // This will be the 'minmum button presses' to get the expected joltage.
+
+  z3::context ctx;
+  z3::optimize optimizer(ctx);
+
+  // Create integer variables for each button (how many times each button is pressed)
+  std::vector<z3::expr> button_counts;
+  for (size_t i = 0; i < buttons.size(); ++i) {
+    button_counts.push_back(ctx.int_const(("b" + std::to_string(i)).c_str()));
+    // Each button must be pressed >= 0 times
+    optimizer.add(button_counts[i] >= 0);
+  }
+
+  // For each joltage position, the sum of button presses that affect it must equal the expected value
+  for (size_t pos = 0; pos < expected.size(); ++pos) {
+    z3::expr sum = ctx.int_val(0);
+    for (size_t btn_idx = 0; btn_idx < buttons.size(); ++btn_idx) {
+      // Check if this button affects this position
+      if (std::find(buttons[btn_idx].begin(), buttons[btn_idx].end(), pos) != buttons[btn_idx].end()) {
+        sum = sum + button_counts[btn_idx];
+      }
+    }
+    optimizer.add(sum == (int)expected[pos]);
+  }
+
+  // Minimize the total number of button presses
+  z3::expr total = ctx.int_val(0);
+  for (auto const& bc : button_counts) {
+    total = total + bc;
+  }
+  optimizer.minimize(total);
+
+  // Solve
+  if (optimizer.check() == z3::sat) {
+    z3::model m = optimizer.get_model();
+    answer = m.eval(total).get_numeral_int64();
+  }
+
+  return answer;
+}
+
 std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
   if (i==0) switch(test_ix) {
 
@@ -427,7 +476,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       // Configuring the first machine's counters requires a minimum of 10 button presses. 
       // One way to do this is by pressing (3) once, (1,3) three times, 
       // (2,3) three times, (0,2) once, and (0,1) twice.
-      INT min_count = min_count_bfs(machine,true);
+      INT min_count = min_count_ilp(machine);
       aoc::print("\nmin_count:{}",test_ix,min_count);
       if (min_count == 10) {
         return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
@@ -443,7 +492,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
     case 3: {
       // Configuring the second machine's counters requires a minimum of 12 button presses. 
       // One way to do this is by pressing (0,2,3,4) twice, (2,3) five times, and (0,1,2) five times.
-      INT min_count = min_count_bfs(machine,true);
+      INT min_count = min_count_ilp(machine);
       aoc::print("\nmin_count:{}",test_ix,min_count);
       if (min_count == 12) {
         return std::format("\ntest {} min_count:{} expected 12 *PASSED*",test_ix,min_count);
@@ -459,7 +508,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
     case 4: {
       // Configuring the third machine's counters requires a minimum of 11 button presses. 
       // One way to do this is by pressing (0,1,2,3,4) five times, (0,1,2,4,5) five times, and (1,2) once.    
-      INT min_count = min_count_bfs(machine,true);
+      INT min_count = min_count_ilp(machine);
       aoc::print("\nmin_count:{}",test_ix,min_count);
       if (min_count == 11) {
         return std::format("\ntest {} min_count:{} expected 11 *PASSED*",test_ix,min_count);
@@ -471,18 +520,6 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
   }
   
   return {};
-}
-
-INT min_count_ilp(Machine const& machine) {
-
-  INT answer{};
-  auto const& expected = machine.joltage;
-  auto const& buttons = machine.buttons;
-
-  // Use Z3 solver to find bs = min set of buttons, so that sum(bs) = expected
-  // This will be the 'minmum button presses' to get the expected joltage.
-
-  return answer;
 }
 
 std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
@@ -551,7 +588,6 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 } // p1
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
-  if (!puzzle_args.meta().m_is_example) return "TODO: Implement arithmetic solver for full input to part 2";
   return solve(puzzle_args,true);
 } // p2
 
