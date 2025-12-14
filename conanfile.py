@@ -22,6 +22,7 @@ class aoc25Recipe(ConanFile):
 
     def requirements(self):
         self.requires("cli11/2.4.2")
+        self.requires("z3/4.13.0")
 
     def layout(self):
         cmake_layout(self)

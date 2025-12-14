@@ -473,6 +473,18 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
   return {};
 }
 
+INT min_count_ilp(Machine const& machine) {
+
+  INT answer{};
+  auto const& expected = machine.joltage;
+  auto const& buttons = machine.buttons;
+
+  // Use Z3 solver to find bs = min set of buttons, so that sum(bs) = expected
+  // This will be the 'minmum button presses' to get the expected joltage.
+
+  return answer;
+}
+
 std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) {
 
   auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
@@ -492,14 +504,18 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
       if (auto test_result = test_p1(i,test_ix,machine)) {
         return *test_result;
       }
+
+      candidate += min_count_bfs(machine,for_part2);
+
     }
     else {
       if (auto test_result = test_p2(i,test_ix,machine)) {
         return *test_result;
       }
-    }
 
-    candidate += min_count_bfs(machine,for_part2);
+      candidate += min_count_ilp(machine);
+
+    }
 
   }
 

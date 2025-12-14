@@ -389,7 +389,18 @@ AHA! This is in fact a vector equation!
 
 - We have 10 unknowns (buttons can affect counters 0..9)
 - We get one equation per member in 'joltage'
-  (E.g., 8 for joltage {174,188,195,169,159,43,182,43})
+  (E.g., 8 equations for joltage {174,188,195,169,159,43,182,43})
+
+I always wanted to 'hand roll' a gaussian elimination solver for this kind of integer equation systems.
+
+But maybe this is the time to try the C++ library Eigen?
+
+- NO. Eigen solves for floats.
+- I need an Integer Linear Programming (ILP) problem solver.
+
+It seems the Z3 library is available from conan?
+
+- GOSH! What a mastodont to download, build and install just for my small little AoC problem?!!
 
 # day9 part 2
 
