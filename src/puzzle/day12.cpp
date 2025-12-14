@@ -35,6 +35,11 @@ struct Shape {
     for (unsigned i=0;i<W;++i) this->at(r,i) = s[i];
     return *this;
   }
+  unsigned covered() const {
+    return std::ranges::count_if(flat,[](char ch){
+      return ch != '.';
+    });
+  }
   auto operator<=>(Shape const& other) const = default;
 };
 
@@ -433,11 +438,8 @@ DBBB....CCC.
 DDD.....C.C.)");
 
         aoc::print("\nexpected\n{}",expected);
-
-
-
       } break;
-    };
+    }
 
     if (test_ix > 0 and i==2) switch (test_ix) {
       case 3: {
@@ -475,6 +477,60 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
 
   // Solve here
   UINT candidate{};
+
+  // Inspect input
+  size_t easilly_possible{};
+  size_t absolutely_impossible{};
+  size_t needs_solving{};
+
+  for (size_t i=0;i<model.regions.size();++i) {
+    auto const& region = model.regions[i];
+    auto [w,l] = region.s;
+    auto fa = w*l;
+    aoc::print("\nRegion[{}] {}x{} = {} pixels",i,w,l,fa);
+
+    size_t worst_case_area{};
+    size_t best_case_area{};
+    unsigned wc = w/3;
+    unsigned lc = l/3;
+    size_t wlc = wc*lc;
+    aoc::print("\n    fits shapes {} x {} = {}",wc,lc,wlc);
+    unsigned n{};
+    for (int i=0;i<region.q.size();++i) {
+      auto qi = region.q[i];
+      n += qi;
+      worst_case_area += qi * 3*3;
+      best_case_area += qi * model.shapes[i].covered();
+    }
+    aoc::print("\n    shape count n:{}",n);
+    aoc::print("\n    worst_case_area:{}",worst_case_area);
+    aoc::print("\n    best_case_area:{}",best_case_area);
+
+    if (n <= wlc) {
+      ++easilly_possible;
+      aoc::print("\n    {} <= {} ==> EASILLY POSSIBLE",n,wlc);
+    }
+    else if (best_case_area > fa) {
+      ++absolutely_impossible;
+      aoc::print("\n    {} > {} ==> ABSOLUTELY IMPOSSIBLE",best_case_area,fa);
+    }
+    else {
+      ++needs_solving;
+      aoc::print("\n    *Needs solving*");
+    }
+    aoc::print(
+       "\n    easilly_possible:{:2} absolutely_impossible:{:2} needs_solving:{:2}"
+      ,easilly_possible
+      ,absolutely_impossible
+      ,needs_solving);
+  }
+
+  if (needs_solving ==0) {
+    return std::format(
+       "TODO: Solve from easilly_possible:{} absolutely_impossible:{}"
+      ,easilly_possible
+      ,absolutely_impossible);
+  }
 
   for (size_t i=0;i<model.regions.size();++i) {
     aoc::print("\nSolve for region:{}",i);

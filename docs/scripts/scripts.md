@@ -191,12 +191,38 @@ It seems we would be tempted to implement a queue-of-state based search?
 We want to fail fast. Does this mean we should go for a Depth first search?
 
 - No. Fail fast does not help us.
+- To know if there is NO solution we need to examine all OR find a solution?
 
-It seems we actually want to succeed fast? So this would mean we want to breadth first search? 
+It seems we actually want to succeed fast? So this would mean we want to breadth first search?
 
+- NO! Suceed fast does not help us.
+- To know if there IS a solution we need to find one or emanine all.
+
+At this stage I checked internet for how others had approached todays problem.
+
+- Kudos to 'icub3d on youtube [Christmas Tree Farm - Advent of Code 2025 - Day 12](https://youtu.be/DHtNCDnwOLA)!
+- He found out that todays puzzle was solvable based on input data only!
+- It turns out all input indicated either 'naively solvable' or 'positively impossible'
+
+The apprach is the following.
+
+- If the shapes to fit covers more area than is available in the frame,
+  then it is absolutely impossible to do so.
+- If the frame offers an area that fits all shapes non-overlapping,
+  then it is positively possible.
+- In both above cases we do NOT need to try any fitting at all!
+
+So I tried this analysis on my input and got:
+
+```text
+easilly_possible:538 absolutely_impossible:462 needs_solving: 0
+```
+
+So it seems even for my input I have ONLY easally possble or absolutely impossible problems!
+
+I still would like to actually implement a solver for the example inout though (fun exersice?).
 
   
-
 # day 11 part 1
 
 We are to process a list of connected devices and count all the paths we can take from the start device to end end device.
