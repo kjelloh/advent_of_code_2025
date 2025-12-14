@@ -402,6 +402,200 @@ It seems the Z3 library is available from conan?
 
 - GOSH! What a mastodont to download, build and install just for my small little AoC problem?!!
 
+So I had Claude solve part 2 for me using the Z3 library.
+
+- This gave me the 'same' powers as those Python kids out there
+- And the Integer Linerar Porgramming solution is 'known' so using a tool for this is fine?
+- But I found this unsatisfactory!
+
+How can we solve this with some hand-rolled solution?
+
+Lets examine one of my inputs:
+
+```sh
+(1,2,3,5,6,8) (4) (1,5,6,9) (2,5,6,8,9) (1,3,4,8) (0,3,8) (0,3,4,5,6,7,8,9) (1,4) (0,7) (1,2,4,6,9) {11,213,12,33,230,26,27,11,40,23}' 
+```
+
+This is 10 integer equations:
+
+```c++
+  a0* (  0   1   1   1   0   1   1   0   1   0) // (1,2,3,5,6,8)
++ a1* (  0   0   0   0   1   0   0   0   0   0) // (4)
++ a2* (  0   1   0   0   0   1   1   0   0   1) // (1,5,6,9)
++ a3* (  0   0   1   0   0   1   1   0   1   1) // (2,5,6,8,9)
++ a4* (  0   1   0   1   1   0   0   0   1   0) // (1,3,4,8)
++ a5* (  1   0   0   1   0   0   0   0   1   0) // (0,3,8)
++ a6* (  1   0   0   1   1   1   1   1   1   1) // (0,3,4,5,6,7,8,9)
++ a7* (  0   1   0   0   1   0   0   0   0   0) // (1,4)
++ a8* (  1   0   0   0   0   0   1   0   0   0) // (0,7)
++ a9* (  0   1   1   0   1   0   1   0   0   1) // (1,2,4,6,9)
+==    ( 11,213, 12, 33,230, 26, 27, 11, 40, 23)
+```
+
+This system either has one unique solution or no solution at all.
+
+- Can we use gaussian elimination to detect if there is a solution?
+- It seems there will always be a real value (or complex value) solution?
+- But is there a feature of the gaussian elimination we can use to detect an integer solution?
+
+Let's play a little with this system to see if we can get a feel for how we can hand-roll an algorithm to solve it?
+
+We can sort the rows on how 'occipied' they are?
+
+```c++
+  a6* (  1   0   0   1   1   1   1   1   1   1) // (0,3,4,5,6,7,8,9)
+  a0* (  0   1   1   1   0   1   1   0   1   0) // (1,2,3,5,6,8)
+  a3* (  0   0   1   0   0   1   1   0   1   1) // (2,5,6,8,9)
+  a9* (  0   1   1   0   1   0   1   0   0   1) // (1,2,4,6,9)
+  a2* (  0   1   0   0   0   1   1   0   0   1) // (1,5,6,9)
+  a4* (  0   1   0   1   1   0   0   0   1   0) // (1,3,4,8)
+  a5* (  1   0   0   1   0   0   0   0   1   0) // (0,3,8)
+  a7* (  0   1   0   0   1   0   0   0   0   0) // (1,4)
+  a8* (  1   0   0   0   0   0   1   0   0   0) // (0,7)
+  a1* (  0   0   0   0   1   0   0   0   0   0) // (4)
++ ---------------------------------------------
+=     ( 11,213, 12, 33,230, 26, 27, 11, 40, 23)
+```
+
+Then we can sort the columns also on how occupied they are?
+
+```c++
+  a6* (  1   0   0   1   1   1   1   1   1   1) // (0,3,4,5,6,7,8,9)
+  a0* (  0   1   1   1   0   1   1   0   1   0) // (1,2,3,5,6,8)
+  a3* (  0   0   1   0   0   1   1   0   1   1) // (2,5,6,8,9)
+  a9* (  0   1   1   0   1   0   1   0   0   1) // (1,2,4,6,9)
+  a2* (  0   1   0   0   0   1   1   0   0   1) // (1,5,6,9)
+  a4* (  0   1   0   1   1   0   0   0   1   0) // (1,3,4,8)
+  a5* (  1   0   0   1   0   0   0   0   1   0) // (0,3,8)
+  a7* (  0   1   0   0   1   0   0   0   0   0) // (1,4)
+  a8* (  1   0   0   0   0   0   1   0   0   0) // (0,7)
+  a1* (  0   0   0   0   1   0   0   0   0   0) // (4)
++ ---------------------------------------------
+=     ( 11,213, 12, 33,230, 26, 27, 11, 40, 23)
+```
+
+Ok, this is a bit unwieldy. Lets look at a smaller example:
+
+```c++
+a0* (0 0 0 1) // (3) 
+a1* (0 1 0 1) // (1,3)
+a2* (0 0 1 0) // (2)
+a3* (0 0 1 1) // (2,3)
+a4* (1 0 1 0) // (0,2)
+a5* (1 1 0 0) // (0,1)
++   ------
+    (3 5 4 7)
+```
+
+We can shuffle the rows after where the first non zero entry is?
+
+```c++
+a4* (1 0 1 0) // (0,2)
+a5* (1 1 0 0) // (0,1)
+a1* (0 1 0 1) // (1,3)
+a3* (0 0 1 1) // (2,3)
+a2* (0 0 1 0) // (2)
+a0* (0 0 0 1) // (3) 
++   ------
+    (3 5 4 7)
+```
+
+Maybe we can go for a diagonal matrix? That would be nice?
+
+```c++
+a4* (1 0 1 0)
+a5* (1 1 0 0)
+a1* (0 1 0 1)
+a3* (0 0 1 1)
+a2* (0 0 1 0)
+a0* (0 0 0 1)
++   ------
+    (3 5 4 7)
+```
+We can also write:
+
+0.  0    0    0    0   a4 + a5 = 3
+1.  0   a1 +  0    0    0   a5 = 5
+2.  0    0   a2 + a3 + a4    0 = 4
+3. a0 + a1    0    0    0    0 = 7
+----------------------------------
+            A*a = j
+
+```text
+
+           A          a        j
+
+      0 0 0 0 1 1     a0       3
+      0 1 0 0 0 1  *  a1   =   5
+      0 0 1 1 1 0     a2       4
+      1 1 0 0 0 0     a3       7
+                      a4
+                      a5
+```
+
+This is more how I remember Gaussian elimination?
+
+AHA! If we create the matrix A | j we can manipulate it row-wise without affecting the order of the searched for solution a?
+
+```text
+             A       j
+
+0.      0 0 0 0 1 1  3
+1.      0 1 0 0 0 1  5
+2.      0 0 1 1 1 0  4
+3.      1 1 0 0 0 0  7
+                      
+```
+
+Is there an algorithm to do row-wise operations to get a diagonal matrix?
+
+- Can we asume there is only one unique single solution?
+- It seems this is true of the 'buttons' are independent?
+  (that is, no 'button' (vector) is an integer combination of other vectors)
+- Or, if we can't reach the same 'button sum' by pressing different sets of buttons?
+
+No! They are NOT independent.
+
+-  button (2) + button (3) is the button (2,3) in out example!
+- So one press on (2,3) ahd the same effect as pressing (2) and (3) separatly
+  (same end result but more button presses)
+
+I wonder, can I implement a Gaussian Elimination to 'pin down' some button counts?
+
+```c++
+auto result = gaussian_solve(buttons, expected);
+```
+
+Maybe I can determine what some of the button presses must be?
+
+Then I can use a BSF to find the minimal solution to press the undetermined button counts?
+
+Claude came up with the following example:
+
+```text
+Buttons: (0), (1), (0,1), (2)
+Expected: [2, 3, 1]
+
+Matrix form:
+[1  0  1  0] [b₀]   [2]
+[0  1  1  0] [b₁] = [3]
+[0  0  0  1] [b₂]   [1]
+             [b₃]
+
+After Gaussian elimination:
+[1  0  1  0 | 2]  → b₀ + b₂ = 2
+[0  1  1  0 | 3]  → b₁ + b₂ = 3  
+[0  0  0  1 | 1]  → b₃ = 1 ✓ DETERMINED!
+```
+
+So this seems feasable?
+
+- The Gaussian Elimination results in dependancies between button counts
+- If we are lucky some button counts can even be 'pinned down'?
+- It should now be possible to BSF through the smaller search space of dependent button counts?
+
+
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 
