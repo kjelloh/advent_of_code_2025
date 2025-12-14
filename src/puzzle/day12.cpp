@@ -526,10 +526,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   }
 
   if (needs_solving ==0) {
-    return std::format(
-       "TODO: Solve from easilly_possible:{} absolutely_impossible:{}"
-      ,easilly_possible
-      ,absolutely_impossible);
+    return std::format("{}",easilly_possible);
   }
 
   for (size_t i=0;i<model.regions.size();++i) {
