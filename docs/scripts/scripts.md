@@ -619,7 +619,7 @@ One can queston - can we create a convex hull that uses all the red tiles?
  
  Wait! Some red tiles connect to its neighbours in a straight line (does NOT create a corner)!
 
- - At this stage I do not dare to propose we can ignore staright-line-red-tile-combos?
+ - At this stage I do not dare to propose we can ignore straight-line-red-tile-combos?
  - We may need intermediate red tiles to anchor a rectangle?
 
 So what operations do we need to implement?
@@ -783,6 +783,27 @@ So Y stripes (compressed indices):
 Compressed grid size: 3 × 3 blocks.
 
 Seems promising!
+
+Wait! What other optioins do we have to detect if a rectangle is inside a polygon?
+
+What do we know (need to know) about our polygon?
+
+- Is it convex or does it have concave parts?
+  (Convenx = all 'corners' are less than 180 degrees)
+- Let's assume it may have concave parts 
+  (as there is nothing in the problem statement that states this)
+
+What invariant tells us if a rectangle is inside the polygon?
+
+1. There exist a triangulation of the polygon that also triangulates the rectangle.
+2. All tiles inside the rectangle are red or green
+   (The rectangle contaons no non-coloured tiles)
+3. No edge of the plygon intersects with an edge of the rectangle
+   (We can walk the polygon edges and check them)
+   AND - all corners of the rectangle lay inside the polygon
+   (There seem to be an algorithm for this?)
+
+
 
 # day8 part 1
 
