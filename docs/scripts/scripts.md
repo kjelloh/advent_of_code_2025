@@ -789,21 +789,38 @@ Wait! What other optioins do we have to detect if a rectangle is inside a polygo
 What do we know (need to know) about our polygon?
 
 - Is it convex or does it have concave parts?
-  (Convenx = all 'corners' are less than 180 degrees)
+  (Convex = all 'corners' are less than 180 degrees)
 - Let's assume it may have concave parts 
   (as there is nothing in the problem statement that states this)
 
-What invariant tells us if a rectangle is inside the polygon?
+Wait! Is it not the case that the rectangle is inside the polygon if it contains no red tiles?
 
-1. There exist a triangulation of the polygon that also triangulates the rectangle.
-2. All tiles inside the rectangle are red or green
-   (The rectangle contaons no non-coloured tiles)
-3. No edge of the plygon intersects with an edge of the rectangle
-   (We can walk the polygon edges and check them)
-   AND - all corners of the rectangle lay inside the polygon
-   (There seem to be an algorithm for this?)
+- If any polygon vertex is inside the rectangle,
+  then the rectangle is NOT totally inside?!
+- We know the rectangle corners are always valid
+  (they are on the polygon border ok)
+- So if the rectangle does not contain any additional
+  INSIDE red tiles, then the rectangle is totally inside?
 
+NO! That is not the case.
 
+- Imagine an U-shaped polygon.
+- A rectangle in the 'U' (outside the polygon)
+  is outisde even without intrusions.
+
+We would need to compare edge normals to detect this case?
+
+- If the edge normal of polygon edge intersects 
+  the rectangle edge (points in to it)
+  then the rectangle is outside.
+
+So a rectangle is inside iff:
+
+- parallel overlapping rectangle polygon edges
+  share normal direction (both points out)
+- All four rectangle corners are inside polygon.
+
+The key operation is thus 'point inside rectilinear polygon'?
 
 # day8 part 1
 

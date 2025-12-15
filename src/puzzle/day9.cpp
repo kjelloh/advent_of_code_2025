@@ -137,7 +137,7 @@ INT signed_area(const Polygon& p) {
     return a/2; 
 }
 
-bool polygon_overlaps_rect(Polygon const& polygon,Frame const& frame) {
+bool rectilinear_polyregion_contains_frame(Polygon const& polygon,Frame const& frame) {
   auto [xt1,yt1] = frame.t1;
   auto [xt2,yt2] = frame.t2;
   auto x1 = std::min(xt1,xt2);
@@ -187,6 +187,7 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
 
   aoc::print("\npolygon: E:{}",edges.size());
 
+  // All possible picks for rectangle
   for (size_t i=0;i<N;++i) {
     for (size_t j=i+1;j<N;++j) {
       if (i==j) continue;
@@ -195,10 +196,10 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
       if (t1.x == t2.x) continue;
       if (t1.y == t2.y) continue;
 
-      Frame rect(t1,t2);
+      Frame frame(t1,t2);
 
-      if (polygon_overlaps_rect(polygon,rect)) {
-        auto a = spanned_area(rect.t1,rect.t2);
+      if (rectilinear_polyregion_contains_frame(polygon,frame)) {
+        auto a = spanned_area(frame.t1,frame.t2);
         candidate = std::max(candidate,a);
       }
 
