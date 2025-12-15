@@ -20,6 +20,7 @@ public:
   INT x;
   INT y;
   Tile() {}
+  Tile(INT x,INT y) : x(x),y(y) {}
   Tile(std::string const& s) {
     std::istringstream iss{s};
     std::string number;
@@ -136,6 +137,22 @@ INT signed_area(const Polygon& p) {
     return a/2; 
 }
 
+bool polygon_overlaps_rect(Polygon const& polygon,Frame const& frame) {
+  auto [xt1,yt1] = frame.t1;
+  auto [xt2,yt2] = frame.t2;
+  auto x1 = std::min(xt1,xt2);
+  auto x2 = std::max(xt1,xt2);
+  auto y1 = std::min(yt1,yt2);
+  auto y2 = std::max(yt1,yt2);
+  Polygon rectangle{
+     {x1,y1}
+    ,{x1,y2}
+    ,{x2,y2}
+    ,{x2,y1}
+  };
+  return false;
+}
+
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
 
   std::ifstream in{puzzle_args.in_file_path()};
@@ -168,7 +185,25 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   // print
   aoc::print("\n{}",edges);
 
-  aoc::print("\npolygon: E:{}",model.size());
+  aoc::print("\npolygon: E:{}",edges.size());
+
+  for (size_t i=0;i<N;++i) {
+    for (size_t j=i+1;j<N;++j) {
+      if (i==j) continue;
+      auto t1 = polygon[i];
+      auto t2 = polygon[j];
+      if (t1.x == t2.x) continue;
+      if (t1.y == t2.y) continue;
+
+      Frame rect(t1,t2);
+
+      if (polygon_overlaps_rect(polygon,rect)) {
+        auto a = spanned_area(rect.t1,rect.t2);
+        candidate = std::max(candidate,a);
+      }
+
+    }
+  }
 
   if (false) {
     // Cooridnate compression
