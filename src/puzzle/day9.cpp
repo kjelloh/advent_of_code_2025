@@ -12,6 +12,9 @@
 using INT = int64_t;
 using UINT = uint64_t;
 
+using Vertex = std::pair<INT,INT>; 
+using Edge = std::pair<Vertex,Vertex>;
+
 class Tile {
 public:
   INT x;
@@ -130,70 +133,89 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   const UINT V = model.size();
   UINT candidate{};
 
-  // Compress ranges to compressed matrix
-  std::vector<INT> xs(V);
-  std::vector<INT> ys(V);
-  for (size_t i=0;i<V;++i) {
-    xs[i] = model[i].x;
-    ys[i] = model[i].y;
+  auto const& polygon = model;
+  auto N = polygon.size();
+  std::vector<Edge> edges{};
+  for (int i=0;i<N;++i) {
+    auto [x_first,y_first] = polygon[i];
+    auto [x_second,y_second] = polygon[(i+1) % N];
+    edges.push_back(Edge(Vertex(x_first,y_first),Vertex(x_second,y_second)));
   }
 
-  // Arrange boundaries in order
-  std::ranges::sort(xs);
-  std::ranges::sort(ys);
+  // print
+  aoc::print("\n{}",edges);
 
-  // Deduplicate boundaries
-  xs.erase(
-     std::unique(xs.begin(),xs.end()) // return iter to tail of duplicates
-    ,xs.end());
-  ys.erase(
-     std::unique(ys.begin(),ys.end())
-    ,ys.end()
-  );
+  aoc::print("\npolygon: E:{}",model.size());
 
-  // Actual compressed sizes
-  const UINT X = xs.size();
-  const UINT Y = ys.size();
+  if (false) {
+    // Cooridnate compression
 
-  // Create otside (+1 size) BOUND
-  const std::pair<INT,INT> X_BOUND(xs.front()-1,xs.back()+1);
-  const std::pair<INT,INT> Y_BOUND(ys.front()-1,ys.back()+1);
+    // Compress ranges to compressed matrix
+    std::vector<INT> xs(V);
+    std::vector<INT> ys(V);
+    for (size_t i=0;i<V;++i) {
+      xs[i] = model[i].x;
+      ys[i] = model[i].y;
+    }
 
-  // Compress ranges to indices idx
-  std::vector<std::pair<INT,INT>> compressed_x(X+1);
-  compressed_x[0] = std::make_pair(X_BOUND.first,xs[0]);
-  compressed_x[X] = std::make_pair(xs[X-1],X_BOUND.second);
-  std::vector<std::pair<INT,INT>> compressed_y(Y+1);
-  compressed_y[0] = std::make_pair(Y_BOUND.first,ys[0]);
-  compressed_y[Y] = std::make_pair(ys[Y-1],Y_BOUND.second);
-  for (size_t i=1;i<X;++i) {
-    compressed_x[i] = std::make_pair(xs[i-1],xs[i]);
+    // Arrange boundaries in order
+    std::ranges::sort(xs);
+    std::ranges::sort(ys);
+
+    // Deduplicate boundaries
+    xs.erase(
+      std::unique(xs.begin(),xs.end()) // return iter to tail of duplicates
+      ,xs.end());
+    ys.erase(
+      std::unique(ys.begin(),ys.end())
+      ,ys.end()
+    );
+
+    // Actual compressed sizes
+    const UINT X = xs.size();
+    const UINT Y = ys.size();
+
+    // Create otside (+1 size) BOUND
+    const std::pair<INT,INT> X_BOUND(xs.front()-1,xs.back()+1);
+    const std::pair<INT,INT> Y_BOUND(ys.front()-1,ys.back()+1);
+
+    // Compress ranges to indices idx
+    std::vector<std::pair<INT,INT>> compressed_x(X+1);
+    compressed_x[0] = std::make_pair(X_BOUND.first,xs[0]);
+    compressed_x[X] = std::make_pair(xs[X-1],X_BOUND.second);
+    std::vector<std::pair<INT,INT>> compressed_y(Y+1);
+    compressed_y[0] = std::make_pair(Y_BOUND.first,ys[0]);
+    compressed_y[Y] = std::make_pair(ys[Y-1],Y_BOUND.second);
+    for (size_t i=1;i<X;++i) {
+      compressed_x[i] = std::make_pair(xs[i-1],xs[i]);
+    }
+    for (size_t i=1;i<Y;++i) {
+      compressed_y[i] = std::make_pair(ys[i-1],ys[i]);
+    }
+
+    const UINT CX = compressed_x.size();
+    const UINT CY = compressed_y.size();
+
+    std::vector<std::vector<char>> compressed_yx(
+      CY
+      ,std::vector<char>(CX)
+    );
+
+    auto x_to_idx = [&xs](unsigned x) {
+      auto it = std::lower_bound(xs.begin(), xs.end(), x); // any x on actual grid
+      size_t idx = it - xs.begin();
+    };
+    auto y_to_idy = [&ys](unsigned y) {
+      auto it = std::lower_bound(ys.begin(), ys.end(), y);
+      size_t idx = it - ys.begin();  // gives index of interval [xs[idx-1], xs[idx]) that contains x  
+    };
+
+    // Fill the compressed grid (mark compressed[id] -> grid coord ranges as inside/outside)
+
   }
-  for (size_t i=1;i<Y;++i) {
-    compressed_y[i] = std::make_pair(ys[i-1],ys[i]);
-  }
-
-  const UINT CX = compressed_x.size();
-  const UINT CY = compressed_y.size();
-
-  std::vector<std::vector<char>> compressed_yx(
-     CY
-    ,std::vector<char>(CX)
-  );
-
-  auto x_to_idx = [&xs](unsigned x) {
-    auto it = std::lower_bound(xs.begin(), xs.end(), x); // any x on actual grid
-    size_t idx = it - xs.begin();
-  };
-  auto y_to_idy = [&ys](unsigned y) {
-    auto it = std::lower_bound(ys.begin(), ys.end(), y);
-    size_t idx = it - ys.begin();  // gives index of interval [xs[idx-1], xs[idx]) that contains x  
-  };
-
-  // Fill the compressed grid (mark compressed[id] -> grid coord ranges as inside/outside)
 
   // return {};
-  return std::format("Not yet fully implemented");
+  return std::format("Not yet fully implemented?");
   // return std::format("{}",candidate);
 } // p2
 
