@@ -11,6 +11,48 @@
   #define AOC25_EXPORT
 #endif
 
+template <typename T>
+using Pair = std::pair<T,T>;
+
+template<typename T>
+struct std::formatter<Pair<T>> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Pair<T> const&  pair, FmtContext& ctx) const {
+        return std::format_to(ctx.out(),"({},{})",pair.first,pair.second);
+    }
+};
+
+template <typename T>
+using Vector = std::vector<T>;
+
+template<typename T>
+struct std::formatter<Vector<T>> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Vector<T> const&  v, FmtContext& ctx) const {
+        auto out = ctx.out();
+        std::format_to(out,"(");
+        for (size_t i=0;i<v.size();++i) {
+          if (i>0) std::format_to(out,",");
+          std::format_to(out,"{}",v[i]);
+        } 
+        std::format_to(out,")");
+        return out;
+    }
+};
+
+
 class PuzzleArgs {
 
 public:
