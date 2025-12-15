@@ -126,14 +126,14 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
 using Polygon = Model;
 
-double signed_area(const Polygon& p) {
-    double a = 0.0;
+INT signed_area(const Polygon& p) { 
+    INT a = 0;
     for (size_t i = 0; i < p.size(); ++i) {
         const auto& cur = p[i];
         const auto& next = p[(i + 1) % p.size()];
         a += (cur.x * next.y - next.x * cur.y);
     }
-    return 0.5 * a;
+    return a/2; 
 }
 
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
