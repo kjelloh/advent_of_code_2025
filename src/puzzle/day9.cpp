@@ -124,6 +124,18 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
 } // p1
 
+using Polygon = Model;
+
+double signed_area(const Polygon& p) {
+    double a = 0.0;
+    for (size_t i = 0; i < p.size(); ++i) {
+        const auto& cur = p[i];
+        const auto& next = p[(i + 1) % p.size()];
+        a += (cur.x * next.y - next.x * cur.y);
+    }
+    return 0.5 * a;
+}
+
 std::optional<std::string> p2(PuzzleArgs puzzle_args) {
 
   std::ifstream in{puzzle_args.in_file_path()};
@@ -133,8 +145,19 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   const UINT V = model.size();
   UINT candidate{};
 
-  auto const& polygon = model;
+  auto polygon = model;
   auto N = polygon.size();
+
+  auto a = signed_area(polygon);
+  aoc::print("\nsigned area:{}",a);
+  if (a<0) {
+    aoc::print(" -> Reverse for counter clockwise vertex order");
+    std::ranges::reverse(polygon); 
+  }
+  else {
+    aoc::print(" -> Counter clockwise vertices OK");
+  }
+
   std::vector<Edge> edges{};
   for (int i=0;i<N;++i) {
     auto [x_first,y_first] = polygon[i];
