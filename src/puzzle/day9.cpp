@@ -163,7 +163,6 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   UINT candidate{};
 
   auto polygon = model;
-  auto N = polygon.size();
 
   auto a = signed_area(polygon);
   aoc::print("\nsigned area:{}",a);
@@ -176,101 +175,103 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   }
 
   std::vector<Edge> edges{};
-  for (int i=0;i<N;++i) {
+  for (int i=0;i<V;++i) {
     auto [x_first,y_first] = polygon[i];
-    auto [x_second,y_second] = polygon[(i+1) % N];
+    auto [x_second,y_second] = polygon[(i+1) % V];
     edges.push_back(Edge(Vertex(x_first,y_first),Vertex(x_second,y_second)));
   }
 
   // print
   aoc::print("\n{}",edges);
-
   aoc::print("\npolygon: E:{}",edges.size());
+  auto E = edges.size();
 
-  // All possible picks for rectangle
-  for (size_t i=0;i<N;++i) {
-    for (size_t j=i+1;j<N;++j) {
-      if (i==j) continue;
-      auto t1 = polygon[i];
-      auto t2 = polygon[j];
-      if (t1.x == t2.x) continue;
-      if (t1.y == t2.y) continue;
-
-      Frame frame(t1,t2);
-
-      if (rectilinear_polyregion_contains_frame(polygon,frame)) {
-        auto a = spanned_area(frame.t1,frame.t2);
-        candidate = std::max(candidate,a);
-      }
-
+  if (false) {
+    std::vector<Edge> horizontals{};
+    std::vector<Edge> verticals{};
+    for (auto const& edge : edges) {
+      auto [x1,y1] = edge.first;
+      auto [x2,y2] = edge.second;
+      if (x2-x1 == 0) verticals.push_back(edge);
+      if (y2-y1 == 0) horizontals.push_back(edge);
     }
+    if (verticals.size() + horizontals.size() != E) 
+      return std::format(
+        "Failed to account for all edges {}",E);
+    auto M = horizontals.size();
+    auto N = verticals.size();
+    aoc::print("\nM:{} N:{}",M,N);
+  }
+  if (true) {
+    std::vector<INT> xs{};
+    std::vector<INT> ys{};
+    for (auto const& p : polygon) {
+      xs.push_back(p.x);
+      ys.push_back(p.y);
+    }
+    auto make_unique = [](auto& vec) {
+        std::ranges::sort(vec);
+        vec.erase(std::ranges::unique(vec).begin(), vec.end());
+    };
+
+    make_unique(xs);
+    make_unique(ys);
+    aoc::print("\nxs:{}",xs);
+    aoc::print("\nys:{}",ys);
+    auto M = xs.size();
+    auto N = ys.size();
+    aoc::print("\nM:{} N:{}",M,N);
+
+    std::vector<std::vector<bool>> z(N,std::vector<bool>(M)); // MxN bool matrix
+
+    auto to_compressed = [](auto const& coords, INT value)  { 
+        return std::ranges::lower_bound(coords, value) - coords.begin();
+    };
+
+    for (size_t i = 0; i < polygon.size(); ++i) {
+      // start - end
+      auto const& p1 = polygon[i]; // begin
+      auto const& p2 = polygon[(i+1) % V]; // end
+
+      // Compressed
+      auto cx1 = to_compressed(xs, p1.x);
+      auto cy1 = to_compressed(ys, p1.y);
+      auto cx2 = to_compressed(xs, p2.x);
+      auto cy2 = to_compressed(ys, p2.y);
+      
+      // Normalise
+      if (cx2<cx1) std::swap(cx1,cx2);
+      if (cy2<cy1) std::swap(cy1,cy2);
+
+      // Mark in compressed
+      if (cy1==cy2) for (auto cx=cx1;cx<cx2;++cx) z[cy1][cx] = true;
+      if (cx1==cx2) for (auto cy=cy1;cy<cy2;++cy) z[cy][cx1] = true; 
+    }
+
+    // print z
+    aoc::print("\n{}",z);
+
   }
 
   if (false) {
-    // Cooridnate compression
-
-    // Compress ranges to compressed matrix
-    std::vector<INT> xs(V);
-    std::vector<INT> ys(V);
+    // All possible picks for rectangle
     for (size_t i=0;i<V;++i) {
-      xs[i] = model[i].x;
-      ys[i] = model[i].y;
+      for (size_t j=i+1;j<V;++j) {
+        if (i==j) continue;
+        auto t1 = polygon[i];
+        auto t2 = polygon[j];
+        if (t1.x == t2.x) continue;
+        if (t1.y == t2.y) continue;
+
+        Frame frame(t1,t2);
+
+        if (rectilinear_polyregion_contains_frame(polygon,frame)) {
+          auto a = spanned_area(frame.t1,frame.t2);
+          candidate = std::max(candidate,a);
+        }
+
+      }
     }
-
-    // Arrange boundaries in order
-    std::ranges::sort(xs);
-    std::ranges::sort(ys);
-
-    // Deduplicate boundaries
-    xs.erase(
-      std::unique(xs.begin(),xs.end()) // return iter to tail of duplicates
-      ,xs.end());
-    ys.erase(
-      std::unique(ys.begin(),ys.end())
-      ,ys.end()
-    );
-
-    // Actual compressed sizes
-    const UINT X = xs.size();
-    const UINT Y = ys.size();
-
-    // Create otside (+1 size) BOUND
-    const std::pair<INT,INT> X_BOUND(xs.front()-1,xs.back()+1);
-    const std::pair<INT,INT> Y_BOUND(ys.front()-1,ys.back()+1);
-
-    // Compress ranges to indices idx
-    std::vector<std::pair<INT,INT>> compressed_x(X+1);
-    compressed_x[0] = std::make_pair(X_BOUND.first,xs[0]);
-    compressed_x[X] = std::make_pair(xs[X-1],X_BOUND.second);
-    std::vector<std::pair<INT,INT>> compressed_y(Y+1);
-    compressed_y[0] = std::make_pair(Y_BOUND.first,ys[0]);
-    compressed_y[Y] = std::make_pair(ys[Y-1],Y_BOUND.second);
-    for (size_t i=1;i<X;++i) {
-      compressed_x[i] = std::make_pair(xs[i-1],xs[i]);
-    }
-    for (size_t i=1;i<Y;++i) {
-      compressed_y[i] = std::make_pair(ys[i-1],ys[i]);
-    }
-
-    const UINT CX = compressed_x.size();
-    const UINT CY = compressed_y.size();
-
-    std::vector<std::vector<char>> compressed_yx(
-      CY
-      ,std::vector<char>(CX)
-    );
-
-    auto x_to_idx = [&xs](unsigned x) {
-      auto it = std::lower_bound(xs.begin(), xs.end(), x); // any x on actual grid
-      size_t idx = it - xs.begin();
-    };
-    auto y_to_idy = [&ys](unsigned y) {
-      auto it = std::lower_bound(ys.begin(), ys.end(), y);
-      size_t idx = it - ys.begin();  // gives index of interval [xs[idx-1], xs[idx]) that contains x  
-    };
-
-    // Fill the compressed grid (mark compressed[id] -> grid coord ranges as inside/outside)
-
   }
 
   // return {};

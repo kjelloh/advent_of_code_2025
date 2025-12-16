@@ -822,6 +822,66 @@ So a rectangle is inside iff:
 
 The key operation is thus 'point inside rectilinear polygon'?
 
+--------------------------
+
+I now went back to study how a compressed space works. I went like this.
+
+- Each edge p1->p2 is mapped to sorted range (1 before 2) 
+  x: [x1..x2[ exclusive
+  y: [y2..y1[ exclusive
+
+- That is, each edge is mapped so that they do NOT overlap.
+  The end vertex of each edge is modelled as the start of next edge only
+
+Wait! What happens with the last edge last -> first?
+
+- We would get the last range last -> first 
+  as the sorted range first-to-last?
+- But at least last vertex x,y WILL map to last cx,cy
+  (3,3 in example case)?
+
+  Wait! We need to handle one dimensional regions!!
+
+  Suppose se mark edges with excluded (overlapping) end as A,B,C,...
+
+```text
+   01234567890123
+ 0 ..............
+ 1 .......AAAAB..
+ 2 .......H...B..
+ 3 ..GGGGGH...B..
+ 4 ..F........B..
+ 5 ..FEEEEEEE.B..
+ 6 .........D.B..
+ 7 .........DCC..
+ 8 ..............
+```
+
+How do we compress these to 'ranges' (stripes)?
+
+- xs:(2,7,9,11) -> 2-7,7-9,9-11,11-?
+- ys:(1,3,5,7)  -> 1-3,3-5,5-7,7-?
+
+I STILL don't get it?
+
+- We need a way to mark the vertical left edge also in compressed space?
+- This edge is one column wide.
+- Would need the x-range x-begin:1 x-end:2?
+- We can't deduce this form xs and ys as is?
+
+Wait! Maybe if we view each vertex as an implied 1x1 region?
+
+- The edge ((7,1),(11,1)) in fact marks 
+  xs: [7,8),[8,11), [11,12)
+  ys: [1,2)
+
+So what is the actual aproach here?
+
+- Expand each vertex to 1x1 ranges?
+- Vertex (7,1) becomes xs: (7,8) and ys: (1,2)?
+
+...
+
 # day8 part 1
 
 So todays problem seems ro be about connected graphs?
