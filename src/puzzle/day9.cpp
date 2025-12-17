@@ -205,6 +205,22 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
   aoc::print("\npolygon: E:{}",edges.size());
   auto E = edges.size();
 
+  if (true) { 
+    auto areaded_frames = to_areaed_frames(polygon);
+    std::ranges::sort(areaded_frames,[](auto const& lhs,auto const& rhs){
+      return (lhs.area > rhs.area);
+    });
+    std::set<INT> histogram{};
+    int cap{1000};
+    for (auto const& af : areaded_frames) {
+      // Pick the first valid one
+      // aoc::print("\n{:3} {}",cap,af.area);
+      // if (--cap ==0 ) break;
+      histogram.insert(af.area/1000000);
+    }
+    aoc::print("\nhistogram:{}",histogram.size()); // 100 000->39271, 1 000 000 -> 4721, 10 000 000 -> 477
+  }
+
   if (false) {
     std::vector<Edge> horizontals{};
     std::vector<Edge> verticals{};
