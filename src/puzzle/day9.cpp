@@ -210,15 +210,53 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
     std::ranges::sort(areaded_frames,[](auto const& lhs,auto const& rhs){
       return (lhs.area > rhs.area);
     });
-    std::set<INT> histogram{};
-    int cap{1000};
+
+    auto an_edge_intrudes_frame = [](Frame const& frame, std::vector<Edge> const& edges){
+      auto [x1, y1] = frame.t1;
+      auto [x2, y2] = frame.t2;
+      if (x1 > x2) std::swap(x1, x2);
+      if (y1 > y2) std::swap(y1, y2);
+
+      for (auto const& edge : edges) {
+        auto [ex1, ey1] = edge.first;
+        auto [ex2, ey2] = edge.second;
+        if (ex1 > ex2) std::swap(ex1, ex2);
+        if (ey1 > ey2) std::swap(ey1, ey2);
+
+        if (ey1 == ey2) {
+          // horizontal edge intrudes (touch ok)
+          if (ey1 > y1 && ey1 < y2 && ex2 > x1 && ex1 < x2)
+              return true;
+        } 
+        else if (ex1 == ex2) { 
+          // vertical edge intrudes (touch ok)
+          if (ex1 > x1 && ex1 < x2 && ey2 > y1 && ey1 < y2)
+              return true;
+        }
+        else {
+          // check AABB (axis alligned bounding box) intersection (touch ok)
+          if (!(ex2 < x1 || ex1 > x2 || ey2 < y1 || ey1 > y2))
+              return true;        
+        }
+      } // for edges
+
+      return false; // no edge intrudes
+    }; // an_edge_intrudes_frame
+
     for (auto const& af : areaded_frames) {
-      // Pick the first valid one
-      // aoc::print("\n{:3} {}",cap,af.area);
-      // if (--cap ==0 ) break;
-      histogram.insert(af.area/1000000);
+      // Pick the first valid one?
+      auto [x1,y1] = af.frame.t1;
+      auto [x2,y2] = af.frame.t2;
+      auto dx = std::abs(x2-x1);
+      auto dy = std::abs(y2-y1);
+      if (dx < 2) continue;
+      if (dy < 2) continue;
+      Tile inner_tile(x1+1,y1+1);
+      if (an_edge_intrudes_frame(af.frame,edges)) continue;
+
+      candidate = af.area;
+      return std::format("{}",candidate); 
     }
-    aoc::print("\nhistogram:{}",histogram.size()); // 100 000->39271, 1 000 000 -> 4721, 10 000 000 -> 477
   }
 
   if (false) {
