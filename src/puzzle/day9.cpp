@@ -233,11 +233,6 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
           if (ex1 > x1 && ex1 < x2 && ey2 > y1 && ey1 < y2)
               return true;
         }
-        else {
-          // check AABB (axis alligned bounding box) intersection (touch ok)
-          if (!(ex2 < x1 || ex1 > x2 || ey2 < y1 || ey1 > y2))
-              return true;        
-        }
       } // for edges
 
       return false; // no edge intrudes
