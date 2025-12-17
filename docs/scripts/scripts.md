@@ -880,7 +880,25 @@ So what is the actual aproach here?
 - Expand each vertex to 1x1 ranges?
 - Vertex (7,1) becomes xs: (7,8) and ys: (1,2)?
 
-...
+------------------------------------
+
+At this stage I went back to finding a solution based on:
+
+- No edge intrudes into rectangle
+- A tile inside rectangle is inside polygon
+
+I got away from checking for 'tile inside both' check by:
+
+- Pre-calculate all possible areas (from part 1)
+- Sort on area large to small
+- loop large-to-small until I found a rectanle inside polygon
+
+It seems the largest I found this way does NOT lay outside the polygon.
+
+Hm...I should implement the 'tile-inside' check just for compleatness?
+
+
+Merry Christmas!
 
 # day8 part 1
 
