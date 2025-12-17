@@ -63,6 +63,24 @@ UINT spanned_area(Tile t1,Tile t2) {
   return ((std::abs(t2.x-t1.x) +1)* (std::abs(t2.y-t1.y) +1));
 }
 
+using Polygon = Model;
+
+std::vector<FrameWithArea> to_areaed_frames(Polygon const& polygon) {
+  auto V = polygon.size(); 
+  std::vector<FrameWithArea> areaed_frames(V*(V-1)/2);
+  unsigned ix{};
+  for (int i=0;i<V;++i) {
+    for (int j=i+1;j<V;++j) {
+      auto frame = Frame{polygon[i],polygon[j]};
+      auto area = spanned_area(frame.t1,frame.t2);
+      areaed_frames[ix] = FrameWithArea(frame,area);
+      ++ix;
+    }
+  }
+  return areaed_frames;
+}
+
+
 std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
   std::ifstream in{puzzle_args.in_file_path()};
@@ -72,7 +90,7 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
   UINT V = model.size();
   UINT candidate{};
 
-  std::vector<FrameWithArea> areaed_frames(V*(V-1)/2);
+  auto areaed_frames = to_areaed_frames(model);
   unsigned ix{};
   for (int i=0;i<V;++i) {
     for (int j=i+1;j<V;++j) {
@@ -125,8 +143,6 @@ std::optional<std::string> p1(PuzzleArgs puzzle_args) {
 
 } // p1
 
-using Polygon = Model;
-
 INT signed_area(const Polygon& p) { 
     INT a = 0;
     for (size_t i = 0; i < p.size(); ++i) {
@@ -150,6 +166,9 @@ bool rectilinear_polyregion_contains_frame(Polygon const& polygon,Frame const& f
     ,{x2,y2}
     ,{x2,y1}
   };
+
+  // Not yet implemented
+
   return false;
 }
 
@@ -202,7 +221,7 @@ std::optional<std::string> p2(PuzzleArgs puzzle_args) {
     auto N = verticals.size();
     aoc::print("\nM:{} N:{}",M,N);
   }
-  if (true) {
+  if (false) {
     std::vector<INT> xs{};
     std::vector<INT> ys{};
     for (auto const& p : polygon) {
