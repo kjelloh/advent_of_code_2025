@@ -465,7 +465,20 @@ INT min_count_ilp(Machine const& machine) {
   for (auto r=0;r<R;++r) {
     Ab[r][C-1] = joltage[R-r-1];
   }
-  aoc::print("\n{}",Ab);
+  aoc::print("\nAb: {}x{}{}",C,R,Ab);  
+  std::vector<unsigned> col_nonz_count(C);
+  std::vector<unsigned> row_nonz_count(R);
+  for (unsigned r=0;r<R;++r) {
+    for (unsigned c=0;c<C-1;++c) {
+      if (Ab[r][c] != 0) {
+        ++col_nonz_count[c];
+        ++row_nonz_count[r];
+      }
+    }
+  }
+  aoc::print("\ncol_nonz_count:{}",col_nonz_count);
+  aoc::print("\nrow_nonz_count:{}",row_nonz_count);
+
   return 0;
 }
 
@@ -571,7 +584,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         return *test_result;
       }
 
-      candidate += min_count_z3(machine);
+      candidate += min_count_ilp(machine);
 
     }
 
