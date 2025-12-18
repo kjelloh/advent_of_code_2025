@@ -594,7 +594,138 @@ So this seems feasable?
 - If we are lucky some button counts can even be 'pinned down'?
 - It should now be possible to BSF through the smaller search space of dependent button counts?
 
+Let's go back to the first example again:
 
+```text
+[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+```
+
+Where we know the lowest button presses is 10. One such case is 'pressing (3) once, (1,3) three times, (2,3) three times, (0,2) once, and (0,1) twice'.
+
+We are back at the equation system:
+
+```c++
+a0* (0 0 0 1) // (3) 
+a1* (0 1 0 1) // (1,3)
+a2* (0 0 1 0) // (2)
+a3* (0 0 1 1) // (2,3)
+a4* (1 0 1 0) // (0,2)
+a5* (1 1 0 0) // (0,1)
++   ------
+    (3 5 4 7)
+```
+
+But we want the 'a-vector' to the right of a matrix A so we get:
+
+```text
+1 1 0 1 0 0 a0  = 7     // a0 + a1 + a3 = 7
+0 0 1 1 1 0 a1    4     // a2 + a3 + a4 = 4
+0 1 0 0 0 1 a2    5     // a1 + a5      = 5
+0 0 0 0 1 1 a3    3     // a4 + a5      = 3
+            a4
+            a5
+```
+
+It is a but confusing. But we get the A matrix by rotating the 'button row matrix' counter clockwise.
+
+- The 'A' column [0] models the a0 wiring.
+- So the 'A' column i models the ai wiring
+- Each row in the A matrix models the sum of ai components for a 'joltage' component.
+
+Finally, the total button count is the sum of all ai.
+
+What do we get if we try to solve this system of equations?
+
+```text
+   0 1 2 3 4 5
+0: 1 1 0 1 0 0 7     // a0 + a1 + a3 = 7
+1: 0 0 1 1 1 0 4     // a2 + a3 + a4 = 4
+2: 0 1 0 0 0 1 5     // a1 + a5      = 5
+3: 0 0 0 0 1 1 3     // a4 + a5      = 3
+```
+
+We see that equation 2: gives us:
+
+- a1 = 5 - a5
+- So: a5 = 0,1,2,3,4,5 -> a1 = 5,4,3,2,1,0
+
+We see that equation 3: gives us:
+
+- a4 = 3 - a5 = 3 - (0,1,2,3,4,5)
+- So: a4 = 3,2,1,0 -> a5 = 0,1,2,3
+
+At this stage we have:
+
+```text
+         a0      a1      a2      a3      a4      a5
+2: ->     ?     5..0      ?       ?       ?     0..5
+3: ->                                    3..0   0..3  
+```
+
+We can now use this in equations 0: and 1: (three unknowns)
+
+Equation 0: gives us:
+
+- a0 + a1 + a3 = 7 (a1 already bound)
+- a0 = 7 - a3 - a1 (5,4,3,2,1,0)
+- So: a3 = 2,3,4,5,6,7 -> a0 = 0,1,2,3,4,5
+
+Equation 1: gives us:
+
+- a2 + a3 + a4 = 4 (a3,a4 already bound)
+- a2 = 4 - a3 (2,3,4,5,6,7) - a4 (3,2,1,0)
+- So: a3 reduces to = 2,3,4 -> a4 reduces to = 2,1,0 -> a2 = 2,1,0
+
+We have reduced the possible values of button pressesn to:
+
+```text
+         (3)   (1,3)     (2)    (2,3)   (0,2)  (0,1)
+         a0      a1      a2      a3      a4      a5
+2: ->     ?     5..0      ?       ?       ?     0..5  5    
+3: ->                                    3..0   0..3  3 
+0: ->   0..5                     2..7                 7 
+1: ->                    2..0    2..4    2..0         4 
+-----------------------------------------------------
+        0..5    5..0     2..0    2..4    2..0   0..3
+Min sum    1       3        0       3       1      2 = 10 button presses
+```
+
+If we could pull this off we would only need to search the space (0..5)x(5..0)x(2..0)x(2..4)x(2..0)x(0..3).
+
+- Or even smaller If I could figure out how to apply the cross dependancies while searching?
+- 2: -> (a1,a5) = (5..0,0..5) under a1 + a5 = 5
+- But final a5 is 0..3 -> (a1,a5) = (3..0,0..3)
+- 3: -> (a4,a5) = (3..0,0..3)
+- But final a4 is 2..0 -> (a4,a5) = (2..0,0..3) under a4 + a5 = 3
+...
+
+I wonder what I am inventing here? Is there a 'gaussian like' elimintation that works on inequalities?
+
+I feed my reasoning above to my AI friends and got some feed back:
+
+Claude said:
+
+```text
+This is a fascinating analysis! You're essentially rediscovering techniques from integer linear programming (ILP) and constraint propagation. Let me break down what you're doing and where it fits:
+```
+
+And chatGPT said:
+
+```text
+What you’re doing is actually quite well-founded — you’re not inventing something ad-hoc. You’ve independently rediscovered a mix of integer linear algebra, polyhedral reasoning, and constraint propagation.
+```
+
+One other takeaway is from chatGTP:
+
+```text
+Abstractly, you have:
+
+- A linear system Aa=b
+- With non-negative integer variables ai ∈ Z ≥ 0 
+- And an objective min ∑ai 
+
+That is exactly an Integer Linear Program (ILP) with equality constraints.
+```
 
 # day9 part 2
 

@@ -401,7 +401,7 @@ std::optional<std::string> test_p1(int i,int test_ix,Machine const& machine) {
   return {};    
 }
 
-INT min_count_ilp(Machine const& machine) {
+INT min_count_z3(Machine const& machine) {
 
   INT answer{};
   auto const& expected = machine.joltage;
@@ -449,6 +449,27 @@ INT min_count_ilp(Machine const& machine) {
   return answer;
 }
 
+INT min_count_ilp(Machine const& machine) {
+
+  auto const& buttons = machine.buttons;
+  auto const& joltage = machine.joltage;
+  const unsigned C = buttons.size()+1; // Ab columns = button count plus rhs joltage
+  const unsigned R = joltage.size(); // Ab rows = joltage components count
+  std::vector<std::vector<int>> Ab(R,std::vector<int>(C));
+  for (unsigned c=0;c<C-1;++c) {
+    auto const& button = buttons[c]; 
+    for (auto jx : button) {
+      Ab[R-jx-1][c] = 1; 
+    }
+  }
+  for (auto r=0;r<R;++r) {
+    Ab[r][C-1] = joltage[R-r-1];
+  }
+  aoc::print("\n{}",Ab);
+  return 0;
+}
+
+
 std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
   if (i==0) switch(test_ix) {
 
@@ -472,7 +493,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
           ,to_string(expected));
       }
     } break;
-    case 2: {
+    case 2: { 
       // Configuring the first machine's counters requires a minimum of 10 button presses. 
       // One way to do this is by pressing (3) once, (1,3) three times, 
       // (2,3) three times, (0,2) once, and (0,1) twice.
@@ -492,7 +513,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
     case 3: {
       // Configuring the second machine's counters requires a minimum of 12 button presses. 
       // One way to do this is by pressing (0,2,3,4) twice, (2,3) five times, and (0,1,2) five times.
-      INT min_count = min_count_ilp(machine);
+      INT min_count = min_count_z3(machine);
       aoc::print("\nmin_count:{}",test_ix,min_count);
       if (min_count == 12) {
         return std::format("\ntest {} min_count:{} expected 12 *PASSED*",test_ix,min_count);
@@ -508,7 +529,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
     case 4: {
       // Configuring the third machine's counters requires a minimum of 11 button presses. 
       // One way to do this is by pressing (0,1,2,3,4) five times, (0,1,2,4,5) five times, and (1,2) once.    
-      INT min_count = min_count_ilp(machine);
+      INT min_count = min_count_z3(machine);
       aoc::print("\nmin_count:{}",test_ix,min_count);
       if (min_count == 11) {
         return std::format("\ntest {} min_count:{} expected 11 *PASSED*",test_ix,min_count);
@@ -550,7 +571,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         return *test_result;
       }
 
-      candidate += min_count_ilp(machine);
+      candidate += min_count_z3(machine);
 
     }
 
