@@ -502,6 +502,18 @@ INT min_count_ilp(Machine const& machine) {
   }
   aoc::print("\nx_constraints:{}",x_constraints);
 
+  // Sort rows in order of unknowns
+  std::vector<unsigned> row_ixs(R);
+  for (unsigned r=0;r<R;++r) row_ixs[r] = r;
+  std::ranges::sort(row_ixs,[&row_nonz_count](auto lhs,auto rhs){
+    return row_nonz_count[lhs] < row_nonz_count[rhs];
+  });
+  aoc::print("\nrow_ixs:{}",row_ixs);
+
+  // Propagate constraints (do least unknowns = most constrained first)
+  for (auto r : row_ixs) {
+  
+  }
 
   return 0;
 }
