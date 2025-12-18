@@ -502,6 +502,10 @@ INT min_count_ilp(Machine const& machine) {
   }
   aoc::print("\nx_constraints:{}",x_constraints);
 
+  auto propagate_constraints = [](auto const& Ab,auto const& x_constraints){
+  
+  };
+
   // Sort rows in order of unknowns
   std::vector<unsigned> row_ixs(R);
   for (unsigned r=0;r<R;++r) row_ixs[r] = r;
@@ -510,10 +514,65 @@ INT min_count_ilp(Machine const& machine) {
   });
   aoc::print("\nrow_ixs:{}",row_ixs);
 
-  // Propagate constraints (do least unknowns = most constrained first)
+  // Helpers
+  auto bound_min = [](MinMax& constraint, unsigned new_min) {
+    // Never decerase min
+    constraint.first = std::max(constraint.first, new_min);
+  };
+
+  auto bound_max = [](MinMax& constraint, unsigned new_max) {
+    // Never increase max
+    constraint.second = std::min(constraint.second, new_max);
+  };
+
+  // Propagate constraints (do least unknowns (most constrained) first)
+  bool failed{false};
   for (auto r : row_ixs) {
-  
+    if (failed) break;
+
+    auto rhs = Ab[r][C-1];
+    std::vector<unsigned> xix{};
+    for (unsigned c=0;c<C-1;++c) {
+      if (Ab[r][c] != 0) xix.push_back(c);
+    }
+    const unsigned U = xix.size(); // Unknowns
+
+    if (U==0) continue; // all zeroes = no info
+    if (U==1) {
+      // xi = rhs
+      auto& cxi = x_constraints[xix[0]];
+      bound_min(cxi,rhs);
+      bound_max(cxi,rhs);
+    }
+    else if (U==2) {
+      // xi = rhs - xj
+      // xj = rhs - xi
+      auto& cxi = x_constraints[xix[0]];
+      auto& cxj = x_constraints[xix[1]];
+      bound_max(cxj,rhs); // xi >= 0 -> Constrain j
+      bound_min(cxi,rhs-cxj.second); // Constrain i
+      bound_max(cxi,rhs);
+      bound_min(cxj,rhs-cxi.second);
+    }
+    else if (U > 2) {
+      for (unsigned i=0;i<xix.size();++i) {
+        for (unsigned j=i+1;j<xix.size();++j) {
+          // Pairwise propagate constraints?
+          // ...
+          // xi = rhs - xj
+          // xj = rhs - xi
+          auto& cxi = x_constraints[xix[i]];
+          auto& cxj = x_constraints[xix[j]];
+          bound_max(cxj,rhs); // xi >= 0 -> Constrain j
+          bound_min(cxi,rhs-cxj.second); // Constrain i
+          bound_max(cxi,rhs);
+          bound_min(cxj,rhs-cxi.second);
+        }
+      }
+    }
   }
+  aoc::print("\nfailed:{},x_constraints:{}",failed,x_constraints);
+
 
   return 0;
 }
@@ -547,7 +606,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       // One way to do this is by pressing (3) once, (1,3) three times, 
       // (2,3) three times, (0,2) once, and (0,1) twice.
       INT min_count = min_count_ilp(machine);
-      aoc::print("\nmin_count:{}",test_ix,min_count);
+      aoc::print("\ntest {} min_count:{}",test_ix,min_count);
       if (min_count == 10) {
         return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
       }
