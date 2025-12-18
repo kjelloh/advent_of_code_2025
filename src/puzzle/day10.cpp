@@ -491,20 +491,16 @@ INT min_count_ilp(Machine const& machine) {
   aoc::print("\nrow_nonz_count:[{}..{}]] {}",row_nonz_min_max.first,row_nonz_min_max.second,row_nonz_count);
 
   std::vector<MinMax> x_constraints(C-1,{0,std::numeric_limits<unsigned>::max()});
-  for (unsigned c=0;c<C-1;++c) {
-    for (unsigned r=0;r<R;++r) {  
-      // Bound unknown xc to <= min joltage component.
-      if (Ab[r][c] != 0) {
-        // button c can't be pressed more than any joltage component it affects.
-        x_constraints[c].second = std::min(x_constraints[c].second,Ab[r][C-1]);
-      }
-    }
-  }
+  // for (unsigned c=0;c<C-1;++c) {
+  //   for (unsigned r=0;r<R;++r) {  
+  //     // Bound unknown xc to <= min joltage component.
+  //     if (Ab[r][c] != 0) {
+  //       // button c can't be pressed more than any joltage component it affects.
+  //       x_constraints[c].second = std::min(x_constraints[c].second,Ab[r][C-1]);
+  //     }
+  //   }
+  // }
   aoc::print("\nx_constraints:{}",x_constraints);
-
-  auto propagate_constraints = [](auto const& Ab,auto const& x_constraints){
-  
-  };
 
   // Sort rows in order of unknowns
   std::vector<unsigned> row_ixs(R);
@@ -527,50 +523,75 @@ INT min_count_ilp(Machine const& machine) {
 
   // Propagate constraints (do least unknowns (most constrained) first)
   bool failed{false};
-  for (auto r : row_ixs) {
-    if (failed) break;
+  bool done{false};
+  auto current = x_constraints;
+  while (!done) {
+  
+    done = false;
+    auto next = current;
+    for (auto r : row_ixs) {
+      aoc::print("\nr:{} failed:{} x_constraints:{}",r,failed,next);
 
-    auto rhs = Ab[r][C-1];
-    std::vector<unsigned> xix{};
-    for (unsigned c=0;c<C-1;++c) {
-      if (Ab[r][c] != 0) xix.push_back(c);
-    }
-    const unsigned U = xix.size(); // Unknowns
+      if (failed) break;
+      auto rhs = Ab[r][C-1];
+      std::vector<unsigned> xix{};
+      for (unsigned c=0;c<C-1;++c) {
+        if (Ab[r][c] != 0) xix.push_back(c);
+      }
+      const unsigned U = xix.size(); // Unknowns
 
-    if (U==0) continue; // all zeroes = no info
-    if (U==1) {
-      // xi = rhs
-      auto& cxi = x_constraints[xix[0]];
-      bound_min(cxi,rhs);
-      bound_max(cxi,rhs);
-    }
-    else if (U==2) {
-      // xi = rhs - xj
-      // xj = rhs - xi
-      auto& cxi = x_constraints[xix[0]];
-      auto& cxj = x_constraints[xix[1]];
-      bound_max(cxj,rhs); // xi >= 0 -> Constrain j
-      bound_min(cxi,rhs-cxj.second); // Constrain i
-      bound_max(cxi,rhs);
-      bound_min(cxj,rhs-cxi.second);
-    }
-    else if (U > 2) {
-      for (unsigned i=0;i<xix.size();++i) {
-        for (unsigned j=i+1;j<xix.size();++j) {
-          // Pairwise propagate constraints?
-          // ...
-          // xi = rhs - xj
-          // xj = rhs - xi
-          auto& cxi = x_constraints[xix[i]];
-          auto& cxj = x_constraints[xix[j]];
-          bound_max(cxj,rhs); // xi >= 0 -> Constrain j
-          bound_min(cxi,rhs-cxj.second); // Constrain i
-          bound_max(cxi,rhs);
-          bound_min(cxj,rhs-cxi.second);
+      if (U==0) {
+        // Empty equation
+        failed |= (rhs != 0); // rhs == 0 ok
+      }
+      if (U==1) {
+        // xi = rhs
+        auto& cxi = next[xix[0]];
+        auto [a,b] = cxi;
+        failed |= a>b;
+        bound_min(cxi,rhs);
+        bound_max(cxi,rhs);
+      }
+      else if (U==2) {
+        // xi = rhs - xj
+        // xj = rhs - xi
+        // If         x_i ∈ [a,b] and x_j ∈ [c,d], 
+        // then       xi = rhs - xj -> xi ∈ [rhs-d, rhs-c].
+        // Likewise,  xj = rhs - xi → x_j ∈ [rhs-b, rhs-a].      
+        auto& cxi = next[xix[0]];
+        auto& cxj = next[xix[1]];
+        auto [a,b] = cxi;
+        auto [c,d] = cxj;
+        failed |= a>b;
+        failed |= c>d;
+        bound_min(cxi,rhs-d);
+        bound_max(cxi,rhs-c);
+        bound_min(cxj,rhs-b);
+        bound_max(cxj,rhs-a);
+      }
+      else if (U > 2) {
+        // TODO: Handle more than three unknowns
+        // x_i.min = max(x_i.min, rhs - sum_of_max_of_others)
+        // x_i.max = min(x_i.max, rhs - sum_of_min_of_others)
+        unsigned sum_of_min{0};
+        unsigned sum_of_max{0};
+        for (auto constraint : x_constraints) {
+          sum_of_min += constraint.first;
+          sum_of_max += constraint.second;
+        }
+        for (auto& constraint : next) {
+          constraint.first = std::max(
+            constraint.first
+            ,std::min(unsigned(0),rhs - sum_of_max + constraint.second));
+          constraint.second = std::min(constraint.second,rhs - sum_of_min + constraint.first);
         }
       }
     }
+
+    done = (next == current);
+    current = next;
   }
+  x_constraints = current;
   aoc::print("\nfailed:{},x_constraints:{}",failed,x_constraints);
 
 
