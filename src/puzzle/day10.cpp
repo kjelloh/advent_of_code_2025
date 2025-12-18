@@ -455,7 +455,7 @@ INT min_count_ilp(Machine const& machine) {
   auto const& joltage = machine.joltage;
   const unsigned C = buttons.size()+1; // Ab columns = button count plus rhs joltage
   const unsigned R = joltage.size(); // Ab rows = joltage components count
-  std::vector<std::vector<int>> Ab(R,std::vector<int>(C));
+  std::vector<std::vector<unsigned>> Ab(R,std::vector<unsigned>(C));
   for (unsigned c=0;c<C-1;++c) {
     auto const& button = buttons[c]; 
     for (auto jx : button) {
@@ -465,7 +465,9 @@ INT min_count_ilp(Machine const& machine) {
   for (auto r=0;r<R;++r) {
     Ab[r][C-1] = joltage[R-r-1];
   }
-  aoc::print("\nAb: {}x{}{}",C,R,Ab);  
+  aoc::print("\nbuttons:{} joltage:{}",buttons,joltage);
+  aoc::print("\nAb: {}x{}{}",C,R,Ab);
+  using MinMax = std::pair<unsigned,unsigned>;
   std::vector<unsigned> col_nonz_count(C);
   std::vector<unsigned> row_nonz_count(R);
   for (unsigned r=0;r<R;++r) {
@@ -476,8 +478,30 @@ INT min_count_ilp(Machine const& machine) {
       }
     }
   }
-  aoc::print("\ncol_nonz_count:{}",col_nonz_count);
-  aoc::print("\nrow_nonz_count:{}",row_nonz_count);
+  MinMax col_nonz_min_max{
+     *std::ranges::min_element(col_nonz_count)
+    ,*std::ranges::max_element(col_nonz_count)
+  };
+  MinMax row_nonz_min_max{
+     *std::ranges::min_element(row_nonz_count)
+    ,*std::ranges::max_element(row_nonz_count)
+  };
+
+  aoc::print("\ncol_nonz_count:[{}..{}] {}",col_nonz_min_max.first,col_nonz_min_max.second,col_nonz_count);
+  aoc::print("\nrow_nonz_count:[{}..{}]] {}",row_nonz_min_max.first,row_nonz_min_max.second,row_nonz_count);
+
+  std::vector<MinMax> x_constraints(C-1,{0,std::numeric_limits<unsigned>::max()});
+  for (unsigned c=0;c<C-1;++c) {
+    for (unsigned r=0;r<R;++r) {  
+      // Bound unknown xc to <= min joltage component.
+      if (Ab[r][c] != 0) {
+        // button c can't be pressed more than any joltage component it affects.
+        x_constraints[c].second = std::min(x_constraints[c].second,Ab[r][C-1]);
+      }
+    }
+  }
+  aoc::print("\nx_constraints:{}",x_constraints);
+
 
   return 0;
 }
