@@ -727,6 +727,23 @@ Abstractly, you have:
 That is exactly an Integer Linear Program (ILP) with equality constraints.
 ```
 
+At this time I did some digging again and found [at 6:00 in youtube video '2.1: Linear programming overview'](https://youtu.be/S5Gh9FFucOE?t=359)
+
+![The Integer Linear Programming optimisation problem](image.png)
+
+- Optimise the cross product of coefficients and unknowns (aT * x)
+- Fullfilling all equations i: Sum(aij*xj) = rhs[i] over all unknowns j
+- Under Sub-conditions xj>0 for all unknown j 
+
+I already kind-of gotten used to the terms:
+
+- R,r for rows of equations
+- C,c for columns of coefficients + rhs column in Ab matrix
+- Ab as the equation system matrix with columns for coefficients 
+  plus one extra column for the right hand side.
+
+And it seems we are now aiming for an algorithm to 'branch and bound' through this search space to try and solve the optimisation problem?
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 
