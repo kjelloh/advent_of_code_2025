@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <string>
 #include <filesystem>
 
@@ -10,6 +11,33 @@
 #else
   #define AOC25_EXPORT
 #endif
+
+template <typename T>
+using Set = std::set<T>;
+
+template<typename T>
+struct std::formatter<Set<T>> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Set<T> const&  set, FmtContext& ctx) const {
+        auto out = ctx.out();
+        std::format_to(out,"(");
+        unsigned i{0};
+        for (auto const& v : set) {
+          if (i>0) std::format_to(out,",");
+          std::format_to(out,"{}",v);
+          ++i;
+        } 
+        std::format_to(out,")");
+        return out;
+    }
+};
+
 
 template <typename T>
 using Maybe = std::optional<T>;

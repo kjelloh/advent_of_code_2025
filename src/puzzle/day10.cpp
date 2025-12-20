@@ -452,11 +452,42 @@ INT min_count_z3(Machine const& machine) {
 
 std::optional<INT> min_count_ilp(
    std::vector<unsigned> const& row_ixs
-  ,unsigned r
-  ,std::vector<unsigned> bound
-  ,std::vector<unsigned> unbound
+  ,unsigned rix
+  ,std::set<unsigned> bound
+  ,std::set<unsigned> unbound
   ,std::vector<unsigned> candidates
   ,std::vector<std::vector<unsigned>> const& Ab) {
+
+  const unsigned C = candidates.size(); 
+  auto r = row_ixs[rix];
+  std::vector<unsigned> unkown_ixs{};
+  for (int c=0;c<C-1;++c) {
+    if (Ab[r][c] != 0) unkown_ixs.push_back(c);
+  }
+  const unsigned U = unkown_ixs.size();
+  const unsigned rhs = Ab[r][C-1];
+
+  switch(U) {
+    case 0: {
+      // No unknowns
+      if (rhs == 0 and r < row_ixs.size()) {
+        return min_count_ilp(
+           row_ixs
+          ,++rix
+          ,bound
+          ,unbound
+          ,candidates
+          ,Ab
+        );
+      }
+      return std::nullopt; // infeasable
+    } break;
+    case 1: {
+    } break;
+    case 2: {
+    } break;
+  }
+
   return std::accumulate(candidates.begin(),candidates.end(),INT{0});  
 }
 
@@ -522,12 +553,12 @@ std::optional<INT> min_count_ilp(Machine const& machine) {
   aoc::print("\nrow_ixs:{}",row_ixs);
 
   std::vector<unsigned> candidates(C-1);
-  std::vector<unsigned> unbound(C-1);
+  std::set<unsigned> unbound{};
   for (unsigned c=0;c<C-1;++c) {
     candidates[c] = x_constraints[c].second;
-    unbound[c] = c;
+    unbound.insert(c);
   }
-  std::vector<unsigned> bound{};
+  std::set<unsigned> bound{};
   auto candidate = min_count_ilp(
      row_ixs
     ,0
