@@ -523,6 +523,7 @@ std::optional<INT> min_count_ilp(
         bound.insert(i);
         unbound.erase(j);
         bound.insert(j);
+        unsigned candidate = std::numeric_limits<unsigned>::max();
         ++rix;
         const auto RHS = rhs - bound_sum;
         for (unsigned xj=0;xj<=RHS;++xj) {
@@ -538,8 +539,10 @@ std::optional<INT> min_count_ilp(
             ,candidates
             ,Ab
           );
-        }
-      }
+          aoc::print(" -> {}",result);
+          if (result and result.value() < candidate) candidate = result.value();
+        } // for xi,xj
+      } // if valid
     } break;
   }
   // Debug - return candidate sum (Remove when fully implemented above)
