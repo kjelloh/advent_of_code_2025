@@ -469,7 +469,7 @@ std::optional<INT> min_count_ilp(
   const unsigned U = unkown_ixs.size();
   const unsigned rhs = Ab[r][C-1];
 
-  aoc::print(" <r:{} b:{} u:{}>",r,bound,unkown_ixs);
+  aoc::print("\n    r:{} b:{} u:{}",r,bound,unkown_ixs);
 
   if (U==0) {
     return std::accumulate(candidates.begin(),candidates.end(),INT{0});
@@ -523,19 +523,21 @@ std::optional<INT> min_count_ilp(
         bound.insert(i);
         unbound.erase(j);
         bound.insert(j);
-        for (unsigned xj=0;xj<=rhs - bound_sum;++xj) {
-          auto xi = rhs -xj;
+        ++rix;
+        const auto RHS = rhs - bound_sum;
+        for (unsigned xj=0;xj<=RHS;++xj) {
+          auto xi = RHS -xj;
           candidates[i] = xi;
           candidates[j] = xj;
           aoc::print(" xi:{},xj:{}",xi,xj);
-          // auto result = min_count_ilp(
-          //   row_ixs
-          //   ,++rix
-          //   ,bound
-          //   ,unbound
-          //   ,candidates
-          //   ,Ab
-          // );
+          auto result = min_count_ilp(
+            row_ixs
+            ,rix
+            ,bound
+            ,unbound
+            ,candidates
+            ,Ab
+          );
         }
       }
     } break;
