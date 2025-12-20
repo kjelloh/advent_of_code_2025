@@ -460,25 +460,37 @@ std::optional<INT> min_count_ilp(
 
   const unsigned C = Ab[0].size();
   const unsigned R = Ab.size();
+
+  if (rix == R) {
+    // return found candidate
+    return std::accumulate(candidates.begin(),candidates.end(),INT{0});
+  }
+
   auto r = row_ixs[rix];
   std::vector<unsigned> unkown_ixs{};
   for (int c=0;c<C-1;++c) {
-    if (Ab[r][c] != 0) unkown_ixs.push_back(c);
+    if (Ab[r][c] != 0) {
+      if (unbound.contains(c)) unkown_ixs.push_back(c);
+    }
   }
 
   const unsigned U = unkown_ixs.size();
-  const unsigned rhs = Ab[r][C-1];
+  unsigned rhs = Ab[r][C-1];
 
-  aoc::print("\n    r:{} b:{} u:{}",r,bound,unkown_ixs);
+  aoc::print("\n    r:{} c: {} b:{} u:{}",r,candidates,bound,unkown_ixs);
 
-  if (U==0) {
-    return std::accumulate(candidates.begin(),candidates.end(),INT{0});
-  }
+  unsigned bound_sum{};
+  for (auto i : bound) bound_sum += candidates[i];
+  aoc::print(" bs:{}",bound_sum);
+  // xi = rhs - bound_sum - xj;
+  if (bound_sum > rhs) return std::nullopt; // Infeasable
+
+  const auto RHS = rhs - bound_sum;
 
   switch(U) {
     case 0: {
       // No unknowns
-      if (rhs == 0 and rix < R) {
+      if (RHS == 0 and rix < R) {
         return min_count_ilp(
            row_ixs
           ,++rix
@@ -494,7 +506,7 @@ std::optional<INT> min_count_ilp(
       // Bind to rhs
       auto uix = unkown_ixs[0];
       if (unbound.contains(uix)) {
-        candidates[uix] = rhs;
+        candidates[uix] = RHS;
         unbound.erase(uix);
         bound.insert(uix);
         if (rix<R) {
@@ -514,11 +526,6 @@ std::optional<INT> min_count_ilp(
       auto i = unkown_ixs[0];
       auto j = unkown_ixs[1];
       if (rix < R and unbound.contains(i) and unbound.contains(j)) {
-        unsigned bound_sum{};
-        for (auto i : bound) bound_sum += candidates[i];
-        aoc::print(" bs:{}",bound_sum);
-        // xi = rhs - bound_sum - xj;
-        if (bound_sum > rhs) return std::nullopt; // Infeasable
         unbound.erase(i);
         bound.insert(i);
         unbound.erase(j);
@@ -539,9 +546,9 @@ std::optional<INT> min_count_ilp(
             ,candidates
             ,Ab
           );
-          aoc::print(" -> {}",result);
           if (result and result.value() < candidate) candidate = result.value();
         } // for xi,xj
+        aoc::print("\n    -> min:{}",candidate);
       } // if valid
     } break;
   }
