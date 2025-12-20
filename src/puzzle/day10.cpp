@@ -470,6 +470,7 @@ std::optional<INT> min_count_ilp(
       }
       if (lhs != rhs) return std::nullopt; // not a valid candidate
     }
+    // candidates fullfills all equations
     return std::accumulate(candidates.begin(),candidates.end(),INT{});
   }
 
@@ -484,13 +485,23 @@ std::optional<INT> min_count_ilp(
   const unsigned U = unkown_ixs.size();
   unsigned rhs = Ab[r][C-1];
 
-  aoc::print("\n{}r:{} c: {} b:{} u:{}",std::string(2*rix,' '),r,candidates,bound,unkown_ixs);
+  aoc::print(
+     "\n{}r:{} c:{} ub:{} b:{} u:{}"
+    ,std::string(2*rix,' ')
+    ,r
+    ,candidates
+    ,unbound
+    ,bound
+    ,unkown_ixs);
 
   unsigned bound_sum{};
-  for (auto i : bound) bound_sum += candidates[i];
+  for (auto i : bound) bound_sum += Ab[r][i] * candidates[i];
   aoc::print(" bs:{}",bound_sum);
   // xi = rhs - bound_sum - xj;
-  if (bound_sum > rhs) return std::nullopt; // Infeasable
+  if (bound_sum > rhs) {
+    aoc ::print(" > rhs:{} INF",rhs);
+    return std::nullopt; // Infeasable
+  }
 
   const auto RHS = rhs - bound_sum;
 
@@ -512,6 +523,7 @@ std::optional<INT> min_count_ilp(
     case 1: {
       // Bind to rhs
       auto uix = unkown_ixs[0];
+      aoc::print(" uix:{}",uix);
       if (unbound.contains(uix)) {
         candidates[uix] = RHS;
         unbound.erase(uix);
