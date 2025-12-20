@@ -458,6 +458,9 @@ std::optional<INT> min_count_ilp(
   ,std::vector<unsigned> candidates
   ,std::vector<std::vector<unsigned>> const& Ab) {
 
+  static UINT call_count{};
+  if (call_count++ % 10000 == 0) std::print("\n{}:{} {}",call_count,bound,unbound);
+
   const unsigned C = Ab[0].size();
   const unsigned R = Ab.size();
 
@@ -521,9 +524,8 @@ std::optional<INT> min_count_ilp(
       return std::nullopt; // infeasable
     } break;
     case 1: {
-      // Bind to rhs
+      // xi + sum(bound)  = rhs;
       auto uix = unkown_ixs[0];
-      aoc::print(" uix:{}",uix);
       if (unbound.contains(uix)) {
         candidates[uix] = RHS;
         unbound.erase(uix);
