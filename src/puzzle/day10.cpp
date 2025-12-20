@@ -450,7 +450,7 @@ INT min_count_z3(Machine const& machine) {
   return answer;
 }
 
-INT min_count_ilp(
+std::optional<INT> min_count_ilp(
    std::vector<unsigned> const& row_ixs
   ,unsigned r
   ,std::vector<unsigned> bound
@@ -460,7 +460,7 @@ INT min_count_ilp(
   return std::accumulate(candidates.begin(),candidates.end(),INT{0});  
 }
 
-INT min_count_ilp(Machine const& machine) {
+std::optional<INT> min_count_ilp(Machine const& machine) {
 
   auto const& buttons = machine.buttons;
   auto const& joltage = machine.joltage;
@@ -578,13 +578,13 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       }
     } break;
     case 3: {
-      INT min_count = min_count_ilp(machine);
-      aoc::print("\ntest {} min_count:{}",test_ix,min_count);
-      if (min_count == 10) {
-        return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
+      auto maybe_min_count = min_count_ilp(machine);
+      aoc::print("\ntest {} min_count:{}",test_ix,maybe_min_count);
+      if (maybe_min_count.value_or(-1) == 10) {
+        return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,maybe_min_count);
       }
       else {
-        return std::format("\ntest {} min_count:{} NOT expected 10 *failed*",test_ix,min_count);
+        return std::format("\ntest {} min_count:{} NOT expected 10 *failed*",test_ix,maybe_min_count);
       }      
     } break;
   }
@@ -652,7 +652,17 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         return *test_result;
       }
 
-      candidate += min_count_z3(machine);
+      auto z3_result = min_count_z3(machine);
+      candidate += z3_result;
+      if (auto ilp_result = min_count_ilp(machine)) {
+        aoc::print("\n\nilp_result:{}",ilp_result);
+        if (ilp_result.value() != z3_result) {
+          aoc::print(" DIFFERS from z3_result:{}",z3_result);
+        }
+        else {
+          aoc::print(" **SAME** as z3_result:{}",z3_result);
+        }
+      }
 
     }
 

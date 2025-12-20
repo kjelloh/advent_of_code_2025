@@ -12,6 +12,27 @@
 #endif
 
 template <typename T>
+using Maybe = std::optional<T>;
+
+template<typename T>
+struct std::formatter<Maybe<T>> {
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+      return ctx.begin();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Maybe<T> const&  maybe_val, FmtContext& ctx) const {
+      if (maybe_val) {
+        return std::format_to(ctx.out(),"{}",maybe_val.value());
+      }
+      return std::format_to(ctx.out(),"nullopt");
+    }
+};
+
+
+template <typename T>
 using Pair = std::pair<T,T>;
 
 template<typename T>
