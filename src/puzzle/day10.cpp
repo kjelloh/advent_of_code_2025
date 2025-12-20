@@ -10,6 +10,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <z3++.h>
+#include <numeric> // std::accumulate,...
 
 using INT = int64_t;
 using UINT = uint64_t;
@@ -449,6 +450,16 @@ INT min_count_z3(Machine const& machine) {
   return answer;
 }
 
+INT min_count_ilp(
+   std::vector<unsigned> const& row_ixs
+  ,unsigned r
+  ,std::vector<unsigned> bound
+  ,std::vector<unsigned> unbound
+  ,std::vector<unsigned> candidates
+  ,std::vector<std::vector<unsigned>> const& Ab) {
+  return std::accumulate(candidates.begin(),candidates.end(),INT{0});  
+}
+
 INT min_count_ilp(Machine const& machine) {
 
   auto const& buttons = machine.buttons;
@@ -491,15 +502,15 @@ INT min_count_ilp(Machine const& machine) {
   aoc::print("\nrow_nonz_count:[{}..{}]] {}",row_nonz_min_max.first,row_nonz_min_max.second,row_nonz_count);
 
   std::vector<MinMax> x_constraints(C-1,{0,std::numeric_limits<unsigned>::max()});
-  // for (unsigned c=0;c<C-1;++c) {
-  //   for (unsigned r=0;r<R;++r) {  
-  //     // Bound unknown xc to <= min joltage component.
-  //     if (Ab[r][c] != 0) {
-  //       // button c can't be pressed more than any joltage component it affects.
-  //       x_constraints[c].second = std::min(x_constraints[c].second,Ab[r][C-1]);
-  //     }
-  //   }
-  // }
+  for (unsigned c=0;c<C-1;++c) {
+    for (unsigned r=0;r<R;++r) {  
+      // Bound unknown xc to <= min joltage component.
+      if (Ab[r][c] != 0) {
+        // button c can't be pressed more than any joltage component it affects.
+        x_constraints[c].second = std::min(x_constraints[c].second,Ab[r][C-1]);
+      }
+    }
+  }
   aoc::print("\nx_constraints:{}",x_constraints);
 
   // Sort rows in order of unknowns
@@ -510,7 +521,23 @@ INT min_count_ilp(Machine const& machine) {
   });
   aoc::print("\nrow_ixs:{}",row_ixs);
 
-  return 0;
+  std::vector<unsigned> candidates(C-1);
+  std::vector<unsigned> unbound(C-1);
+  for (unsigned c=0;c<C-1;++c) {
+    candidates[c] = x_constraints[c].second;
+    unbound[c] = c;
+  }
+  std::vector<unsigned> bound{};
+  auto candidate = min_count_ilp(
+     row_ixs
+    ,0
+    ,bound
+    ,unbound
+    ,candidates
+    ,Ab
+  );
+
+  return candidate;
 }
 
 
@@ -549,6 +576,16 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       else {
         return std::format("\ntest {} min_count:{} NOT expected 10 *failed*",test_ix,min_count);
       }
+    } break;
+    case 3: {
+      INT min_count = min_count_ilp(machine);
+      aoc::print("\ntest {} min_count:{}",test_ix,min_count);
+      if (min_count == 10) {
+        return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
+      }
+      else {
+        return std::format("\ntest {} min_count:{} NOT expected 10 *failed*",test_ix,min_count);
+      }      
     } break;
   }
 
