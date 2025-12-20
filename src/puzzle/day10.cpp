@@ -458,19 +458,27 @@ std::optional<INT> min_count_ilp(
   ,std::vector<unsigned> candidates
   ,std::vector<std::vector<unsigned>> const& Ab) {
 
-  const unsigned C = candidates.size(); 
+  const unsigned C = Ab[0].size();
+  const unsigned R = Ab.size();
   auto r = row_ixs[rix];
   std::vector<unsigned> unkown_ixs{};
   for (int c=0;c<C-1;++c) {
     if (Ab[r][c] != 0) unkown_ixs.push_back(c);
   }
+
   const unsigned U = unkown_ixs.size();
   const unsigned rhs = Ab[r][C-1];
+
+  aoc::print(" <r:{} b:{} u:{}>",r,bound,unkown_ixs);
+
+  if (U==0) {
+    return std::accumulate(candidates.begin(),candidates.end(),INT{0});
+  }
 
   switch(U) {
     case 0: {
       // No unknowns
-      if (rhs == 0 and r < row_ixs.size()) {
+      if (rhs == 0 and rix < R) {
         return min_count_ilp(
            row_ixs
           ,++rix
@@ -483,12 +491,60 @@ std::optional<INT> min_count_ilp(
       return std::nullopt; // infeasable
     } break;
     case 1: {
+      // Bind to rhs
+      auto uix = unkown_ixs[0];
+      if (unbound.contains(uix)) {
+        candidates[uix] = rhs;
+        unbound.erase(uix);
+        bound.insert(uix);
+        if (rix<R) {
+          return min_count_ilp(
+            row_ixs
+            ,++rix
+            ,bound
+            ,unbound
+            ,candidates
+            ,Ab
+          );
+        }
+      }
     } break;
     case 2: {
+      // xi + xj + sum(bound)  = rhs;
+      auto i = unkown_ixs[0];
+      auto j = unkown_ixs[1];
+      if (rix < R and unbound.contains(i) and unbound.contains(j)) {
+        unsigned bound_sum{};
+        for (auto i : bound) bound_sum += candidates[i];
+        aoc::print(" bs:{}",bound_sum);
+        // xi = rhs - bound_sum - xj;
+        if (bound_sum > rhs) return std::nullopt; // Infeasable
+        unbound.erase(i);
+        bound.insert(i);
+        unbound.erase(j);
+        bound.insert(j);
+        for (unsigned xj=0;xj<=rhs - bound_sum;++xj) {
+          auto xi = rhs -xj;
+          candidates[i] = xi;
+          candidates[j] = xj;
+          aoc::print(" xi:{},xj:{}",xi,xj);
+          // auto result = min_count_ilp(
+          //   row_ixs
+          //   ,++rix
+          //   ,bound
+          //   ,unbound
+          //   ,candidates
+          //   ,Ab
+          // );
+        }
+      }
     } break;
   }
+  // Debug - return candidate sum (Remove when fully implemented above)
+  return std::accumulate(candidates.begin(),candidates.end(),INT{0});
 
-  return std::accumulate(candidates.begin(),candidates.end(),INT{0});  
+  // Final - return infeasable
+  return std::nullopt;
 }
 
 std::optional<INT> min_count_ilp(Machine const& machine) {
