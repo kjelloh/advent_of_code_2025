@@ -462,8 +462,15 @@ std::optional<INT> min_count_ilp(
   const unsigned R = Ab.size();
 
   if (rix == R) {
-    // return found candidate
-    return std::accumulate(candidates.begin(),candidates.end(),INT{0});
+    for (unsigned r=0;r<R;++r) {
+      auto rhs = Ab[r][C-1];
+      unsigned lhs{};
+      for (unsigned c=0;c<C-1;++c) {
+        lhs += Ab[r][c] * candidates[c];
+      }
+      if (lhs != rhs) return std::nullopt; // not a valid candidate
+    }
+    return std::accumulate(candidates.begin(),candidates.end(),INT{});
   }
 
   auto r = row_ixs[rix];
@@ -477,7 +484,7 @@ std::optional<INT> min_count_ilp(
   const unsigned U = unkown_ixs.size();
   unsigned rhs = Ab[r][C-1];
 
-  aoc::print("\n    r:{} c: {} b:{} u:{}",r,candidates,bound,unkown_ixs);
+  aoc::print("\n{}r:{} c: {} b:{} u:{}",std::string(2*rix,' '),r,candidates,bound,unkown_ixs);
 
   unsigned bound_sum{};
   for (auto i : bound) bound_sum += candidates[i];
@@ -537,7 +544,6 @@ std::optional<INT> min_count_ilp(
           auto xi = RHS -xj;
           candidates[i] = xi;
           candidates[j] = xj;
-          aoc::print(" xi:{},xj:{}",xi,xj);
           auto result = min_count_ilp(
             row_ixs
             ,rix
