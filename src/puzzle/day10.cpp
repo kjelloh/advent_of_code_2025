@@ -567,6 +567,7 @@ std::optional<INT> min_count_ilp(
           if (result and result.value() < candidate) candidate = result.value();
         } // for xi,xj
         aoc::print("\n    -> min:{}",candidate);
+        return candidate;
       } // if valid
     } break;
   }
