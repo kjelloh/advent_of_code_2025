@@ -510,91 +510,6 @@ INT min_count_ilp(Machine const& machine) {
   });
   aoc::print("\nrow_ixs:{}",row_ixs);
 
-  // Helpers
-  auto bound_min = [](MinMax& constraint, unsigned new_min) {
-    // Never decerase min
-    constraint.first = std::max(constraint.first, new_min);
-  };
-
-  auto bound_max = [](MinMax& constraint, unsigned new_max) {
-    // Never increase max
-    constraint.second = std::min(constraint.second, new_max);
-  };
-
-  // Propagate constraints (do least unknowns (most constrained) first)
-  bool failed{false};
-  bool done{false};
-  auto current = x_constraints;
-  while (!done) {
-  
-    done = false;
-    auto next = current;
-    for (auto r : row_ixs) {
-      aoc::print("\nr:{} failed:{} x_constraints:{}",r,failed,next);
-
-      if (failed) break;
-      auto rhs = Ab[r][C-1];
-      std::vector<unsigned> xix{};
-      for (unsigned c=0;c<C-1;++c) {
-        if (Ab[r][c] != 0) xix.push_back(c);
-      }
-      const unsigned U = xix.size(); // Unknowns
-
-      if (U==0) {
-        // Empty equation
-        failed |= (rhs != 0); // rhs == 0 ok
-      }
-      if (U==1) {
-        // xi = rhs
-        auto& cxi = next[xix[0]];
-        auto [a,b] = cxi;
-        failed |= a>b;
-        bound_min(cxi,rhs);
-        bound_max(cxi,rhs);
-      }
-      else if (U==2) {
-        // xi = rhs - xj
-        // xj = rhs - xi
-        // If         x_i ∈ [a,b] and x_j ∈ [c,d], 
-        // then       xi = rhs - xj -> xi ∈ [rhs-d, rhs-c].
-        // Likewise,  xj = rhs - xi → x_j ∈ [rhs-b, rhs-a].      
-        auto& cxi = next[xix[0]];
-        auto& cxj = next[xix[1]];
-        auto [a,b] = cxi;
-        auto [c,d] = cxj;
-        failed |= a>b;
-        failed |= c>d;
-        bound_min(cxi,rhs-d);
-        bound_max(cxi,rhs-c);
-        bound_min(cxj,rhs-b);
-        bound_max(cxj,rhs-a);
-      }
-      else if (U > 2) {
-        // TODO: Handle more than three unknowns
-        // x_i.min = max(x_i.min, rhs - sum_of_max_of_others)
-        // x_i.max = min(x_i.max, rhs - sum_of_min_of_others)
-        unsigned sum_of_min{0};
-        unsigned sum_of_max{0};
-        for (auto constraint : x_constraints) {
-          sum_of_min += constraint.first;
-          sum_of_max += constraint.second;
-        }
-        for (auto& constraint : next) {
-          constraint.first = std::max(
-            constraint.first
-            ,std::min(unsigned(0),rhs - sum_of_max + constraint.second));
-          constraint.second = std::min(constraint.second,rhs - sum_of_min + constraint.first);
-        }
-      }
-    }
-
-    done = (next == current);
-    current = next;
-  }
-  x_constraints = current;
-  aoc::print("\nfailed:{},x_constraints:{}",failed,x_constraints);
-
-
   return 0;
 }
 
@@ -626,7 +541,7 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
       // Configuring the first machine's counters requires a minimum of 10 button presses. 
       // One way to do this is by pressing (3) once, (1,3) three times, 
       // (2,3) three times, (0,2) once, and (0,1) twice.
-      INT min_count = min_count_ilp(machine);
+      INT min_count = min_count_z3(machine);
       aoc::print("\ntest {} min_count:{}",test_ix,min_count);
       if (min_count == 10) {
         return std::format("\ntest {} min_count:{} expected 10 *PASSED*",test_ix,min_count);
@@ -700,7 +615,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
         return *test_result;
       }
 
-      candidate += min_count_ilp(machine);
+      candidate += min_count_z3(machine);
 
     }
 

@@ -744,6 +744,84 @@ I already kind-of gotten used to the terms:
 
 And it seems we are now aiming for an algorithm to 'branch and bound' through this search space to try and solve the optimisation problem?
 
+Still, I have yet to pin down what exact creature our problem is when studying youtube videos and AI answers to my investigation.
+
+We have concluded our problem can be expressed as A*x == b wanting MIN(sum(xi)) and xi positive integers.
+
+- It seems we have some form of Integer Programming problem?
+- But a special case with A*x == b NOT A*x <= b
+- It seems for general solutions to A*x <= b 
+  This is a Linear Programming (LP) problem?
+- And for A*x <= b for integer x components
+  This is an Integer Linear Programming (ILP) problem?
+- So what exactly is our A*x == b for integer x components?
+
+I have imagined an algorithm to solve our specific problem based on the sparse matrix A.
+
+- We model a state as candidate xi values.
+- We model 'free' value as std::optional nullopt (not yet proposed)
+- For equation r (A row) with single unknown xi 
+  -> we can propose xi == rhs[r]
+- For equation r (A row) with two unknowns xi,xj, 
+  -> we can propose all pairs xi = rhs[r] - xj
+- For equation r (A row) with more than two unknowns
+  -> We can expand on any proposed x by applying
+     bound xi and produce new possible xj.
+
+Is this a known algorithm?
+
+My AI friends has the following to say:
+
+- ILP with only equalities is still NP-hard
+- Your problem becomes easy if integrality is removed
+- Linear Diophantine Systems Ax=b,x∈Z
+  If you remove the objective and positivity constraint,
+  this is classical number theory. Solvable via:
+  - Smith Normal Form
+  - Hermite Normal Form
+  ==> But these do not handle optimization or positivity well!
+- Many AoC problems secretly reduce to multi-row knapsack variants
+
+So a short control if todays problem is a knapsack in disguise?
+
+- A knapsack probnlem is a single row (single equation) problem
+- So NO - I have A matrices with rank > 1
+- Although the rank of A:s may be small?
+- To calculate the rank we can apply gaussian elimination
+  and see how many non zero rows we have left.
+
+More AI feedback from above:
+
+- A*x = b with integer x: This is called an Integer Equality Linear Programming
+- Sometimes this is also called:
+  - Diophantine system (when seeking integer solutions to linear equations)
+  - Integer feasibility problem (when you just want to find any solution)
+  - Combined with MIN(sum(xi)), 
+    this becomes an Integer Linear Programming problem with equality constraints
+
+Ok, it is time to give up on AI picking up on my reasoning and providing a short cut to a solution? Maybe I can actually hard-code myself to a solution?
+
+What do we need to explore the search space defined by the equation system we have?
+
+- We have the equation system modelled by an Ab.
+- If we find a row equation r with a single unknown we can bind it: 
+  -> xi = rhs[r].
+- We can then recurse with this value bound.
+  -> We need a way to model bound vs unbound xi.
+- We can provide one vector 'bound' with the index of bound xi.
+- We can provide one vector 'unbound' with the index of xi not yet bound
+- We can provide a vector 'candidates' with xi values to operate on
+
+So it seems our recursion is f: bound -> unbound -> candidates -> Ab -> ??
+
+- What should the function return?
+- Can it return 'best' candidates or 'best' min sum?
+- It seems at each call-to-recurse we 'drill deeper'?
+  - So we never need a modified or tried 'candidates' back?
+
+Ok, so it seems we can start with returning 'best so far' to assemble overall best on the stack unwind?
+
+
 # day9 part 2
 
 We have a list of positions of red tiles on a 2D 'floor'. 
