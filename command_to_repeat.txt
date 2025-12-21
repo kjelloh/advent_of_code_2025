@@ -1,0 +1,1 @@
+./run.zsh --take2 -D 10 -p 2 --in ex0.txt --debug -t 3
