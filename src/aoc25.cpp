@@ -56,7 +56,7 @@ int solve(AppArgs args) {
       if (args.use_take2) {
         switch (args.day) {
           case 10: {
-            maybe_answer = day10::solve(puzzle_args);
+            maybe_answer = take2::day10::solve(puzzle_args);
           } break;
         }
       }

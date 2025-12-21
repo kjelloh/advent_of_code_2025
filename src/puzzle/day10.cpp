@@ -448,7 +448,7 @@ INT min_count_z3(Machine const& machine) {
   }
 
   return answer;
-}
+} // min_count_z3
 
 std::optional<INT> min_count_ilp(
    std::vector<unsigned> const& row_ixs

@@ -1,7 +1,7 @@
 #include "solver.hpp"
 
-namespace day10 {
+namespace take2::day10 {
   std::optional<std::string> solve(PuzzleArgs puzzle_args) {
-    return std::format("day10 take2");
+    return std::format("take2::day10::solve - Not yet implemented");
   }
 }
