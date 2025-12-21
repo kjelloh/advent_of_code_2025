@@ -24,8 +24,15 @@ else()
     set(DAY_FILE "src/puzzle/day0.cpp")
 endif()
 
+# 'take 2' in subfolder dayn for each day n=0,1,...12
+file(GLOB DAY_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/day[0-9]/*.cpp"
+    "${CMAKE_SOURCE_DIR}/src/day1[0-2]/*.cpp"
+)
+
 add_executable(aoc25
   ${DAY_FILE}
+  ${DAY_SOURCES}
   src/aoc25.cpp
   src/main.cpp)
 

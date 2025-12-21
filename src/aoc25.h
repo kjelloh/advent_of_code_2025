@@ -125,6 +125,8 @@ private:
 };
 
 struct AppArgs {
+  bool use_take2;
+  unsigned day;
   std::optional<int> maybe_test;
   std::optional<int> maybe_part;
   bool debug;

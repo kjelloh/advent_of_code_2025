@@ -1,4 +1,5 @@
 #include "aoc25.h"
+#include "day10/solver.hpp"
 #include <iostream>
 #include <filesystem> // std::filesystem::path,...
 #include <algorithm> // std::ranges::sort
@@ -50,9 +51,21 @@ int solve(AppArgs args) {
         ,.m_part = part
         ,.m_maybe_test = args.maybe_test}
         ,in_file_path);
-      auto maybe_answer = day(puzzle_args);
+
+      std::optional<std::string> maybe_answer{};
+      if (args.use_take2) {
+        switch (args.day) {
+          case 10: {
+            maybe_answer = day10::solve(puzzle_args);
+          } break;
+        }
+      }
+      else {
+        maybe_answer = day(puzzle_args);
+      }
       auto solve_result = SolveResult{puzzle_args,maybe_answer};
       solve_results.push_back(solve_result);
+
       do_break = not maybe_answer.has_value();
     }
   }

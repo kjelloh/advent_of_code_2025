@@ -11,6 +11,12 @@ int main(int argc, char** argv) {
 
   // Define command-line options
 
+  app.add_flag("--take2", args.use_take2, "Show platform information");
+
+  app.add_option("-D,--Day", args.day, "Part to solve (1=part1, 2=part2)")
+     ->default_val(0)
+     ->check(CLI::Range(0, 12));
+
   app.add_option("-p,--part", args.maybe_part, "Part to solve (1=part1, 2=part2)")
      ->check(CLI::Range(1, 2));
 
