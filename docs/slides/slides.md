@@ -1,6 +1,207 @@
 ---
 marp : true
 ---
+# day 10 part 2
+
+What is the minimum number of button presses to produce a defined 'joltage'?
+
+Example:
+
+- Target Joltage {3,5,4,7}
+- Buttons (1,3) (2) (2,3) (0,2) (0,1)
+- Initial joltage counters {0,0,0,0}
+
+What kind of problem is this?
+
+<!-- 
+
+- The 'joltage' has components 0..N-1, like the example {3,5,4,7}
+- A 'button' defines joltage counters it increments, like (1,3).
+  When pushed it increments joltage counter 1 and 3 by one.
+
+Pause the video here to think about this. How would you solve it?
+
+-->
+
+---
+
+We can model this problem as a task of finding a vector sum.
+
+```text
+x0 * v(1,3) + x1 * v(2)  + x2 * v(2,3) + x3 * v(0,2) + x4 * v(0,1) = {3,5,4,7}
+```
+
+- x0 is the number of times we press button (1,3)
+- Button (1,3) increments counter 1 and 3
+                   0 1 2 3
+- v(1,3) = vector (0,1,0,1)
+
+What is the minimal sum(x1) that satisfies the equation?
+
+How can we solve this?
+
+<!-- 
+
+- v of indecies is the vector representing the vector 'value'
+- v(1,3) is the vector (0,1,0,1)
+  This will model that the button adds 1 to counter 1 and 3
+
+-->
+
+---
+
+This is an Integer Linear Programming problem.
+
+- Find integer solutions to a system of integer equations
+
+This type of problem is NP hard!
+
+- VAST search space
+- But: Easy to check solution
+
+<!--
+- VAST search space for candidate solutions x0,x1,..xi..
+- Easy to check matrix A times vector x = joltage vector b
+-->
+
+---
+
+I found two ways to solve day10.
+
+First:
+
+- Model as Ax == b
+
+Then two options: 
+
+1. Feed to z3 solver
+2. Feed to hand rolled solver
+
+<!--
+
+This video is about my hand rolled solver.
+
+- All solutions I have found on the web uses the z3 solver
+- But surely there should be a feasable hand-rolled solution also for day10 part 2?
+- And YES - I implemented one that worked on my input
+
+-->
+
+---
+
+How can we:
+
+1. Model the problem as Ax=b?
+2. Search the space of possible x to find min(sum(xi))?
+
+Pause the video here to think about this.
+
+<!--
+
+- To model our problem as matrix A times vector X equals vector b
+  IS a known problem.
+- Searching all x that fullfills this equation system
+  has no general solution
+- An integer solution to integer equation system Ax=b 
+  IS NP hard
+- But we expect advent of code problem to have features we can exploit!
+
+-->
+
+---
+
+Model the problem as system Ax=b
+
+```text
+- Buttons: (3) (1,3) (2) (2,3) (0,2) (0,1)
+- Joltage: {3,5,4,7}
+```
+
+Becomes:
+
+```c++
+i:   0 1 2 3
+x0* (0 0 0 1) // (3) 
+x1* (0 1 0 1) // (1,3)
+x2* (0 0 1 0) // (2)
+x3* (0 0 1 1) // (2,3)
+x4* (1 0 1 0) // (0,2)
+x5* (1 1 0 0) // (0,1)
++   ------
+    (3 5 4 7)
+```
+---
+
+```c++
+i:   0 1 2 3
+x0* (0 0 0 1) // (3) 
+x1* (0 1 0 1) // (1,3)
+x2* (0 0 1 0) // (2)
+x3* (0 0 1 1) // (2,3)
+x4* (1 0 1 0) // (0,2)
+x5* (1 1 0 0) // (0,1)
++   ------
+    (3 5 4 7)
+```
+Becomes:
+```text
+1 1 0 1 0 0 x0  = 7     // x0 + x1 + a3 = 7
+0 0 1 1 1 0 x1    4     // x2 + x3 + a4 = 4
+0 1 0 0 0 1 x2    5     // x1 + x5      = 5
+0 0 0 0 1 1 x3    3     // x4 + x5      = 3
+            x4
+            x5
+```
+
+---
+
+Is there feature we can exploit?
+
+```text
+1 1 0 1 0 0 x0  = 7     // x0 + x1 + a3 = 7
+0 0 1 1 1 0 x1    4     // x2 + x3 + a4 = 4
+0 1 0 0 0 1 x2    5     // x1 + x5      = 5
+0 0 0 0 1 1 x3    3     // x4 + x5      = 3
+            x4
+            x5
+```
+
+Pause the video here to think about this.
+
+<!--
+
+Are there features showing in the example we can exploit?
+
+- YES - there is.
+- The equation system is of a nature that
+  dramatically reduces the space of possible x:s to try!
+- Look at the the two bottom equations.
+
+-->
+
+---
+
+The equation:  
+```sh
+x4 + x5      = 3
+```
+
+Means:
+
+```sh
+x4 = 3 - x5 -> (x4,x5) = (0,3),(1,2),(2,1),(3,0),
+```
+
+<!--
+
+- x4 + x5 equals 3
+- Means x4 is 3 minus x5
+- Giving us a set of possible pairwise x4,x5
+- This is only 4 possible combinations we have to try! 
+
+-->
+
+---
 # day7 part 2
 
 How many paths can a single particle take to reach the bottom row?
