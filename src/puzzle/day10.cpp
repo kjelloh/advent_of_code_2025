@@ -451,7 +451,7 @@ INT min_count_z3(Machine const& machine) {
 } // min_count_z3
 
 std::optional<INT> min_count_ilp(
-   std::vector<unsigned> const& row_ixs
+   std::vector<unsigned> const& row_ixs 
   ,unsigned rix
   ,std::set<unsigned> bound
   ,std::set<unsigned> unbound
@@ -500,7 +500,7 @@ std::optional<INT> min_count_ilp(
   unsigned bound_sum{};
   for (auto i : bound) bound_sum += Ab[r][i] * candidates[i];
   aoc::print(" bs:{}",bound_sum);
-  // xi = rhs - bound_sum - xj;
+  // sum(unbound xi:s) = rhs - bound_sum
   if (bound_sum > rhs) {
     aoc ::print(" > rhs:{} INF",rhs);
     return std::nullopt; // Infeasable
