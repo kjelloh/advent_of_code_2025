@@ -1,187 +1,29 @@
 #include "aoc25.h"
+#include "day10/parse.hpp"
 #include <string>
-#include <print>
 #include <iostream>
 #include <fstream>
-#include <optional>
-#include <algorithm>
+#include <algorithm> // std::ranges::sort,...
 #include <set>
 #include <map>
 #include <sstream>
-#include <unordered_set>
 #include <z3++.h>
 #include <numeric> // std::accumulate,...
 
 using INT = int64_t;
 using UINT = uint64_t;
 
-using Lights = std::string;
-using Button = std::vector<unsigned>;
-using Buttons = std::vector<Button>;
-using Joltage = std::vector<unsigned>;
-
-struct Machine {
-  Lights lights;
-  std::vector<Button> buttons;
-  Joltage joltage;
-
-};
-
-std::tuple<std::string_view,std::string_view,std::string_view> to_sections_svs(std::string_view sv) {
-  // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
-  //       ^                               ^
-  auto pos1 = sv.find(']')+1;
-  auto pos2 = sv.find('{');  
-  return {
-    sv.substr(0,pos1)
-    ,sv.substr(pos1,pos2-pos1 -1)
-    ,sv.substr(pos2)};  
-}
-
-std::vector<std::string_view> to_buttons_svs(std::string_view sv) {
-  // ' (3) (1,3) (2) (2,3) (0,2) (0,1)'
-  //      ^     ^   ^     ^     ^
-  std::vector<std::string_view> result{};
-  size_t begin{0};
-  aoc::print("\nto_buttons_svs:");
-  size_t pos{0};
-  while (pos < sv.size()) {
-    auto end = sv.find(')',pos);
-    result.push_back(sv.substr(pos,end-pos+1));
-    aoc::print(" '{}'",result.back());
-    pos = end+1;
-  }
-  return result;
-}
-
-Lights to_lights(std::string_view sv) {
-  // [.##.]
-  return Lights{sv.substr(1,sv.size()-2)};
-}
-
-Button to_button(std::string_view sv) {
-  // ' (1,3)'
-  // ' (3)'
-  Button result{};
-  aoc::print("\nto_button:");
-  auto begin = sv.find('(') + 1;
-  auto find_end = [&sv](size_t begin){
-    auto pos = sv.find(',',begin);
-    if (pos == std::string_view::npos) pos = sv.find(')',begin);
-    return pos;
-  };
-  auto end = find_end(begin);
-  while (begin < sv.size()) {
-    try {
-      std::string val(sv.substr(begin,end-begin));
-      aoc::print(" '{}'",val);
-      result.push_back(std::stoi(val));
-    }
-    catch (std::exception const& e) {
-      std::print("\nto_button: Excpetion - {}",e.what());
-    }
-    begin = end+1;
-    end = find_end(begin);
-  }
-  return result;
-}
-
-Buttons to_buttons(std::string_view sv) {
-  Buttons result{};
-  auto svs = to_buttons_svs(sv);
-  for (auto const& sv : svs) {
-    result.push_back(to_button(sv));
-  }
-  return result;
-}
-
-Joltage to_joltage(std::string_view sv) {
-  Joltage result{};
-  aoc::print("\nto_joltage:");
-  auto begin = sv.find('{') + 1;
-  auto find_end = [&sv](size_t begin){
-    auto pos = sv.find(',',begin);
-    if (pos == std::string_view::npos) pos = sv.find('}',begin);
-    return pos;
-  };
-  auto end = find_end(begin);
-  while (begin < sv.size()) {
-    try {
-      std::string val(sv.substr(begin,end-begin));
-      aoc::print(" '{}'",val);
-      result.push_back(std::stoi(val));
-    }
-    catch (std::exception const& e) {
-      std::print("\to_joltage: Excpetion - {}",e.what());
-    }
-    begin = end+1;
-    end = find_end(begin);
-  }
-  return result;
-}
-
-Machine to_machine(std::string_view sv) {
-  auto const& [lights,buttons,joltage] = to_sections_svs(sv);
-  aoc::print(
-    "\nto_machine '{}' '{}' '{}'"
-    ,lights
-    ,buttons
-    ,joltage);
-  return Machine {
-    .lights = to_lights(lights)
-    ,.buttons = to_buttons(buttons)
-    ,.joltage = to_joltage(joltage)
-  };
-}
-
-using Model = std::vector<Machine>;
-Model parse(std::istream& in) {
-  Model model{};
-
-  std::string entry;
-  int ix{0};
-  while (std::getline(in, entry)) {
-    aoc::print("\nin[{:4}][0..{:3}]: '{}' ", ix++,entry.size()-1,entry);
-    model.push_back(to_machine(entry));
-    aoc::print(
-       "\nmachine: lights:'{}'"
-      ,model.back().lights);
-  }
-  return model;
-}
-
-std::string to_string(Button const& button) {
-  std::string result{};
-  result.push_back('(');
-  bool first(true);
-  for (auto lx : button) {
-    if (!first) {
-      result.push_back(',');
-    }
-    result += std::to_string(lx);
-    first = false;
-  }
-  result.push_back(')');
-  return result;
-}
-
-std::string to_string(Buttons const& buttons) {
-  std::string result{};
-  bool first(true);
-  for (auto const& button : buttons) {
-    if (!first) {
-      result.push_back(' ');
-    }
-    first = false;
-  }
-  return result;
-}
+using Lights = day10::Lights;
+using Button = day10::Button;
+using Buttons = day10::Buttons;
+using Joltage = day10::Joltage;
+using Machine = day10::Machine;
 
 Lights press(Button const& button,Lights state) {
   Lights result(state);
   aoc::print(
      "\npress({},'{}')"
-    ,to_string(button)
+    ,button
     ,state);
   for (auto lx : button) {
     bool l(result[lx] == '#');
@@ -249,7 +91,7 @@ INT min_count_bfs(Machine const& machine,bool is_part2 = false) {
 
     if (count++ % 10000 == 0) {
       aoc::print(
-         "\n{}: {}:{}",count,to_string(current.value),current.press_count);
+         "\n{}: {}:{}",count,current.value,current.press_count);
       std::cout << std::flush;
     }
 
@@ -673,15 +515,15 @@ std::optional<std::string> test_p2(int i,int test_ix,Machine const& machine) {
         return std::format(
           "Test {} next:{} is expected {} *PASSED*"
           ,test_ix
-          ,to_string(next)
-          ,to_string(expected));
+          ,next
+          ,expected);
       }
       else {
         return std::format(
           "Test {} next:{} is NOT expected {} *failed*"
           ,test_ix
-          ,to_string(next)
-          ,to_string(expected));
+          ,next
+          ,expected);
       }
     } break;
     case 2: { 
@@ -749,7 +591,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   auto test_ix = puzzle_args.meta().m_maybe_test.value_or(0);
 
   std::ifstream in{puzzle_args.in_file_path()};
-  auto model = parse(in);
+  auto model = day10::parse(in);
 
   // Solve here
   UINT candidate{};
@@ -757,7 +599,7 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   for (size_t i=0;i < model.size();++i) {
     auto const& machine = model[i];
     
-    aoc::print("\nmachine:{} joltage:{}",i,to_string(machine.joltage));
+    aoc::print("\nmachine:{} joltage:{}",i,machine.joltage);
 
     if (!for_part2) {
       if (auto test_result = test_p1(i,test_ix,machine)) {
