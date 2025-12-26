@@ -1,5 +1,5 @@
 #include "aoc25.h"
-#include "day10/solver.hpp"
+#include "day10/solve.hpp"
 #include <iostream>
 #include <filesystem> // std::filesystem::path,...
 #include <algorithm> // std::ranges::sort

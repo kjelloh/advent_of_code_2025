@@ -1,4 +1,4 @@
-#include "solver.hpp"
+#include "solve.hpp"
 
 namespace take2::day10 {
   std::optional<std::string> solve(PuzzleArgs puzzle_args) {
