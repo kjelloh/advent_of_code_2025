@@ -16,7 +16,7 @@ What kind of problem is this?
 <!-- 
 
 - The 'joltage' has components 0..N-1, like the example {3,5,4,7}
-- A 'button' defines joltage counters it increments, like (1,3).
+- A 'button' defines the joltage counter indicies it increments, like (1,3).
   When pushed it increments joltage counter 1 and 3 by one.
 
 Pause the video here to think about this. How would you solve it?
