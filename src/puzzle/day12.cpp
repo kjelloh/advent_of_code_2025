@@ -526,22 +526,30 @@ std::optional<std::string> solve(PuzzleArgs puzzle_args,bool for_part2 = false) 
   }
 
   if (needs_solving ==0) {
-    return std::format("{}",easilly_possible);
+    if (puzzle_args.meta().m_part == 1) return std::format("{}",easilly_possible);
+    else return std::format("Day12 has no part 2");
+  }
+  else {
+    for (size_t i=0;i<model.regions.size();++i) {
+      aoc::print("\nSolve for region:{}",i);
+      if (for_part2) {
+        if (auto test_result = test_p2(model,i,test_ix)) {
+          return *test_result;
+        }
+      }
+      else {
+        if (auto test_result = test_p1(model, i,test_ix)) {
+          return *test_result;
+        }
+      }
+    }
+    
+    if (puzzle_args.meta().m_is_example) {
+      return std::format("Skipped solving example: Day input should be trivially solvable?");
+    }
+
   }
 
-  for (size_t i=0;i<model.regions.size();++i) {
-    aoc::print("\nSolve for region:{}",i);
-    if (for_part2) {
-      if (auto test_result = test_p2(model,i,test_ix)) {
-        return *test_result;
-      }
-    }
-    else {
-      if (auto test_result = test_p1(model, i,test_ix)) {
-        return *test_result;
-      }
-    }
-  }
 
   return {};
   // return std::format("Not yet fully implemented");
